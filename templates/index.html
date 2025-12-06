@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<! DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1. 0, user-scalable=no">
     <title>Skintoner Try-On</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,13 +12,12 @@
             overflow: hidden; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
 
-        .phone-container {
+        . phone-container {
             width: 100%; height: 100%;
             background: #fff; position: relative; touch-action: none;
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* FIX 1: Increased z-index to 600 to be above EVERYTHING (Webcam is 300, Overlay is 200) */
         .close-app-btn {
             position: absolute; top: 20px; right: 20px;
             width: 40px; height: 40px;
@@ -31,42 +30,41 @@
             display: flex; justify-content: center; align-items: center;
             color: #000;
         }
-        .close-app-btn:hover { background: #f0f0f0; }
+        . close-app-btn:hover { background: #f0f0f0; }
 
         /* STARTUP */
         .startup-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: white; z-index: 200; display: flex; flex-direction: column;
-            justify-content: center; padding: 40px 30px; transition: opacity 0.4s ease;
+            justify-content: center; padding: 40px 30px; transition: opacity 0. 4s ease;
         }
         .startup-overlay.hidden { opacity: 0; pointer-events: none; }
         .startup-content { text-align: center; width: 100%; max-width: 400px; margin: 0 auto; }
-        .startup-content h1 { font-size: 36px; margin-bottom: 15px; color: #000; font-weight: 800; }
-        .startup-content p { color: #666; margin-bottom: 50px; font-size: 18px; }
+        . startup-content h1 { font-size: 36px; margin-bottom: 15px; color: #000; font-weight: 800; }
+        . startup-content p { color: #666; margin-bottom: 50px; font-size: 18px; }
 
-        .action-btn {
+        . action-btn {
             display: flex; justify-content: center; align-items: center;
             width: 100%; padding: 18px; margin-bottom: 15px; background: #000;
             color: white; border: none; border-radius: 50px; font-size: 16px;
             font-weight: 700; cursor: pointer; text-decoration: none;
         }
-        .action-btn.secondary { background: #fff; color: #000; border: 2px solid #f0f0f0; }
+        .action-btn. secondary { background: #fff; color: #000; border: 2px solid #f0f0f0; }
 
-        /* FIX 2: IMPROVED WEBCAM CSS */
+        /* WEBCAM */
         #webcamModal {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 300; display: none;
-            /* Removed flex-direction: column to use absolute positioning for controls */
         }
         #webcam-preview {
             width: 100%; height: 100%;
-            object-fit: cover; /* Ensures video fills screen without pushing buttons off */
+            object-fit: cover;
             transform: scaleX(-1);
             background: black;
         }
-        .webcam-controls {
+        . webcam-controls {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            height: 120px; background: rgba(0,0,0,0.5); /* Semi-transparent overlay */
+            height: 120px; background: rgba(0,0,0,0.5);
             display: flex; justify-content: center; align-items: center;
             z-index: 310;
         }
@@ -84,10 +82,20 @@
             border-radius:20px; cursor:pointer; font-weight:bold;
         }
 
+        /* Webcam validation message */
+        .webcam-message {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 20px 30px;
+            border-radius: 10px; text-align: center; z-index: 320;
+            display: none; max-width: 300px;
+        }
+        .webcam-message.error { background: rgba(200, 50, 50, 0.9); }
+        . webcam-message. processing { background: rgba(0,0,0,0.8); }
+
         /* EXIT MODAL */
         #exitModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); z-index: 500;
+            background: rgba(0,0,0,0. 4); z-index: 500;
             display: none; justify-content: center; align-items: center;
             backdrop-filter: blur(3px);
         }
@@ -97,13 +105,13 @@
         }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px;}
         .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
-        .modal-btn.yes { background: #000; color: white; }
+        . modal-btn. yes { background: #000; color: white; }
         .modal-btn.no { background: #f0f0f0; color: #000; }
 
         /* VIDEO SLIDES */
         .video-container { position: relative; flex-grow: 1; width: 100%; background: white; z-index: 10; }
-        .video-slide { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .video-slide.no-transition { transition: none; }
+        . video-slide { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 0. 3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        . video-slide.no-transition { transition: none; }
         .video-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
         /* TOOLBAR */
@@ -115,10 +123,10 @@
         .toolbar-button { background: transparent; border: none; cursor: pointer; width: 44px; height: 100%; display:flex; justify-content:center; align-items:center;}
         .toolbar-button svg { width: 24px; height: 24px; stroke: #000; stroke-width: 2; fill: none; }
 
-        .desktop-arrows-container { display: none; flex-direction: column; gap: 15px; align-items: center; }
+        . desktop-arrows-container { display: none; flex-direction: column; gap: 15px; align-items: center; }
         .nav-buttons-container { display: flex; justify-content: space-around; width: 100%; height: 100%; }
 
-        /* NEW PHOTO BUTTON (Circular) */
+        /* NEW PHOTO BUTTON */
         .new-photo-btn {
             display: none;
             background: white;
@@ -139,31 +147,72 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            line-height: 1.1;
+            line-height: 1. 1;
         }
         .new-photo-btn:hover { background: #f0f0f0; }
-        @media (max-width: 767px) { .new-photo-btn { display: none !important; } }
+        @media (max-width: 767px) { .new-photo-btn { display: none ! important; } }
 
         /* SIDE PANEL */
         .side-panel {
             position: absolute; top: 0; right: -100%; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.95); z-index: 40;
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: right 0. 3s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 30px; padding-top: 80px; backdrop-filter: blur(5px);
         }
         .side-panel.open { right: 0; }
-        .close-panel { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 30px; cursor: pointer; }
+        . close-panel { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 30px; cursor: pointer; }
+
+        /* Product Card in Side Panel */
+        . product-card-panel {
+            background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 10px;
+        }
+        .product-card-panel . product-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+        .product-card-panel .product-shade { color: #666; }
+        .product-card-panel .product-brand { margin-top: 5px; font-size: 12px; color: #999; }
+        . product-card-panel .product-price { margin-top: 8px; font-weight: bold; font-size: 14px; }
+
+        /* Button container for Shop Now + Add to Cart */
+        .product-buttons {
+            display: flex; margin-top: 12px; gap: 0; border-radius: 8px; overflow: hidden;
+        }
+        .btn-shop-now {
+            flex: 0. 8; background: #000; color: white; padding: 12px;
+            text-align: center; text-decoration: none; font-weight: bold; font-size: 14px;
+            border: none; cursor: pointer;
+        }
+        .btn-shop-now:hover { background: #333; }
+        . btn-add-cart-quick {
+            flex: 0.2; background: #000; color: white; padding: 12px;
+            display: flex; justify-content: center; align-items: center;
+            border: none; cursor: pointer; border-left: 1px solid #333;
+        }
+        .btn-add-cart-quick:hover { background: #333; }
+        .btn-add-cart-quick svg { width: 20px; height: 20px; stroke: white; fill: none; }
+
+        /* Cart added feedback */
+        .cart-feedback {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: #000; color: white; padding: 12px 24px; border-radius: 30px;
+            font-weight: bold; z-index: 1000; display: none;
+        }
+        .cart-feedback.show { display: block; animation: fadeInOut 2s ease; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
 
         @media (min-width: 768px) {
             .video-slide img { object-fit: contain; background: white; }
-            .bottom-toolbar {
+            . bottom-toolbar {
                 position: absolute; top: 0; right: 0; bottom: 0; left: auto;
                 width: 90px; height: 100%;
                 background: white; border-left: 1px solid #f0f0f0; border-top: none;
                 flex-direction: column; justify-content: space-between; padding: 30px 0;
             }
             .nav-buttons-container { flex-direction: column; height: auto; gap: 20px; justify-content: flex-end; }
-            .toolbar-button { height: 60px; width: 100%; }
+            . toolbar-button { height: 60px; width: 100%; }
             .toolbar-button svg { width: 32px; height: 32px; }
             .side-panel {
                 width: 300px; right: -300px; top: 0; height: 100%; z-index: 45;
@@ -172,27 +221,40 @@
             .side-panel.open { right: 90px; }
             .close-panel { display: none; }
             .desktop-arrows-container { display: flex; justify-content: center; align-items: center; flex-grow: 1; }
-            .new-photo-btn { display: flex !important; }
+            .new-photo-btn { display: flex ! important; }
         }
 
-        .history-section { margin-top: 40px; text-align: left; }
-        .history-grid { display: flex; gap: 10px; overflow-x: auto; }
+        . history-section { margin-top: 40px; text-align: left; }
+        . history-grid { display: flex; gap: 10px; overflow-x: auto; }
         .history-item { width: 60px; height: 60px; border-radius: 10px; overflow: hidden; cursor: pointer; }
-        .panel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 35; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .panel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 35; opacity: 0; pointer-events: none; transition: opacity 0. 3s; }
         .panel-overlay.visible { opacity: 1; pointer-events: auto; }
         #preload-container { display: none; }
+
+        /* Error toast for upload/capture failures */
+        .error-toast {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(200, 50, 50, 0. 95); color: white; padding: 20px 30px;
+            border-radius: 15px; text-align: center; z-index: 1000;
+            display: none; max-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .error-toast h4 { margin-bottom: 10px; }
+        .error-toast p { font-size: 14px; margin-bottom: 15px; }
+        .error-toast button {
+            background: white; color: #333; border: none; padding: 10px 25px;
+            border-radius: 20px; font-weight: bold; cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="phone-container" id="phone">
 
-        <!-- Close Button now has z-index 600 -->
         <button class="close-app-btn" onclick="toggleExitModal(true)">&times;</button>
 
         <div id="exitModal">
             <div class="modal-box">
                 <h3>Back To Homepage</h3>
-                <p>Are you sure?</p>
+                <p>Are you sure? </p>
                 <div class="modal-actions">
                     <button class="modal-btn no" onclick="toggleExitModal(false)">No</button>
                     <button class="modal-btn yes" onclick="confirmExit()">Yes</button>
@@ -200,10 +262,20 @@
             </div>
         </div>
 
+        <!-- Error Toast -->
+        <div id="errorToast" class="error-toast">
+            <h4>📷 Photo Issue</h4>
+            <p id="errorMessage">Face not detected. </p>
+            <button onclick="closeErrorToast()">Try Again</button>
+        </div>
+
+        <!-- Cart Feedback -->
+        <div id="cartFeedback" class="cart-feedback">✓ Added to cart! </div>
+
         <div class="startup-overlay" id="startupOverlay">
             <div class="startup-content">
                 <h1>Welcome</h1>
-                <p>Upload or take a photo to find the look of your dreams.</p>
+                <p>Upload or take a photo to find the look of your dreams. </p>
                 <button class="action-btn" onclick="handleCameraClick()">Open Camera</button>
                 <input type="file" id="mobileCameraInput" accept="image/*" capture="user" style="display: none" onchange="handleFileUpload(this)">
                 <button class="action-btn secondary" onclick="document.getElementById('uploadInput').click()">Upload Photo</button>
@@ -219,6 +291,7 @@
         <div id="webcamModal">
             <button class="webcam-cancel-btn" onclick="closeWebcam()">Cancel</button>
             <video id="webcam-preview" autoplay playsinline muted onloadedmetadata="this.play()"></video>
+            <div id="webcamMessage" class="webcam-message"></div>
             <div class="webcam-controls">
                 <button type="button" class="shutter-btn" onclick="captureWebcam()"></button>
             </div>
@@ -235,7 +308,7 @@
         <div class="side-panel" id="sidePanel">
             <button class="close-panel" id="closePanel">&times;</button>
             <h2 style="margin-bottom:20px;">The Recipe</h2>
-            <div id="productInfoContainer">Loading...</div>
+            <div id="productInfoContainer">Loading... </div>
         </div>
 
         <div class="bottom-toolbar" id="bottomToolbar">
@@ -253,14 +326,14 @@
                 <button class="toolbar-button" id="lipstickBtn">
                      <svg viewBox="0 0 24 24">
                         <circle cx="8" cy="11" r="5" stroke="#000" stroke-width="2" fill="none" />
-                        <path d="M5 11 L7 9" stroke="#000" stroke-width="1.5" />
+                        <path d="M5 11 L7 9" stroke="#000" stroke-width="1. 5" />
                         <rect x="2" y="17" width="12" height="2" rx="1" fill="#000" />
-                        <rect x="17" y="13" width="4" height="6" rx="0.5" stroke="#000" stroke-width="2" fill="none" />
+                        <rect x="17" y="13" width="4" height="6" rx="0. 5" stroke="#000" stroke-width="2" fill="none" />
                         <rect x="17" y="10" width="4" height="3" fill="#000" />
                         <path d="M17 10 L17 4 L21 2 L21 10 Z" fill="#000" />
                      </svg>
                 </button>
-                <button class="toolbar-button" id="editorBtn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                <button class="toolbar-button" id="editorBtn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18. 5 2.5a2. 121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9. 5-9.5z"></path></svg></button>
             </div>
         </div>
 
@@ -271,14 +344,17 @@
     <script>
         const overlay = document.getElementById('startupOverlay');
         const exitModal = document.getElementById('exitModal');
-        const webcamModal = document.getElementById('webcamModal');
+        const webcamModal = document. getElementById('webcamModal');
         const webcamVideo = document.getElementById('webcam-preview');
+        const webcamMessage = document.getElementById('webcamMessage');
         const canvas = document.getElementById('canvas');
-        const sidePanel = document.getElementById('sidePanel');
+        const sidePanel = document. getElementById('sidePanel');
         const productInfo = document.getElementById('productInfoContainer');
         const videoContainer = document.getElementById('videoContainer');
+        const errorToast = document. getElementById('errorToast');
+        const errorMessage = document.getElementById('errorMessage');
+        const cartFeedback = document.getElementById('cartFeedback');
 
-        // DOM ROTATION SETUP
         let slideElements = [
             document.getElementById('slide-prev'),
             document.getElementById('slide-current'),
@@ -296,8 +372,8 @@
         window.addEventListener('message', (e) => { if (e.data === 'request-close-confirmation') toggleExitModal(true); });
 
         function fetchProducts() {
-            fetch('/api/products').then(r => r.json()).then(d => {
-                products = d.products;
+            fetch('/api/products'). then(r => r.json()). then(d => {
+                products = d. products;
                 if(products.length > 0) {
                     initSlides();
                     preloadAround(currentIndex);
@@ -312,7 +388,7 @@
 
         function getProductUrl(index) {
             const p = products[index];
-            return `/frame?id=${p.id}&t=${Date.now()}`;
+            return `/frame? id=${p.id}&t=${Date.now()}`;
         }
 
         function initSlides() {
@@ -337,7 +413,7 @@
         function preloadAround(centerIndex) {
             [-2, -1, 1, 2].forEach(off => {
                 const u = getProductUrl(getIndex(centerIndex + off));
-                if(!imageCache[u]) {
+                if(! imageCache[u]) {
                     const i = new Image(); i.src = u; imageCache[u] = i;
                 }
             });
@@ -345,33 +421,65 @@
 
         function updateInfo(idx) {
             const p = products[idx];
-            if(!p) return;
+            if(! p) return;
+
+            // Build the product URL - go to product detail page
+            const productUrl = `/product/${p.id}`;
+
             productInfo.innerHTML = `
-                <div style="background:#fff; border:1px solid #eee; padding:15px; border-radius:10px;">
-                    <p style="font-weight:bold; font-size:16px; margin-bottom:5px;">${p.product_name}</p>
-                    <p style="color:#666;">${p.shade_name}</p>
-                    <p style="margin-top:5px; font-size:12px; color:#999;">${p.brand}</p>
-                    <a href="${p.url}" target="_blank" style="display:block; margin-top:10px; text-align:center; background:#000; color:white; padding:10px; border-radius:8px; text-decoration:none;">Shop Now</a>
+                <div class="product-card-panel">
+                    <p class="product-name">${p.product_name}</p>
+                    <p class="product-shade">${p.shade_name || ''}</p>
+                    <p class="product-brand">${p.brand}</p>
+                    <p class="product-price">$${p.price}</p>
+                    <div class="product-buttons">
+                        <a href="${productUrl}" target="_blank" class="btn-shop-now">Shop Now</a>
+                        <button class="btn-add-cart-quick" onclick="addToCartQuick('${p.id}', '${p.product_name. replace(/'/g, "\\'")}', ${parseFloat(p.price) || 0})">
+                            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2. 68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1. 61L23 6H6"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>`;
+        }
+
+        // Quick add to cart from sidebar
+        function addToCartQuick(id, name, price) {
+            let cart = JSON.parse(localStorage.getItem('shopCart') || '[]');
+            let existing = cart.find(i => i.id === id);
+
+            if(existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ id: id, name: name, price: price, qty: 1 });
+            }
+
+            localStorage. setItem('shopCart', JSON.stringify(cart));
+
+            // Show feedback
+            cartFeedback.classList.add('show');
+            setTimeout(() => { cartFeedback.classList.remove('show'); }, 2000);
         }
 
         function goToNext() {
             if (isAnimating) return;
             isAnimating = true;
             slideElements[0].style.transform = 'translateY(-200%)';
-            slideElements[1].style.transform = 'translateY(-100%)';
+            slideElements[1].style. transform = 'translateY(-100%)';
             slideElements[2].style.transform = 'translateY(0)';
             setTimeout(() => {
                 currentIndex = getIndex(currentIndex + 1);
-                const reusedSlide = slideElements.shift();
-                reusedSlide.classList.add('no-transition');
-                reusedSlide.style.transform = 'translateY(100%)';
+                const reusedSlide = slideElements. shift();
+                reusedSlide. classList.add('no-transition');
+                reusedSlide. style.transform = 'translateY(100%)';
                 updateSlideImage(reusedSlide, getProductUrl(getIndex(currentIndex + 1)));
                 slideElements.push(reusedSlide);
                 updateInfo(currentIndex);
                 preloadAround(currentIndex);
-                void reusedSlide.offsetHeight;
-                reusedSlide.classList.remove('no-transition');
+                void reusedSlide. offsetHeight;
+                reusedSlide. classList.remove('no-transition');
                 isAnimating = false;
             }, 300);
         }
@@ -379,19 +487,19 @@
         function goToPrevious() {
             if (isAnimating) return;
             isAnimating = true;
-            slideElements[0].style.transform = 'translateY(0)';
+            slideElements[0].style. transform = 'translateY(0)';
             slideElements[1].style.transform = 'translateY(100%)';
-            slideElements[2].style.transform = 'translateY(200%)';
+            slideElements[2]. style.transform = 'translateY(200%)';
             setTimeout(() => {
                 currentIndex = getIndex(currentIndex - 1);
-                const reusedSlide = slideElements.pop();
-                reusedSlide.classList.add('no-transition');
+                const reusedSlide = slideElements. pop();
+                reusedSlide. classList.add('no-transition');
                 reusedSlide.style.transform = 'translateY(-100%)';
                 updateSlideImage(reusedSlide, getProductUrl(getIndex(currentIndex - 1)));
                 slideElements.unshift(reusedSlide);
                 updateInfo(currentIndex);
                 preloadAround(currentIndex);
-                void reusedSlide.offsetHeight;
+                void reusedSlide. offsetHeight;
                 reusedSlide.classList.remove('no-transition');
                 isAnimating = false;
             }, 300);
@@ -410,8 +518,9 @@
                     video: { facingMode: "user" }
                 });
                 webcamVideo.srcObject = stream;
-                await webcamVideo.play().catch(e => console.error("Video play error:", e));
-                webcamModal.style.display = 'block'; // Changed from flex to block for absolute positioning
+                await webcamVideo.play(). catch(e => console.error("Video play error:", e));
+                webcamModal.style. display = 'block';
+                hideWebcamMessage();
             } catch (err) {
                 console.error(err);
                 alert("Camera access denied or not available.");
@@ -421,57 +530,105 @@
         function closeWebcam() {
             if(stream) stream.getTracks().forEach(t => t.stop());
             webcamModal.style.display = 'none';
+            hideWebcamMessage();
+        }
+
+        function showWebcamMessage(msg, isError) {
+            webcamMessage.textContent = msg;
+            webcamMessage.className = 'webcam-message ' + (isError ? 'error' : 'processing');
+            webcamMessage.style.display = 'block';
+        }
+
+        function hideWebcamMessage() {
+            webcamMessage.style.display = 'none';
         }
 
         function captureWebcam() {
             if (webcamVideo.readyState >= 2) {
                 canvas.width = webcamVideo.videoWidth;
-                canvas.height = webcamVideo.videoHeight;
+                canvas.height = webcamVideo. videoHeight;
 
                 if(canvas.width === 0 || canvas.height === 0) {
-                    alert("Camera stream not ready. Please wait.");
+                    showWebcamMessage("Camera stream not ready.  Please wait.", true);
+                    setTimeout(hideWebcamMessage, 2000);
                     return;
                 }
+
+                showWebcamMessage("Processing.. .", false);
 
                 const ctx = canvas.getContext('2d');
                 ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
                 ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
 
                 const data = canvas.toDataURL('image/jpeg', 0.95);
-                closeWebcam();
-                handleImageSelection(data, true);
+
+                // Validate via server before accepting
+                fetch('/upload_selfie', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({image:data})
+                })
+                .then(r=>r.json())
+                .then(d => {
+                    if(d.success) {
+                        saveToHistory(data);
+                        closeWebcam();
+                        overlay.classList.add('hidden');
+                        initSlides();
+                        preloadAround(currentIndex);
+                    } else {
+                        showWebcamMessage(d.error || "Face not detected.  Try again.", true);
+                        setTimeout(hideWebcamMessage, 3000);
+                    }
+                })
+                .catch(err => {
+                    showWebcamMessage("Connection error. Please try again.", true);
+                    setTimeout(hideWebcamMessage, 3000);
+                });
             } else {
-                console.log("Video not ready");
-                alert("Camera is still loading, please wait...");
+                showWebcamMessage("Camera is still loading, please wait.. .", true);
+                setTimeout(hideWebcamMessage, 2000);
             }
         }
 
         function handleFileUpload(inp) {
             if(inp.files[0]) {
                 const r = new FileReader();
-                r.onload = e => handleImageSelection(e.target.result, true);
-                r.readAsDataURL(inp.files[0]);
+                r.onload = e => handleImageSelection(e.target. result, true);
+                r. readAsDataURL(inp.files[0]);
             }
+        }
+
+        function showErrorToast(msg) {
+            errorMessage.textContent = msg;
+            errorToast.style.display = 'block';
+        }
+
+        function closeErrorToast() {
+            errorToast.style.display = 'none';
         }
 
         function handleImageSelection(b64, save) {
             imageCache = {};
-            fetch('/upload_selfie', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({image:b64}) })
-            .then(r=>r.json()).then(d => {
+            fetch('/upload_selfie', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON. stringify({image:b64}) })
+            .then(r=>r.json()). then(d => {
                 if(d.success) {
                     if(save) saveToHistory(b64);
                     overlay.classList.add('hidden');
                     initSlides();
                     preloadAround(currentIndex);
                 } else {
-                    if(save) alert(d.error || "Face not detected. Try brighter lighting.");
+                    showErrorToast(d. error || "Face not detected. Please try a clearer photo with good lighting.");
                 }
+            })
+            .catch(err => {
+                showErrorToast("Connection error. Please try again.");
             });
         }
 
         function saveToHistory(b64) {
-            let h = JSON.parse(localStorage.getItem('photo_history')||'[]');
-            if(!h.includes(b64)) {
+            let h = JSON.parse(localStorage. getItem('photo_history')||'[]');
+            if(! h.includes(b64)) {
                 h.unshift(b64);
                 if(h.length>5) h.pop();
                 localStorage.setItem('photo_history', JSON.stringify(h));
@@ -500,12 +657,12 @@
         function confirmExit() { window.parent.postMessage('close-skintoner-widget', '*'); toggleExitModal(false); }
 
         document.getElementById('lipstickBtn').onclick = (e) => { e.stopPropagation(); toggleSidePanel(); };
-        document.getElementById('closePanel').onclick = (e) => { e.stopPropagation(); toggleSidePanel(false); };
+        document. getElementById('closePanel').onclick = (e) => { e.stopPropagation(); toggleSidePanel(false); };
         document.getElementById('panelOverlay').onclick = e => { e.stopPropagation(); toggleSidePanel(false); };
         document.getElementById('bottomToolbar').addEventListener('click', e => e.stopPropagation());
 
         document.getElementById('arrowUpBtn').onclick = (e) => { e.stopPropagation(); goToPrevious(); };
-        document.getElementById('arrowDownBtn').onclick = (e) => { e.stopPropagation(); goToNext(); };
+        document. getElementById('arrowDownBtn').onclick = (e) => { e.stopPropagation(); goToNext(); };
 
         document.getElementById('newPhotoBtn').onclick = (e) => {
             e.stopPropagation();
@@ -514,22 +671,22 @@
 
         function toggleSidePanel(forceState) {
             if (typeof forceState !== 'undefined') {
-                forceState ? sidePanel.classList.add('open') : sidePanel.classList.remove('open');
+                forceState ?  sidePanel.classList.add('open') : sidePanel.classList.remove('open');
             } else { sidePanel.classList.toggle('open'); }
         }
 
-        videoContainer.addEventListener('mousedown', e => startDrag(e.clientY));
-        videoContainer.addEventListener('mousemove', e => { if(isDragging) moveDrag(e.clientY); });
+        videoContainer.addEventListener('mousedown', e => startDrag(e. clientY));
+        videoContainer.addEventListener('mousemove', e => { if(isDragging) moveDrag(e. clientY); });
         videoContainer.addEventListener('mouseup', endDrag);
         videoContainer.addEventListener('touchstart', e => { e.preventDefault(); startDrag(e.touches[0].clientY); }, {passive:false});
-        videoContainer.addEventListener('touchmove', e => { if(isDragging) { e.preventDefault(); moveDrag(e.touches[0].clientY); } }, {passive:false});
-        videoContainer.addEventListener('touchend', endDrag);
+        videoContainer.addEventListener('touchmove', e => { if(isDragging) { e.preventDefault(); moveDrag(e. touches[0].clientY); } }, {passive:false});
+        videoContainer. addEventListener('touchend', endDrag);
 
         function startDrag(y) {
             if (window.innerWidth >= 768) return;
             if(isAnimating)return;
             isDragging=true; touchStartY=y; currentTouchY=y;
-            slideElements.forEach(s=>s.classList.add('no-transition'));
+            slideElements. forEach(s=>s.classList.add('no-transition'));
         }
         function moveDrag(y) {
             currentTouchY=y; const d = y-touchStartY;
@@ -539,17 +696,17 @@
             slideElements[2].style.transform=`translateY(${100+pct}%)`;
         }
         function endDrag() {
-            if(!isDragging) return; isDragging=false;
+            if(! isDragging) return; isDragging=false;
             const d = currentTouchY-touchStartY;
             slideElements.forEach(s=>{s.classList.remove('no-transition');s.classList.add('animating')});
             if(d < -80) goToNext();
             else if(d > 80) goToPrevious();
             else {
                 slideElements[0].style.transform='translateY(-100%)';
-                slideElements[1].style.transform='translateY(0)';
+                slideElements[1]. style.transform='translateY(0)';
                 slideElements[2].style.transform='translateY(100%)';
             }
-            setTimeout(()=>slideElements.forEach(s=>s.classList.remove('animating')), 300);
+            setTimeout(()=>slideElements. forEach(s=>s.classList.remove('animating')), 300);
         }
     </script>
 </body>
