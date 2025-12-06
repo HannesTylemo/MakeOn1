@@ -1,18 +1,5 @@
 [
   {
-    "id": "prod_midnight_lash",
-    "category": "mascara",
-    "brand": "Luna",
-    "product_name": "Midnight Volume",
-    "hex_color": "#000000",
-    "price": "18.50",
-    "description": "Dramatic volume and length with jet black pigments.",
-    "image_url": "/static/uploads/mascara_demo.jpg",
-    "pigment": 100,
-    "shine": 0,
-    "effect": "none"
-  },
-  {
     "id": "prod_demo1",
     "category": "lipstick",
     "brand": "MAC Cosmetics",
