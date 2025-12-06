@@ -128,8 +128,22 @@
                             <span class="ms-2 small text-muted">{{ product.hex_color }}</span>
                         </td>
                         <td class="text-end">
-                            <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal('{{ product.id }}', '{{ product.category }}', '{{ product.brand }}', '{{ product.product_name }}', '{{ product.hex_color }}', '{{ product.price }}', '{{ product.description }}', {{ product.pigment|default(70) }}, {{ product.shine|default(30) }}, '{{ product.effect|default("none") }}')">Edit</button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="openDeleteModal('{{ product.id }}', '{{ product.product_name }}')">Delete</button>
+                            <button class="btn btn-sm btn-outline-primary me-2" 
+                                    data-id="{{ product.id }}" 
+                                    data-category="{{ product.category }}" 
+                                    data-brand="{{ product.brand|e }}" 
+                                    data-name="{{ product.product_name|e }}" 
+                                    data-color="{{ product.hex_color }}" 
+                                    data-price="{{ product.price }}" 
+                                    data-description="{{ product.description|e }}" 
+                                    data-pigment="{{ product.pigment|default(70) }}" 
+                                    data-shine="{{ product.shine|default(30) }}" 
+                                    data-effect="{{ product.effect|default('none') }}"
+                                    onclick="openEditModalFromData(this)">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" 
+                                    data-id="{{ product.id }}" 
+                                    data-name="{{ product.product_name|e }}"
+                                    onclick="openDeleteModalFromData(this)">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -409,16 +423,29 @@
         setupSyncedSlider('edit-range-pigment', 'edit-num-pigment', 'edit-bubble-pigment');
         setupSyncedSlider('edit-range-shine', 'edit-num-shine', 'edit-bubble-shine');
 
-        // Delete Modal Functions
-        function openDeleteModal(productId, productName) {
+        // Delete Modal Functions using data attributes (secure against XSS)
+        function openDeleteModalFromData(button) {
+            const productId = button.dataset.id;
+            const productName = button.dataset.name;
             document.getElementById('deleteProductId').value = productId;
             document.getElementById('deleteProductName').textContent = productName;
             var deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
             deleteModal.show();
         }
 
-        // Edit Modal Functions
-        function openEditModal(id, category, brand, productName, hexColor, price, description, pigment, shine, effect) {
+        // Edit Modal Functions using data attributes (secure against XSS)
+        function openEditModalFromData(button) {
+            const id = button.dataset.id;
+            const category = button.dataset.category;
+            const brand = button.dataset.brand;
+            const productName = button.dataset.name;
+            const hexColor = button.dataset.color;
+            const price = button.dataset.price;
+            const description = button.dataset.description;
+            const pigment = parseInt(button.dataset.pigment);
+            const shine = parseInt(button.dataset.shine);
+            const effect = button.dataset.effect;
+            
             document.getElementById('edit-product-id').value = id;
             document.getElementById('edit-category-select').value = category;
             document.getElementById('edit-brand').value = brand;
@@ -433,6 +460,24 @@
                 document.getElementById('edit-range-shine').value = shine;
                 document.getElementById('edit-num-shine').value = shine;
                 document.getElementById('edit-effect').value = effect;
+                
+                // Update bubble positions after setting values
+                const pigmentRange = document.getElementById('edit-range-pigment');
+                const pigmentBubble = document.getElementById('edit-bubble-pigment');
+                const shineRange = document.getElementById('edit-range-shine');
+                const shineBubble = document.getElementById('edit-bubble-shine');
+                
+                if(pigmentRange && pigmentBubble) {
+                    const pigmentPercent = Number(((pigment - 0) * 100) / (100 - 0));
+                    pigmentBubble.innerHTML = pigment;
+                    pigmentBubble.style.left = `calc(${pigmentPercent}% + (${8 - pigmentPercent * 0.15}px))`;
+                }
+                
+                if(shineRange && shineBubble) {
+                    const shinePercent = Number(((shine - 0) * 100) / (100 - 0));
+                    shineBubble.innerHTML = shine;
+                    shineBubble.style.left = `calc(${shinePercent}% + (${8 - shinePercent * 0.15}px))`;
+                }
             }
             
             toggleEditProperties();
