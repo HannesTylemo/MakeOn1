@@ -9,10 +9,11 @@
         body { background: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
         .product-container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
 
+        /* UPDATED: Relative positioning to hold the absolute Try-On button */
         .product-image-container {
             background: #f8f8f8; width: 100%; height: 500px;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 10px; overflow: hidden;
+            border-radius: 10px; overflow: hidden; position: relative;
         }
         .product-image { max-width: 100%; max-height: 100%; object-fit: cover; }
 
@@ -21,24 +22,53 @@
         .price { font-size: 24px; font-weight: 400; margin-bottom: 30px; }
         .description { color: #555; line-height: 1.6; margin-bottom: 40px; }
 
-        .btn-black { background: black; color: white; border: none; padding: 15px 30px; font-weight: 700; width: 100%; text-transform: uppercase; }
-        .btn-black:hover { background: #333; color: white; }
-
-        .btn-try-on {
+        /* Add to Cart Button (replaces old Try-On spot) */
+        .btn-add-cart {
             background: white; color: black; border: 2px solid black;
             padding: 15px 30px; font-weight: 700; width: 100%;
-            text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;
+            text-transform: uppercase; margin-bottom: 15px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
         }
-        .btn-try-on:hover { background: #f0f0f0; }
+        .btn-add-cart:hover { background: #f0f0f0; }
+
+        /* UPDATED: Try-On button moved to bottom right of image, smaller */
+        .btn-try-on-overlay {
+            position: absolute; bottom: 15px; right: 15px;
+            background: white; color: black; border: 1px solid black;
+            padding: 8px 16px; font-weight: 700; font-size: 12px;
+            text-transform: uppercase; border-radius: 30px;
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        .btn-try-on-overlay:hover { background: #f9f9f9; transform: scale(1.05); }
+
+        /* Cart Modal Styles */
+        .cart-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;
+        }
+        .cart-content { background: white; padding: 30px; width: 90%; max-width: 500px; border-radius: 10px; }
+        .cart-list { list-style: none; padding: 0; margin: 20px 0; }
+        .cart-list li { padding: 10px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        .close-cart { float: right; font-size: 24px; cursor: pointer; }
+
+        .header-cart-btn { cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- Simple Header with Fake Cart -->
+    <!-- Header with Cart Icon -->
     <div style="padding: 20px 40px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; background:white; z-index:100;">
-        <a href="/" style="text-decoration:none; color:black; font-weight:900; font-size:24px; letter-spacing:2px;">BEAUTY STORE</a>
-        <div style="font-weight: bold; cursor: pointer;" onclick="alert('Fake Cart: Items inside!')">
-            CART (<span id="cart-count">0</span>)
+        <a href="/mock" style="text-decoration:none; color:black; font-weight:900; font-size:24px; letter-spacing:2px;">BEAUTY STORE</a>
+
+        <div class="header-cart-btn" onclick="showCart()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span id="cart-count">0</span>
         </div>
     </div>
 
@@ -52,6 +82,11 @@
                     {% else %}
                         <div class="text-muted">No Image Available</div>
                     {% endif %}
+
+                    <!-- NEW: Try-On Button Overlay -->
+                    <button class="btn-try-on-overlay" onclick="Skintoner.open('{{ product.id }}')">
+                        📷 Try-On
+                    </button>
                 </div>
             </div>
 
@@ -65,15 +100,14 @@
                     {{ product.description }}
                 </div>
 
-                <!-- TRY ON BUTTON -->
-                <button class="btn-try-on" onclick="Skintoner.open('{{ product.id }}')">
-                    📷 Virtual Try-On
+                <!-- NEW: Add to Cart Button in place of old Try-On -->
+                <button class="btn-add-cart" onclick="addToCart()">
+                    Add to Cart
                 </button>
 
-                <!-- Add to Cart Section -->
-                <div class="d-flex gap-2 mb-3">
+                <div class="d-flex gap-2 mb-3 align-items-center">
+                    <label>Qty:</label>
                     <input type="number" id="qty-input" value="1" min="1" class="form-control" style="width: 80px; text-align: center;">
-                    <button class="btn-black" onclick="addToCart()">Add to Cart</button>
                 </div>
 
                 <div id="cart-msg" style="display:none; color: green; font-weight: bold; margin-top: 10px;">
@@ -83,30 +117,78 @@
         </div>
     </div>
 
+    <!-- Cart Modal -->
+    <div id="cartModal" class="cart-modal">
+        <div class="cart-content">
+            <span class="close-cart" onclick="document.getElementById('cartModal').style.display='none'">&times;</span>
+            <h2>Shopping Cart</h2>
+            <ul id="cart-list-body" class="cart-list"></ul>
+            <div id="cart-total" style="text-align: right; font-size: 18px; font-weight: bold;"></div>
+            <button class="btn btn-dark w-100 mt-3" onclick="document.getElementById('cartModal').style.display='none'">Continue Shopping</button>
+        </div>
+    </div>
+
     <!-- Widget Script -->
     <script src="http://127.0.0.1:5000/static/widget.js"></script>
 
     <!-- Cart Logic -->
     <script>
-        // Load initial cart count from LocalStorage
-        let cartCount = parseInt(localStorage.getItem('fakeCartCount')) || 0;
-        document.getElementById('cart-count').innerText = cartCount;
+        function getCart() { return JSON.parse(localStorage.getItem('shopCart') || '[]'); }
+        function saveCart(c) { localStorage.setItem('shopCart', JSON.stringify(c)); updateCartUI(); }
+
+        function updateCartUI() {
+            let c = getCart();
+            let count = c.reduce((a,b)=>a+b.qty,0);
+            document.getElementById('cart-count').innerText = count;
+        }
 
         function addToCart() {
-            const qty = parseInt(document.getElementById('qty-input').value);
-            cartCount += qty;
+            let c = getCart();
+            let qty = parseInt(document.getElementById('qty-input').value);
+            let existing = c.find(i => i.id === "{{ product.id }}");
 
-            // Update UI
-            document.getElementById('cart-count').innerText = cartCount;
+            if(existing) {
+                existing.qty += qty;
+            } else {
+                c.push({
+                    id: "{{ product.id }}",
+                    name: "{{ product.product_name }}",
+                    price: {{ product.price }},
+                    qty: qty
+                });
+            }
+            saveCart(c);
 
-            // Save to LocalStorage
-            localStorage.setItem('fakeCartCount', cartCount);
-
-            // Show confirmation
             const msg = document.getElementById('cart-msg');
             msg.style.display = 'block';
             setTimeout(() => { msg.style.display = 'none'; }, 2000);
         }
+
+        function showCart() {
+            let c = getCart();
+            let list = document.getElementById('cart-list-body');
+            let totalEl = document.getElementById('cart-total');
+
+            if(c.length === 0) {
+                list.innerHTML = '<li>Your cart is empty.</li>';
+                totalEl.innerText = '';
+            } else {
+                list.innerHTML = c.map(i => `
+                    <li>
+                        <span>${i.name} <small>x ${i.qty}</small></span>
+                        <span>$${(i.price * i.qty).toFixed(2)}</span>
+                    </li>
+                `).join('');
+
+                let total = c.reduce((a,b) => a + (b.price * b.qty), 0);
+                totalEl.innerText = "Total: $" + total.toFixed(2);
+            }
+
+            document.getElementById('cartModal').style.display = 'flex';
+        }
+
+        // Init
+        updateCartUI();
     </script>
 </body>
 </html>

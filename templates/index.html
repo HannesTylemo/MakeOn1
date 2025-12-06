@@ -1,57 +1,227 @@
 <!DOCTYPE html>
-<!-- ... (CSS styles remain the same, omitted for brevity, just replace the script at the bottom) ... -->
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Skintoner Try-On</title>
-<style>
-    /* Paste your existing CSS here or keep file as is, just UPDATE THE SCRIPT BELOW */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body, html { width: 100%; height: 100%; background: white; overflow: hidden; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-    .phone-container { width: 100%; height: 100%; background: #fff; position: relative; display: flex; flex-direction: column; overflow: hidden; }
-    .close-app-btn { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(255,255,255,0.9); border-radius: 50%; border: none; font-size: 24px; font-weight: bold; cursor: pointer; z-index: 600; display: flex; justify-content: center; align-items: center; color: #000; }
-    .startup-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 200; display: flex; flex-direction: column; justify-content: center; padding: 40px 30px; transition: opacity 0.4s ease; }
-    .startup-overlay.hidden { opacity: 0; pointer-events: none; }
-    .startup-content { text-align: center; width: 100%; max-width: 400px; margin: 0 auto; }
-    .action-btn { display: flex; justify-content: center; align-items: center; width: 100%; padding: 18px; margin-bottom: 15px; background: #000; color: white; border: none; border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer; text-decoration: none; }
-    #webcamModal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 300; display: none; }
-    #webcam-preview { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); background: black; }
-    .webcam-controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 310; }
-    .shutter-btn { width: 72px; height: 72px; border-radius: 50%; background: transparent; border: 4px solid white; cursor: pointer; position: relative; }
-    .shutter-btn::after { content:''; width: 60px; height: 60px; background: white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-    .webcam-cancel-btn { position:absolute; top:20px; left:20px; z-index:310; padding:10px 20px; border:none; background:rgba(255,255,255,0.8); border-radius:20px; cursor:pointer; font-weight:bold; }
-    .video-container { position: relative; flex-grow: 1; width: 100%; background: white; z-index: 10; }
-    .video-slide { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 0.3s; }
-    .video-slide img { width: 100%; height: 100%; object-fit: contain; display: block; }
-    .bottom-toolbar { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: white; display: flex; justify-content: space-around; align-items: center; z-index: 50; border-top: 1px solid #f0f0f0; }
-    .side-panel { position: absolute; top: 0; right: -100%; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 40; transition: right 0.3s; padding: 30px; padding-top: 80px; }
-    .side-panel.open { right: 0; }
-    @media (min-width: 768px) {
-        .bottom-toolbar { position: absolute; top: 0; right: 0; bottom: 0; left: auto; width: 90px; height: 100%; flex-direction: column; padding: 30px 0; border-left: 1px solid #eee; border-top: none; }
-        .side-panel { width: 300px; right: -300px; border-left: 1px solid #eee; }
-        .side-panel.open { right: 90px; }
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Skintoner Try-On</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body, html {
+            width: 100%; height: 100%; background: white;
+            overflow: hidden; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        .phone-container {
+            width: 100%; height: 100%;
+            background: #fff; position: relative; touch-action: none;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* FIX 1: Increased z-index to 600 to be above EVERYTHING (Webcam is 300, Overlay is 200) */
+        .close-app-btn {
+            position: absolute; top: 20px; right: 20px;
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 50%; border: none;
+            font-size: 24px; line-height: 1;
+            font-weight: bold; cursor: pointer;
+            z-index: 600;
+            display: flex; justify-content: center; align-items: center;
+            color: #000;
+        }
+        .close-app-btn:hover { background: #f0f0f0; }
+
+        /* STARTUP */
+        .startup-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 200; display: flex; flex-direction: column;
+            justify-content: center; padding: 40px 30px; transition: opacity 0.4s ease;
+        }
+        .startup-overlay.hidden { opacity: 0; pointer-events: none; }
+        .startup-content { text-align: center; width: 100%; max-width: 400px; margin: 0 auto; }
+        .startup-content h1 { font-size: 36px; margin-bottom: 15px; color: #000; font-weight: 800; }
+        .startup-content p { color: #666; margin-bottom: 50px; font-size: 18px; }
+
+        .action-btn {
+            display: flex; justify-content: center; align-items: center;
+            width: 100%; padding: 18px; margin-bottom: 15px; background: #000;
+            color: white; border: none; border-radius: 50px; font-size: 16px;
+            font-weight: 700; cursor: pointer; text-decoration: none;
+        }
+        .action-btn.secondary { background: #fff; color: #000; border: 2px solid #f0f0f0; }
+
+        /* FIX 2: IMPROVED WEBCAM CSS */
+        #webcamModal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 300; display: none;
+            /* Removed flex-direction: column to use absolute positioning for controls */
+        }
+        #webcam-preview {
+            width: 100%; height: 100%;
+            object-fit: cover; /* Ensures video fills screen without pushing buttons off */
+            transform: scaleX(-1);
+            background: black;
+        }
+        .webcam-controls {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            height: 120px; background: rgba(0,0,0,0.5); /* Semi-transparent overlay */
+            display: flex; justify-content: center; align-items: center;
+            z-index: 310;
+        }
+        .shutter-btn {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: transparent; border: 4px solid white;
+            cursor: pointer; position: relative; display: flex; justify-content: center; align-items: center;
+        }
+        .shutter-btn::after {
+            content:''; width: 60px; height: 60px; background: white; border-radius: 50%;
+        }
+        .webcam-cancel-btn {
+            position:absolute; top:20px; left:20px; z-index:310;
+            padding:10px 20px; border:none; background:rgba(255,255,255,0.8);
+            border-radius:20px; cursor:pointer; font-weight:bold;
+        }
+
+        /* EXIT MODAL */
+        #exitModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 500;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(3px);
+        }
+        .modal-box {
+            background: white; padding: 30px; border-radius: 20px; width: 300px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px;}
+        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
+        .modal-btn.yes { background: #000; color: white; }
+        .modal-btn.no { background: #f0f0f0; color: #000; }
+
+        /* VIDEO SLIDES */
+        .video-container { position: relative; flex-grow: 1; width: 100%; background: white; z-index: 10; }
+        .video-slide { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .video-slide.no-transition { transition: none; }
+        .video-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        /* TOOLBAR */
+        .bottom-toolbar {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 60px;
+            background: white; display: flex; justify-content: space-around; align-items: center;
+            z-index: 50; border-top: 1px solid #f0f0f0;
+        }
+        .toolbar-button { background: transparent; border: none; cursor: pointer; width: 44px; height: 100%; display:flex; justify-content:center; align-items:center;}
+        .toolbar-button svg { width: 24px; height: 24px; stroke: #000; stroke-width: 2; fill: none; }
+
+        .desktop-arrows-container { display: none; flex-direction: column; gap: 15px; align-items: center; }
+        .nav-buttons-container { display: flex; justify-content: space-around; width: 100%; height: 100%; }
+
+        /* NEW PHOTO BUTTON (Circular) */
+        .new-photo-btn {
+            display: none;
+            background: white;
+            border: 2px solid black;
+            color: black;
+            font-family: 'Helvetica Neue', sans-serif;
+            font-weight: bold;
+            font-size: 10px;
+            padding: 0;
+            cursor: pointer;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            line-height: 1.1;
+        }
+        .new-photo-btn:hover { background: #f0f0f0; }
+        @media (max-width: 767px) { .new-photo-btn { display: none !important; } }
+
+        /* SIDE PANEL */
+        .side-panel {
+            position: absolute; top: 0; right: -100%; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95); z-index: 40;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 30px; padding-top: 80px; backdrop-filter: blur(5px);
+        }
+        .side-panel.open { right: 0; }
+        .close-panel { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 30px; cursor: pointer; }
+
+        @media (min-width: 768px) {
+            .video-slide img { object-fit: contain; background: white; }
+            .bottom-toolbar {
+                position: absolute; top: 0; right: 0; bottom: 0; left: auto;
+                width: 90px; height: 100%;
+                background: white; border-left: 1px solid #f0f0f0; border-top: none;
+                flex-direction: column; justify-content: space-between; padding: 30px 0;
+            }
+            .nav-buttons-container { flex-direction: column; height: auto; gap: 20px; justify-content: flex-end; }
+            .toolbar-button { height: 60px; width: 100%; }
+            .toolbar-button svg { width: 32px; height: 32px; }
+            .side-panel {
+                width: 300px; right: -300px; top: 0; height: 100%; z-index: 45;
+                border-left: 1px solid #eee; padding-top: 30px;
+            }
+            .side-panel.open { right: 90px; }
+            .close-panel { display: none; }
+            .desktop-arrows-container { display: flex; justify-content: center; align-items: center; flex-grow: 1; }
+            .new-photo-btn { display: flex !important; }
+        }
+
+        .history-section { margin-top: 40px; text-align: left; }
+        .history-grid { display: flex; gap: 10px; overflow-x: auto; }
+        .history-item { width: 60px; height: 60px; border-radius: 10px; overflow: hidden; cursor: pointer; }
+        .panel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 35; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .panel-overlay.visible { opacity: 1; pointer-events: auto; }
+        #preload-container { display: none; }
+    </style>
 </head>
 <body>
-    <div class="phone-container">
-        <button class="close-app-btn" onclick="window.parent.postMessage('close-skintoner-widget', '*')">&times;</button>
+    <div class="phone-container" id="phone">
+
+        <!-- Close Button now has z-index 600 -->
+        <button class="close-app-btn" onclick="toggleExitModal(true)">&times;</button>
+
+        <div id="exitModal">
+            <div class="modal-box">
+                <h3>Back To Homepage</h3>
+                <p>Are you sure?</p>
+                <div class="modal-actions">
+                    <button class="modal-btn no" onclick="toggleExitModal(false)">No</button>
+                    <button class="modal-btn yes" onclick="confirmExit()">Yes</button>
+                </div>
+            </div>
+        </div>
 
         <div class="startup-overlay" id="startupOverlay">
             <div class="startup-content">
                 <h1>Welcome</h1>
                 <p>Upload or take a photo to find the look of your dreams.</p>
-                <button class="action-btn" onclick="openWebcam()">Open Camera</button>
-                <button class="action-btn" style="background:white; color:black; border:2px solid #eee" onclick="document.getElementById('uploadInput').click()">Upload Photo</button>
+                <button class="action-btn" onclick="handleCameraClick()">Open Camera</button>
+                <input type="file" id="mobileCameraInput" accept="image/*" capture="user" style="display: none" onchange="handleFileUpload(this)">
+                <button class="action-btn secondary" onclick="document.getElementById('uploadInput').click()">Upload Photo</button>
                 <input type="file" id="uploadInput" accept="image/*" style="display: none" onchange="handleFileUpload(this)">
+
+                <div class="history-section" id="historySection" style="display:none;">
+                    <h3 style="font-size:12px;color:#999;margin-bottom:10px;">PREVIOUSLY USED</h3>
+                    <div class="history-grid" id="historyGrid"></div>
+                </div>
             </div>
         </div>
 
         <div id="webcamModal">
             <button class="webcam-cancel-btn" onclick="closeWebcam()">Cancel</button>
-            <video id="webcam-preview" autoplay playsinline muted></video>
-            <div class="webcam-controls"><button type="button" class="shutter-btn" onclick="captureWebcam()"></button></div>
+            <video id="webcam-preview" autoplay playsinline muted onloadedmetadata="this.play()"></video>
+            <div class="webcam-controls">
+                <button type="button" class="shutter-btn" onclick="captureWebcam()"></button>
+            </div>
         </div>
 
         <div class="video-container" id="videoContainer">
@@ -60,58 +230,90 @@
             <div class="video-slide" id="slide-next" style="transform: translateY(100%)"><img src="" alt=""></div>
         </div>
 
+        <div class="panel-overlay" id="panelOverlay"></div>
+
         <div class="side-panel" id="sidePanel">
-            <button onclick="toggleSidePanel(false)" style="position:absolute; top:20px; right:20px; border:none; background:none; font-size:24px;">&times;</button>
-            <h2>The Recipe</h2>
+            <button class="close-panel" id="closePanel">&times;</button>
+            <h2 style="margin-bottom:20px;">The Recipe</h2>
             <div id="productInfoContainer">Loading...</div>
         </div>
 
-        <div class="bottom-toolbar">
-            <button onclick="toggleSidePanel()" style="background:none;border:none;cursor:pointer">ℹ️ Info</button>
-            <button onclick="goToPrevious()" style="background:none;border:none;cursor:pointer">⬆️</button>
-            <button onclick="goToNext()" style="background:none;border:none;cursor:pointer">⬇️</button>
+        <div class="bottom-toolbar" id="bottomToolbar">
+            <div style="height:20px;" class="desktop-only"></div>
+            <div class="desktop-arrows-container">
+                <button class="new-photo-btn" id="newPhotoBtn">New<br>Photo</button>
+                <button class="toolbar-button" id="arrowUpBtn">
+                    <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="toolbar-button" id="arrowDownBtn">
+                    <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+            <div class="nav-buttons-container">
+                <button class="toolbar-button" id="lipstickBtn">
+                     <svg viewBox="0 0 24 24">
+                        <circle cx="8" cy="11" r="5" stroke="#000" stroke-width="2" fill="none" />
+                        <path d="M5 11 L7 9" stroke="#000" stroke-width="1.5" />
+                        <rect x="2" y="17" width="12" height="2" rx="1" fill="#000" />
+                        <rect x="17" y="13" width="4" height="6" rx="0.5" stroke="#000" stroke-width="2" fill="none" />
+                        <rect x="17" y="10" width="4" height="3" fill="#000" />
+                        <path d="M17 10 L17 4 L21 2 L21 10 Z" fill="#000" />
+                     </svg>
+                </button>
+                <button class="toolbar-button" id="editorBtn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+            </div>
         </div>
+
+        <div id="preload-container"></div>
         <canvas id="canvas" style="display:none;"></canvas>
     </div>
 
     <script>
         const overlay = document.getElementById('startupOverlay');
+        const exitModal = document.getElementById('exitModal');
         const webcamModal = document.getElementById('webcamModal');
         const webcamVideo = document.getElementById('webcam-preview');
         const canvas = document.getElementById('canvas');
         const sidePanel = document.getElementById('sidePanel');
         const productInfo = document.getElementById('productInfoContainer');
+        const videoContainer = document.getElementById('videoContainer');
 
-        let slideElements = [document.getElementById('slide-prev'), document.getElementById('slide-current'), document.getElementById('slide-next')];
+        // DOM ROTATION SETUP
+        let slideElements = [
+            document.getElementById('slide-prev'),
+            document.getElementById('slide-current'),
+            document.getElementById('slide-next')
+        ];
+
         let currentIndex = 0;
         let products = [];
+        let isAnimating = false;
+        let touchStartY = 0; let currentTouchY = 0; let isDragging = false;
         let stream = null;
         let imageCache = {};
 
-        window.addEventListener('load', fetchProducts);
+        window.addEventListener('load', () => { loadHistory(); fetchProducts(); });
+        window.addEventListener('message', (e) => { if (e.data === 'request-close-confirmation') toggleExitModal(true); });
 
         function fetchProducts() {
             fetch('/api/products').then(r => r.json()).then(d => {
                 products = d.products;
                 if(products.length > 0) {
-                    // FIX: Check URL for product_id
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const startId = urlParams.get('product_id');
-
-                    if (startId) {
-                        const foundIndex = products.findIndex(p => p.id === startId);
-                        if (foundIndex !== -1) {
-                            currentIndex = foundIndex;
-                        }
-                    }
-
                     initSlides();
+                    preloadAround(currentIndex);
                 }
             });
         }
 
-        function getIndex(i) { const len = products.length; return ((i % len) + len) % len; }
-        function getProductUrl(index) { return `/frame?id=${products[index].id}&t=${Date.now()}`; }
+        function getIndex(i) {
+            const len = products.length;
+            return ((i % len) + len) % len;
+        }
+
+        function getProductUrl(index) {
+            const p = products[index];
+            return `/frame?id=${p.id}&t=${Date.now()}`;
+        }
 
         function initSlides() {
             updateSlideImage(slideElements[0], getProductUrl(getIndex(currentIndex - 1)));
@@ -122,66 +324,232 @@
 
         function updateSlideImage(el, url) {
             const img = el.querySelector('img');
-            img.src = url;
+            if(imageCache[url] && imageCache[url].complete) {
+                img.src = url;
+            } else {
+                const temp = new Image();
+                temp.src = url;
+                imageCache[url] = temp;
+                temp.onload = () => { img.src = url; }
+            }
+        }
+
+        function preloadAround(centerIndex) {
+            [-2, -1, 1, 2].forEach(off => {
+                const u = getProductUrl(getIndex(centerIndex + off));
+                if(!imageCache[u]) {
+                    const i = new Image(); i.src = u; imageCache[u] = i;
+                }
+            });
         }
 
         function updateInfo(idx) {
             const p = products[idx];
             if(!p) return;
-            productInfo.innerHTML = `<h3>${p.product_name}</h3><p>${p.brand}</p><br><button style="background:black;color:white;width:100%;padding:10px;">Shop Now</button>`;
+            productInfo.innerHTML = `
+                <div style="background:#fff; border:1px solid #eee; padding:15px; border-radius:10px;">
+                    <p style="font-weight:bold; font-size:16px; margin-bottom:5px;">${p.product_name}</p>
+                    <p style="color:#666;">${p.shade_name}</p>
+                    <p style="margin-top:5px; font-size:12px; color:#999;">${p.brand}</p>
+                    <a href="${p.url}" target="_blank" style="display:block; margin-top:10px; text-align:center; background:#000; color:white; padding:10px; border-radius:8px; text-decoration:none;">Shop Now</a>
+                </div>`;
         }
 
         function goToNext() {
-            currentIndex = getIndex(currentIndex + 1);
-            initSlides();
+            if (isAnimating) return;
+            isAnimating = true;
+            slideElements[0].style.transform = 'translateY(-200%)';
+            slideElements[1].style.transform = 'translateY(-100%)';
+            slideElements[2].style.transform = 'translateY(0)';
+            setTimeout(() => {
+                currentIndex = getIndex(currentIndex + 1);
+                const reusedSlide = slideElements.shift();
+                reusedSlide.classList.add('no-transition');
+                reusedSlide.style.transform = 'translateY(100%)';
+                updateSlideImage(reusedSlide, getProductUrl(getIndex(currentIndex + 1)));
+                slideElements.push(reusedSlide);
+                updateInfo(currentIndex);
+                preloadAround(currentIndex);
+                void reusedSlide.offsetHeight;
+                reusedSlide.classList.remove('no-transition');
+                isAnimating = false;
+            }, 300);
         }
 
         function goToPrevious() {
-            currentIndex = getIndex(currentIndex - 1);
-            initSlides();
+            if (isAnimating) return;
+            isAnimating = true;
+            slideElements[0].style.transform = 'translateY(0)';
+            slideElements[1].style.transform = 'translateY(100%)';
+            slideElements[2].style.transform = 'translateY(200%)';
+            setTimeout(() => {
+                currentIndex = getIndex(currentIndex - 1);
+                const reusedSlide = slideElements.pop();
+                reusedSlide.classList.add('no-transition');
+                reusedSlide.style.transform = 'translateY(-100%)';
+                updateSlideImage(reusedSlide, getProductUrl(getIndex(currentIndex - 1)));
+                slideElements.unshift(reusedSlide);
+                updateInfo(currentIndex);
+                preloadAround(currentIndex);
+                void reusedSlide.offsetHeight;
+                reusedSlide.classList.remove('no-transition');
+                isAnimating = false;
+            }, 300);
         }
 
-        // Camera Logic
+        // --- CAMERA & UPLOAD ---
+        function handleCameraClick() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) { document.getElementById('mobileCameraInput').click(); }
+            else { openWebcam(); }
+        }
+
         async function openWebcam() {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "user" }
+                });
                 webcamVideo.srcObject = stream;
-                webcamModal.style.display = 'block';
-            } catch (err) { alert("Camera error"); }
+                await webcamVideo.play().catch(e => console.error("Video play error:", e));
+                webcamModal.style.display = 'block'; // Changed from flex to block for absolute positioning
+            } catch (err) {
+                console.error(err);
+                alert("Camera access denied or not available.");
+            }
         }
-        function closeWebcam() { if(stream) stream.getTracks().forEach(t => t.stop()); webcamModal.style.display = 'none'; }
+
+        function closeWebcam() {
+            if(stream) stream.getTracks().forEach(t => t.stop());
+            webcamModal.style.display = 'none';
+        }
 
         function captureWebcam() {
-            canvas.width = webcamVideo.videoWidth; canvas.height = webcamVideo.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
-            ctx.drawImage(webcamVideo, 0, 0);
-            const data = canvas.toDataURL('image/jpeg', 0.8);
-            closeWebcam();
-            uploadImage(data);
+            if (webcamVideo.readyState >= 2) {
+                canvas.width = webcamVideo.videoWidth;
+                canvas.height = webcamVideo.videoHeight;
+
+                if(canvas.width === 0 || canvas.height === 0) {
+                    alert("Camera stream not ready. Please wait.");
+                    return;
+                }
+
+                const ctx = canvas.getContext('2d');
+                ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
+                ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
+
+                const data = canvas.toDataURL('image/jpeg', 0.95);
+                closeWebcam();
+                handleImageSelection(data, true);
+            } else {
+                console.log("Video not ready");
+                alert("Camera is still loading, please wait...");
+            }
         }
 
         function handleFileUpload(inp) {
             if(inp.files[0]) {
                 const r = new FileReader();
-                r.onload = e => uploadImage(e.target.result);
+                r.onload = e => handleImageSelection(e.target.result, true);
                 r.readAsDataURL(inp.files[0]);
             }
         }
 
-        function uploadImage(b64) {
+        function handleImageSelection(b64, save) {
+            imageCache = {};
             fetch('/upload_selfie', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({image:b64}) })
             .then(r=>r.json()).then(d => {
                 if(d.success) {
+                    if(save) saveToHistory(b64);
                     overlay.classList.add('hidden');
                     initSlides();
+                    preloadAround(currentIndex);
+                } else {
+                    if(save) alert(d.error || "Face not detected. Try brighter lighting.");
                 }
             });
         }
 
-        function toggleSidePanel(force) {
-            if(force !== undefined) { force ? sidePanel.classList.add('open') : sidePanel.classList.remove('open'); }
-            else sidePanel.classList.toggle('open');
+        function saveToHistory(b64) {
+            let h = JSON.parse(localStorage.getItem('photo_history')||'[]');
+            if(!h.includes(b64)) {
+                h.unshift(b64);
+                if(h.length>5) h.pop();
+                localStorage.setItem('photo_history', JSON.stringify(h));
+            }
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const h = JSON.parse(localStorage.getItem('photo_history') || '[]');
+            const grid = document.getElementById('historyGrid');
+            if(h.length > 0) {
+                document.getElementById('historySection').style.display = 'block';
+                grid.innerHTML = '';
+                h.forEach(d => {
+                    const el = document.createElement('div'); el.className='history-item';
+                    el.innerHTML = `<img src="${d}" style="width:100%;height:100%;object-fit:cover;">`;
+                    el.onclick = () => handleImageSelection(d, false);
+                    grid.appendChild(el);
+                });
+            } else {
+                document.getElementById('historySection').style.display = 'none';
+            }
+        }
+
+        function toggleExitModal(show) { exitModal.style.display = show ? 'flex' : 'none'; }
+        function confirmExit() { window.parent.postMessage('close-skintoner-widget', '*'); toggleExitModal(false); }
+
+        document.getElementById('lipstickBtn').onclick = (e) => { e.stopPropagation(); toggleSidePanel(); };
+        document.getElementById('closePanel').onclick = (e) => { e.stopPropagation(); toggleSidePanel(false); };
+        document.getElementById('panelOverlay').onclick = e => { e.stopPropagation(); toggleSidePanel(false); };
+        document.getElementById('bottomToolbar').addEventListener('click', e => e.stopPropagation());
+
+        document.getElementById('arrowUpBtn').onclick = (e) => { e.stopPropagation(); goToPrevious(); };
+        document.getElementById('arrowDownBtn').onclick = (e) => { e.stopPropagation(); goToNext(); };
+
+        document.getElementById('newPhotoBtn').onclick = (e) => {
+            e.stopPropagation();
+            overlay.classList.remove('hidden');
+        };
+
+        function toggleSidePanel(forceState) {
+            if (typeof forceState !== 'undefined') {
+                forceState ? sidePanel.classList.add('open') : sidePanel.classList.remove('open');
+            } else { sidePanel.classList.toggle('open'); }
+        }
+
+        videoContainer.addEventListener('mousedown', e => startDrag(e.clientY));
+        videoContainer.addEventListener('mousemove', e => { if(isDragging) moveDrag(e.clientY); });
+        videoContainer.addEventListener('mouseup', endDrag);
+        videoContainer.addEventListener('touchstart', e => { e.preventDefault(); startDrag(e.touches[0].clientY); }, {passive:false});
+        videoContainer.addEventListener('touchmove', e => { if(isDragging) { e.preventDefault(); moveDrag(e.touches[0].clientY); } }, {passive:false});
+        videoContainer.addEventListener('touchend', endDrag);
+
+        function startDrag(y) {
+            if (window.innerWidth >= 768) return;
+            if(isAnimating)return;
+            isDragging=true; touchStartY=y; currentTouchY=y;
+            slideElements.forEach(s=>s.classList.add('no-transition'));
+        }
+        function moveDrag(y) {
+            currentTouchY=y; const d = y-touchStartY;
+            const pct = (d/videoContainer.offsetHeight)*100;
+            slideElements[0].style.transform=`translateY(${-100+pct}%)`;
+            slideElements[1].style.transform=`translateY(${pct}%)`;
+            slideElements[2].style.transform=`translateY(${100+pct}%)`;
+        }
+        function endDrag() {
+            if(!isDragging) return; isDragging=false;
+            const d = currentTouchY-touchStartY;
+            slideElements.forEach(s=>{s.classList.remove('no-transition');s.classList.add('animating')});
+            if(d < -80) goToNext();
+            else if(d > 80) goToPrevious();
+            else {
+                slideElements[0].style.transform='translateY(-100%)';
+                slideElements[1].style.transform='translateY(0)';
+                slideElements[2].style.transform='translateY(100%)';
+            }
+            setTimeout(()=>slideElements.forEach(s=>s.classList.remove('animating')), 300);
         }
     </script>
 </body>

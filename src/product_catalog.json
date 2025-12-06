@@ -6,11 +6,24 @@
     "product_name": "Midnight Volume",
     "hex_color": "#000000",
     "price": "18.50",
-    "description": " dramatic volume and length with jet black pigments.",
+    "description": "Dramatic volume and length with jet black pigments.",
     "image_url": "/static/uploads/mascara_demo.jpg",
     "pigment": 100,
     "shine": 0,
     "effect": "none"
+  },
+  {
+    "id": "prod_demo1",
+    "category": "lipstick",
+    "brand": "MAC Cosmetics",
+    "product_name": "Retro Matte - Ruby Woo",
+    "hex_color": "#D62B38",
+    "price": "22.00",
+    "description": "The iconic vivid blue-red with a retro matte finish.",
+    "image_url": "/static/uploads/lipstick_demo.jpg",
+    "pigment": 90,
+    "shine": 10,
+    "effect": "matte"
   },
   {
     "id": "prod_demo2",
@@ -21,6 +34,19 @@
     "price": "12.00",
     "description": "Full fan effect volume.",
     "image_url": "/static/uploads/mascara_demo.jpg"
+  },
+  {
+    "id": "prod_new_1",
+    "category": "lipstick",
+    "brand": "Urban Decay",
+    "product_name": "Vice Lipstick - Hitch Hike",
+    "hex_color": "#B4635D",
+    "price": "19.00",
+    "description": "Comfort matte finish in a brick rose shade.",
+    "image_url": "/static/uploads/vice_lipstick.jpg",
+    "pigment": 85,
+    "shine": 20,
+    "effect": "matte"
   },
   {
     "id": "prod_new_2",
