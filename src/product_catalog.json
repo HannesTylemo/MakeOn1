@@ -1,16 +1,17 @@
 [
   {
-    "id": "prod_demo1",
+    "id": "prod_ca490861",
     "category": "lipstick",
-    "brand": "MAC Cosmetics",
-    "product_name": "Retro Matte - Ruby Woo",
-    "hex_color": "#D21532",
-    "price": "22.00",
-    "description": "The iconic matte red lipstick.",
-    "image_url": "/static/uploads/lipstick_demo.jpg",
-    "pigment": 90,
+    "brand": "gucci",
+    "product_name": "homo",
+    "hex_color": "#cc0000",
+    "price": "25.00",
+    "description": "Long-wearing, full coverage finish.",
+    "url": "#",
+    "image_url": "/static/uploads/56d624_642.390-2067730124.png",
+    "pigment": 55,
     "shine": 10,
-    "effect": "matte"
+    "effect": "none"
   },
   {
     "id": "prod_demo2",
