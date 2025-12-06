@@ -2,16 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - Skintoner</title>
+    <title>Dashboard - MakeOn Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: #f8f9fa; font-family: 'Helvetica Neue', sans-serif; }
         .navbar { background: white; border-bottom: 1px solid #eee; padding: 15px 40px; }
-        .brand { font-weight: 900; letter-spacing: 1px; font-size: 20px; }
+        .brand { font-weight: 900; letter-spacing: 1px; font-size: 20px; text-transform: uppercase; }
 
         .table-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.02); margin-top: 40px; }
 
-        /* ZOOM FEATURE CSS */
         .img-preview {
             width: 50px; height: 50px; object-fit: cover;
             border-radius: 6px; background: #f0f0f0; border:1px solid #eee;
@@ -21,25 +20,18 @@
 
         .color-dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #eee; display: inline-block; vertical-align: middle; }
 
-        .slider-group { margin-bottom: 25px; }
-        .slider-label { font-weight: 600; font-size: 13px; color: #444; margin-bottom: 8px; display: block; }
-        .slider-wrapper { position: relative; display: flex; align-items: center; gap: 15px; height: 40px; }
-        .range-bubble { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); background: #000; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
-        .slider-container:hover .range-bubble { opacity: 1; }
-        .form-range { flex-grow: 1; cursor: pointer; }
-        .slider-container { position: relative; flex-grow: 1; }
-        .number-input { width: 70px; text-align: center; font-weight: bold; }
-
         .properties-section { display: none; border-top: 1px solid #eee; margin-top: 20px; padding-top: 20px; }
         .properties-section.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .section-header { color: black; font-weight: 700; margin-bottom: 15px; }
+
+        .empty-state { text-align: center; padding: 40px 0; color: #666; }
     </style>
 </head>
 <body>
 
     <nav class="navbar d-flex justify-content-between">
-        <div class="brand">SKINTONER ADMIN</div>
+        <div class="brand">MakeOn Admin Panel</div>
         <div class="d-flex align-items-center gap-3">
             <span class="text-muted">Logged in as {{ user }}</span>
             <a href="/logout" class="btn btn-outline-danger btn-sm">Logout</a>
@@ -67,30 +59,36 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for product in products %}
-                    <tr>
-                        <td>
-                            {% if product.image_url %}
-                                <img src="{{ product.image_url }}" class="img-preview" onclick="openZoomModal(this.src)">
-                            {% else %}
-                                <div class="small text-muted">No Img</div>
-                            {% endif %}
-                        </td>
-                        <td class="fw-bold">{{ product.product_name }}</td>
-                        <td class="text-muted">{{ product.brand }}</td>
-                        <td><span class="badge bg-light text-dark border">{{ product.category|capitalize }}</span></td>
-                        <td>
-                            <span class="color-dot" style="background-color: {{ product.hex_color }}"></span>
-                            <span class="ms-2 small text-muted">{{ product.hex_color }}</span>
-                        </td>
-                        <td class="text-end">
-                            <form action="/delete_product" method="POST" onsubmit="return confirm('Delete this product?');" style="display:inline;">
-                                <input type="hidden" name="id" value="{{ product.id }}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                    {% if products and products|length > 0 %}
+                        {% for product in products %}
+                        <tr>
+                            <td>
+                                {% if product.image_url %}
+                                    <img src="{{ product.image_url }}" class="img-preview" onclick="openZoomModal(this.src)">
+                                {% else %}
+                                    <div class="small text-muted">No Image</div>
+                                {% endif %}
+                            </td>
+                            <td class="fw-bold">{{ product.product_name }}</td>
+                            <td class="text-muted">{{ product.brand }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ product.category|capitalize }}</span></td>
+                            <td>
+                                <span class="color-dot" style="background-color: {{ product.hex_color }}"></span>
+                                <span class="ms-2 small text-muted">{{ product.hex_color }}</span>
+                            </td>
+                            <td class="text-end">
+                                <form action="/delete_product" method="POST" onsubmit="return confirm('Delete this product?');" style="display:inline;">
+                                    <input type="hidden" name="id" value="{{ product.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="empty-state">No products yet. Click “Add Product” to create one.</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -156,31 +154,27 @@
                                 <textarea name="description" class="form-control" rows="1">Long-wearing, full coverage finish.</textarea>
                             </div>
                         </div>
+                        <div class="row">
+                             <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Product URL (optional)</label>
+                                <input type="url" name="product_url" class="form-control" placeholder="https://example.com/product-page">
+                            </div>
+                        </div>
 
                         <div id="props-lipstick" class="properties-section active">
                             <h6 class="section-header">Lipstick Properties</h6>
-                            <div class="slider-group">
-                                <label class="slider-label">Pigment Strength (Opacity)</label>
-                                <div class="slider-wrapper">
-                                    <div class="slider-container">
-                                        <span class="range-bubble" id="bubble-pigment">70</span>
-                                        <input type="range" class="form-range" name="pigment" id="range-pigment" min="0" max="100" step="5" value="70">
-                                    </div>
-                                    <input type="number" class="form-control number-input" id="num-pigment" min="0" max="100" step="5" value="70">
-                                </div>
-                            </div>
-                            <div class="slider-group">
-                                <label class="slider-label">Shine Level (Reflection)</label>
-                                <div class="slider-wrapper">
-                                    <div class="slider-container">
-                                        <span class="range-bubble" id="bubble-shine">30</span>
-                                        <input type="range" class="form-range" name="shine" id="range-shine" min="0" max="100" step="5" value="30">
-                                    </div>
-                                    <input type="number" class="form-control number-input" id="num-shine" min="0" max="100" step="5" value="30">
-                                    </div>
+                            <div class="mb-3">
+                                <label class="form-label">Pigment Strength (Opacity)</label>
+                                <input type="range" class="form-range" name="pigment" id="range-pigment" min="0" max="100" step="5" value="70" oninput="syncSlider('range-pigment','num-pigment')">
+                                <input type="number" class="form-control form-control-sm w-25" id="num-pigment" min="0" max="100" step="5" value="70" oninput="syncNumber('num-pigment','range-pigment')">
                             </div>
                             <div class="mb-3">
-                                <label class="slider-label">Reflective Effect</label>
+                                <label class="form-label">Shine Level (Reflection)</label>
+                                <input type="range" class="form-range" name="shine" id="range-shine" min="0" max="100" step="5" value="30" oninput="syncSlider('range-shine','num-shine')">
+                                <input type="number" class="form-control form-control-sm w-25" id="num-shine" min="0" max="100" step="5" value="30" oninput="syncNumber('num-shine','range-shine')">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Reflective Effect</label>
                                 <select name="effect" class="form-select">
                                     <option value="none">None (Standard Cream/Matte)</option>
                                     <option value="metallic">Metallic / Frost</option>
@@ -206,7 +200,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ZOOM FUNCTION
         function openZoomModal(src) {
             document.getElementById('zoomedImage').src = src;
             var myModal = new bootstrap.Modal(document.getElementById('imageZoomModal'));
@@ -220,30 +213,20 @@
             if(target) target.classList.add('active');
         }
 
-        function setupSyncedSlider(rangeId, numId, bubbleId) {
+        function syncSlider(rangeId, numId) {
             const range = document.getElementById(rangeId);
             const num = document.getElementById(numId);
-            const bubble = document.getElementById(bubbleId);
-            if(!range) return;
-
-            function updateBubblePosition() {
-                const val = range.value;
-                const min = range.min ? range.min : 0;
-                const max = range.max ? range.max : 100;
-                const newVal = Number(((val - min) * 100) / (max - min));
-                bubble.innerHTML = val;
-                bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
-            }
-            range.addEventListener('input', () => { num.value = range.value; updateBubblePosition(); });
-            num.addEventListener('input', () => {
-                let val = parseInt(num.value);
-                if(val > 100) val = 100; if(val < 0) val = 0;
-                range.value = val; updateBubblePosition();
-            });
-            updateBubblePosition();
+            num.value = range.value;
         }
-        setupSyncedSlider('range-pigment', 'num-pigment', 'bubble-pigment');
-        setupSyncedSlider('range-shine', 'num-shine', 'bubble-shine');
+        function syncNumber(numId, rangeId) {
+            const num = document.getElementById(numId);
+            const range = document.getElementById(rangeId);
+            let val = parseInt(num.value || 0, 10);
+            if (val > 100) val = 100;
+            if (val < 0) val = 0;
+            num.value = val;
+            range.value = val;
+        }
     </script>
 </body>
 </html>
