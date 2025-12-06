@@ -1,0 +1,35 @@
+[
+  {
+    "id": "prod_midnight_lash",
+    "category": "mascara",
+    "brand": "Luna",
+    "product_name": "Midnight Volume",
+    "hex_color": "#000000",
+    "price": "18.50",
+    "description": " dramatic volume and length with jet black pigments.",
+    "image_url": "/static/uploads/mascara_demo.jpg",
+    "pigment": 100,
+    "shine": 0,
+    "effect": "none"
+  },
+  {
+    "id": "prod_demo2",
+    "category": "mascara",
+    "brand": "Maybelline",
+    "product_name": "Lash Sensational",
+    "hex_color": "#000000",
+    "price": "12.00",
+    "description": "Full fan effect volume.",
+    "image_url": "/static/uploads/mascara_demo.jpg"
+  },
+  {
+    "id": "prod_new_2",
+    "category": "mascara",
+    "brand": "Too Faced",
+    "product_name": "Better Than Sex Mascara",
+    "hex_color": "#000000",
+    "price": "28.00",
+    "description": "An intensely black, volumizing mascara with an hourglass-shaped brush.",
+    "image_url": "/static/uploads/better_than_sex.jpg"
+  }
+]

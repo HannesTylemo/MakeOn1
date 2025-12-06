@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.product_name }} - Beauty Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        .product-container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+
+        .product-image-container {
+            background: #f8f8f8; width: 100%; height: 500px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 10px; overflow: hidden;
+        }
+        .product-image { max-width: 100%; max-height: 100%; object-fit: cover; }
+
+        .brand { text-transform: uppercase; letter-spacing: 1px; color: #666; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+        .title { font-size: 36px; font-weight: 700; margin-bottom: 15px; }
+        .price { font-size: 24px; font-weight: 400; margin-bottom: 30px; }
+        .description { color: #555; line-height: 1.6; margin-bottom: 40px; }
+
+        .btn-black { background: black; color: white; border: none; padding: 15px 30px; font-weight: 700; width: 100%; text-transform: uppercase; }
+        .btn-black:hover { background: #333; color: white; }
+
+        .btn-try-on {
+            background: white; color: black; border: 2px solid black;
+            padding: 15px 30px; font-weight: 700; width: 100%;
+            text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-try-on:hover { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+
+    <!-- Simple Header with Fake Cart -->
+    <div style="padding: 20px 40px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; background:white; z-index:100;">
+        <a href="/" style="text-decoration:none; color:black; font-weight:900; font-size:24px; letter-spacing:2px;">BEAUTY STORE</a>
+        <div style="font-weight: bold; cursor: pointer;" onclick="alert('Fake Cart: Items inside!')">
+            CART (<span id="cart-count">0</span>)
+        </div>
+    </div>
+
+    <div class="product-container">
+        <div class="row">
+            <!-- Image Column -->
+            <div class="col-md-7 mb-4">
+                <div class="product-image-container">
+                    {% if product.image_url %}
+                        <img src="{{ product.image_url }}" class="product-image">
+                    {% else %}
+                        <div class="text-muted">No Image Available</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Details Column -->
+            <div class="col-md-5">
+                <div class="brand">{{ product.brand }}</div>
+                <h1 class="title">{{ product.product_name }}</h1>
+                <div class="price">${{ product.price }}</div>
+
+                <div class="description">
+                    {{ product.description }}
+                </div>
+
+                <!-- TRY ON BUTTON -->
+                <button class="btn-try-on" onclick="Skintoner.open('{{ product.id }}')">
+                    📷 Virtual Try-On
+                </button>
+
+                <!-- Add to Cart Section -->
+                <div class="d-flex gap-2 mb-3">
+                    <input type="number" id="qty-input" value="1" min="1" class="form-control" style="width: 80px; text-align: center;">
+                    <button class="btn-black" onclick="addToCart()">Add to Cart</button>
+                </div>
+
+                <div id="cart-msg" style="display:none; color: green; font-weight: bold; margin-top: 10px;">
+                    ✓ Added to cart!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Widget Script -->
+    <script src="http://127.0.0.1:5000/static/widget.js"></script>
+
+    <!-- Cart Logic -->
+    <script>
+        // Load initial cart count from LocalStorage
+        let cartCount = parseInt(localStorage.getItem('fakeCartCount')) || 0;
+        document.getElementById('cart-count').innerText = cartCount;
+
+        function addToCart() {
+            const qty = parseInt(document.getElementById('qty-input').value);
+            cartCount += qty;
+
+            // Update UI
+            document.getElementById('cart-count').innerText = cartCount;
+
+            // Save to LocalStorage
+            localStorage.setItem('fakeCartCount', cartCount);
+
+            // Show confirmation
+            const msg = document.getElementById('cart-msg');
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 2000);
+        }
+    </script>
+</body>
+</html>

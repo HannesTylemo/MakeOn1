@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<!-- ... (CSS styles remain the same, omitted for brevity, just replace the script at the bottom) ... -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Skintoner Try-On</title>
+<style>
+    /* Paste your existing CSS here or keep file as is, just UPDATE THE SCRIPT BELOW */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { width: 100%; height: 100%; background: white; overflow: hidden; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+    .phone-container { width: 100%; height: 100%; background: #fff; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+    .close-app-btn { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(255,255,255,0.9); border-radius: 50%; border: none; font-size: 24px; font-weight: bold; cursor: pointer; z-index: 600; display: flex; justify-content: center; align-items: center; color: #000; }
+    .startup-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 200; display: flex; flex-direction: column; justify-content: center; padding: 40px 30px; transition: opacity 0.4s ease; }
+    .startup-overlay.hidden { opacity: 0; pointer-events: none; }
+    .startup-content { text-align: center; width: 100%; max-width: 400px; margin: 0 auto; }
+    .action-btn { display: flex; justify-content: center; align-items: center; width: 100%; padding: 18px; margin-bottom: 15px; background: #000; color: white; border: none; border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer; text-decoration: none; }
+    #webcamModal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 300; display: none; }
+    #webcam-preview { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); background: black; }
+    .webcam-controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 310; }
+    .shutter-btn { width: 72px; height: 72px; border-radius: 50%; background: transparent; border: 4px solid white; cursor: pointer; position: relative; }
+    .shutter-btn::after { content:''; width: 60px; height: 60px; background: white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .webcam-cancel-btn { position:absolute; top:20px; left:20px; z-index:310; padding:10px 20px; border:none; background:rgba(255,255,255,0.8); border-radius:20px; cursor:pointer; font-weight:bold; }
+    .video-container { position: relative; flex-grow: 1; width: 100%; background: white; z-index: 10; }
+    .video-slide { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 0.3s; }
+    .video-slide img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .bottom-toolbar { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: white; display: flex; justify-content: space-around; align-items: center; z-index: 50; border-top: 1px solid #f0f0f0; }
+    .side-panel { position: absolute; top: 0; right: -100%; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 40; transition: right 0.3s; padding: 30px; padding-top: 80px; }
+    .side-panel.open { right: 0; }
+    @media (min-width: 768px) {
+        .bottom-toolbar { position: absolute; top: 0; right: 0; bottom: 0; left: auto; width: 90px; height: 100%; flex-direction: column; padding: 30px 0; border-left: 1px solid #eee; border-top: none; }
+        .side-panel { width: 300px; right: -300px; border-left: 1px solid #eee; }
+        .side-panel.open { right: 90px; }
+    }
+</style>
+</head>
+<body>
+    <div class="phone-container">
+        <button class="close-app-btn" onclick="window.parent.postMessage('close-skintoner-widget', '*')">&times;</button>
+
+        <div class="startup-overlay" id="startupOverlay">
+            <div class="startup-content">
+                <h1>Welcome</h1>
+                <p>Upload or take a photo to find the look of your dreams.</p>
+                <button class="action-btn" onclick="openWebcam()">Open Camera</button>
+                <button class="action-btn" style="background:white; color:black; border:2px solid #eee" onclick="document.getElementById('uploadInput').click()">Upload Photo</button>
+                <input type="file" id="uploadInput" accept="image/*" style="display: none" onchange="handleFileUpload(this)">
+            </div>
+        </div>
+
+        <div id="webcamModal">
+            <button class="webcam-cancel-btn" onclick="closeWebcam()">Cancel</button>
+            <video id="webcam-preview" autoplay playsinline muted></video>
+            <div class="webcam-controls"><button type="button" class="shutter-btn" onclick="captureWebcam()"></button></div>
+        </div>
+
+        <div class="video-container" id="videoContainer">
+            <div class="video-slide" id="slide-prev" style="transform: translateY(-100%)"><img src="" alt=""></div>
+            <div class="video-slide" id="slide-current" style="transform: translateY(0)"><img src="" alt=""></div>
+            <div class="video-slide" id="slide-next" style="transform: translateY(100%)"><img src="" alt=""></div>
+        </div>
+
+        <div class="side-panel" id="sidePanel">
+            <button onclick="toggleSidePanel(false)" style="position:absolute; top:20px; right:20px; border:none; background:none; font-size:24px;">&times;</button>
+            <h2>The Recipe</h2>
+            <div id="productInfoContainer">Loading...</div>
+        </div>
+
+        <div class="bottom-toolbar">
+            <button onclick="toggleSidePanel()" style="background:none;border:none;cursor:pointer">ℹ️ Info</button>
+            <button onclick="goToPrevious()" style="background:none;border:none;cursor:pointer">⬆️</button>
+            <button onclick="goToNext()" style="background:none;border:none;cursor:pointer">⬇️</button>
+        </div>
+        <canvas id="canvas" style="display:none;"></canvas>
+    </div>
+
+    <script>
+        const overlay = document.getElementById('startupOverlay');
+        const webcamModal = document.getElementById('webcamModal');
+        const webcamVideo = document.getElementById('webcam-preview');
+        const canvas = document.getElementById('canvas');
+        const sidePanel = document.getElementById('sidePanel');
+        const productInfo = document.getElementById('productInfoContainer');
+
+        let slideElements = [document.getElementById('slide-prev'), document.getElementById('slide-current'), document.getElementById('slide-next')];
+        let currentIndex = 0;
+        let products = [];
+        let stream = null;
+        let imageCache = {};
+
+        window.addEventListener('load', fetchProducts);
+
+        function fetchProducts() {
+            fetch('/api/products').then(r => r.json()).then(d => {
+                products = d.products;
+                if(products.length > 0) {
+                    // FIX: Check URL for product_id
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const startId = urlParams.get('product_id');
+
+                    if (startId) {
+                        const foundIndex = products.findIndex(p => p.id === startId);
+                        if (foundIndex !== -1) {
+                            currentIndex = foundIndex;
+                        }
+                    }
+
+                    initSlides();
+                }
+            });
+        }
+
+        function getIndex(i) { const len = products.length; return ((i % len) + len) % len; }
+        function getProductUrl(index) { return `/frame?id=${products[index].id}&t=${Date.now()}`; }
+
+        function initSlides() {
+            updateSlideImage(slideElements[0], getProductUrl(getIndex(currentIndex - 1)));
+            updateSlideImage(slideElements[1], getProductUrl(getIndex(currentIndex)));
+            updateSlideImage(slideElements[2], getProductUrl(getIndex(currentIndex + 1)));
+            updateInfo(currentIndex);
+        }
+
+        function updateSlideImage(el, url) {
+            const img = el.querySelector('img');
+            img.src = url;
+        }
+
+        function updateInfo(idx) {
+            const p = products[idx];
+            if(!p) return;
+            productInfo.innerHTML = `<h3>${p.product_name}</h3><p>${p.brand}</p><br><button style="background:black;color:white;width:100%;padding:10px;">Shop Now</button>`;
+        }
+
+        function goToNext() {
+            currentIndex = getIndex(currentIndex + 1);
+            initSlides();
+        }
+
+        function goToPrevious() {
+            currentIndex = getIndex(currentIndex - 1);
+            initSlides();
+        }
+
+        // Camera Logic
+        async function openWebcam() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                webcamVideo.srcObject = stream;
+                webcamModal.style.display = 'block';
+            } catch (err) { alert("Camera error"); }
+        }
+        function closeWebcam() { if(stream) stream.getTracks().forEach(t => t.stop()); webcamModal.style.display = 'none'; }
+
+        function captureWebcam() {
+            canvas.width = webcamVideo.videoWidth; canvas.height = webcamVideo.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
+            ctx.drawImage(webcamVideo, 0, 0);
+            const data = canvas.toDataURL('image/jpeg', 0.8);
+            closeWebcam();
+            uploadImage(data);
+        }
+
+        function handleFileUpload(inp) {
+            if(inp.files[0]) {
+                const r = new FileReader();
+                r.onload = e => uploadImage(e.target.result);
+                r.readAsDataURL(inp.files[0]);
+            }
+        }
+
+        function uploadImage(b64) {
+            fetch('/upload_selfie', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({image:b64}) })
+            .then(r=>r.json()).then(d => {
+                if(d.success) {
+                    overlay.classList.add('hidden');
+                    initSlides();
+                }
+            });
+        }
+
+        function toggleSidePanel(force) {
+            if(force !== undefined) { force ? sidePanel.classList.add('open') : sidePanel.classList.remove('open'); }
+            else sidePanel.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

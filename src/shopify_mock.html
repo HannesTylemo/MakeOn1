@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sephora Mockup - Beauty Store</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 0; background: #f8f8f8; color: #333; }
+        header { background: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .logo { font-size: 24px; font-weight: 900; letter-spacing: 2px; }
+        .nav { display: flex; gap: 20px; font-size: 14px; font-weight: 600; }
+        .hero { background: #000; color: white; text-align: center; padding: 80px 20px; }
+        .hero h1 { font-size: 48px; margin-bottom: 10px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .section-title { font-size: 24px; margin-bottom: 30px; font-weight: 700; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px; }
+        .product-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: transform 0.2s; display: flex; flex-direction: column; }
+        .product-card:hover { transform: translateY(-5px); }
+        .product-img { width: 100%; height: 200px; background: #eee; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-img img { width: 100%; height: 100%; object-fit: cover; }
+        .brand { color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .name { font-weight: bold; margin: 5px 0; font-size: 16px; }
+        .price { margin-bottom: 15px; color: #333; }
+        .shop-btn { text-decoration: none; background: black; color: white; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; display: block; margin-top: auto; }
+        .shop-btn:hover { background: #333; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">BEAUTY STORE</div>
+        <div class="nav">
+            <span>NEW</span>
+            <span>BRANDS</span>
+            <span>MAKEUP</span>
+        </div>
+    </header>
+
+    <div class="hero">
+        <h1>FIND YOUR LOOK</h1>
+        <p>Discover the perfect shade for your skin tone using AI.</p>
+    </div>
+
+    <div class="container">
+        <div class="section-title">New Arrivals</div>
+        <div class="product-grid">
+
+            <!-- Product 1 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="http://127.0.0.1:5000/static/uploads/lipstick_demo.jpg" onerror="this.style.display='none';this.parentElement.style.background='#FFEBEE'">
+                </div>
+                <div class="brand">MAC Cosmetics</div>
+                <div class="name">Retro Matte - Ruby Woo</div>
+                <div class="price">$22.00</div>
+                <!-- target="_blank" opens in new window -->
+                <a href="http://127.0.0.1:5000/product/prod_demo1" target="_blank" class="shop-btn">VIEW PRODUCT</a>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="http://127.0.0.1:5000/static/uploads/mascara_demo.jpg" onerror="this.style.display='none';this.parentElement.style.background='#E0E0E0'">
+                </div>
+                <div class="brand">Maybelline</div>
+                <div class="name">Lash Sensational</div>
+                <div class="price">$12.00</div>
+                <a href="http://127.0.0.1:5000/product/prod_demo2" target="_blank" class="shop-btn">VIEW PRODUCT</a>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="http://127.0.0.1:5000/static/uploads/vice_lipstick.jpg" onerror="this.style.display='none';this.parentElement.style.background='#FFEBEE'">
+                </div>
+                <div class="brand">Urban Decay</div>
+                <div class="name">Vice Lipstick - Hitch Hike</div>
+                <div class="price">$19.00</div>
+                <a href="http://127.0.0.1:5000/product/prod_new_1" target="_blank" class="shop-btn">VIEW PRODUCT</a>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="http://127.0.0.1:5000/static/uploads/better_than_sex.jpg" onerror="this.style.display='none';this.parentElement.style.background='#FFEBEE'">
+                </div>
+                <div class="brand">Too Faced</div>
+                <div class="name">Better Than Sex Mascara</div>
+                <div class="price">$28.00</div>
+                <a href="http://127.0.0.1:5000/product/prod_new_2" target="_blank" class="shop-btn">VIEW PRODUCT</a>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
