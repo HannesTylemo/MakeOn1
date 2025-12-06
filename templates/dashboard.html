@@ -30,6 +30,50 @@
         .slider-container { position: relative; flex-grow: 1; }
         .number-input { width: 70px; text-align: center; font-weight: bold; }
 
+        /* Custom range slider styling - make track visible and black */
+        .form-range {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: #000;
+            outline: none;
+            border-radius: 3px;
+        }
+        
+        .form-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #000;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .form-range::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #000;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .form-range::-webkit-slider-runnable-track {
+            background: #000;
+            height: 6px;
+            border-radius: 3px;
+        }
+        
+        .form-range::-moz-range-track {
+            background: #000;
+            height: 6px;
+            border-radius: 3px;
+        }
+
         .properties-section { display: none; border-top: 1px solid #eee; margin-top: 20px; padding-top: 20px; }
         .properties-section.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -84,10 +128,22 @@
                             <span class="ms-2 small text-muted">{{ product.hex_color }}</span>
                         </td>
                         <td class="text-end">
-                            <form action="/delete_product" method="POST" onsubmit="return confirm('Delete this product?');" style="display:inline;">
-                                <input type="hidden" name="id" value="{{ product.id }}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                            </form>
+                            <button class="btn btn-sm btn-outline-primary me-2" 
+                                    data-id="{{ product.id }}" 
+                                    data-category="{{ product.category }}" 
+                                    data-brand="{{ product.brand|e }}" 
+                                    data-name="{{ product.product_name|e }}" 
+                                    data-color="{{ product.hex_color }}" 
+                                    data-price="{{ product.price }}" 
+                                    data-description="{{ product.description|e }}" 
+                                    data-pigment="{{ product.pigment|default(70) }}" 
+                                    data-shine="{{ product.shine|default(30) }}" 
+                                    data-effect="{{ product.effect|default('none') }}"
+                                    onclick="openEditModalFromData(this)">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" 
+                                    data-id="{{ product.id }}" 
+                                    data-name="{{ product.product_name|e }}"
+                                    onclick="openDeleteModalFromData(this)">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -204,6 +260,126 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete <strong id="deleteProductName"></strong>?</p>
+                    <p class="text-muted small">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">No, Cancel</button>
+                    <form id="deleteForm" action="/delete_product" method="POST" style="display:inline;">
+                        <input type="hidden" name="id" id="deleteProductId">
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal fade" id="editProductModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Edit Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form action="/edit_product" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="id" id="edit-product-id">
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Category</label>
+                            <select name="category" id="edit-category-select" class="form-select form-select-lg" onchange="toggleEditProperties()">
+                                <option value="lipstick">Lipstick</option>
+                                <option value="mascara">Mascara</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Brand</label>
+                                <input type="text" name="brand" id="edit-brand" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Product Name</label>
+                                <input type="text" name="product_name" id="edit-product-name" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row align-items-end">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Color (HEX)</label>
+                                <input type="color" name="hex_color" id="edit-hex-color" class="form-control form-control-color w-100" required>
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label fw-bold">Product Image (Optional - leave empty to keep current)</label>
+                                <input type="file" name="product_image" class="form-control" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="row">
+                             <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Price ($)</label>
+                                <input type="number" name="price" id="edit-price" class="form-control" step="0.01" required>
+                            </div>
+                             <div class="col-md-8 mb-3">
+                                <label class="form-label fw-bold">Description</label>
+                                <textarea name="description" id="edit-description" class="form-control" rows="1"></textarea>
+                            </div>
+                        </div>
+
+                        <div id="edit-props-lipstick" class="properties-section active">
+                            <h6 class="section-header">Lipstick Properties</h6>
+                            <div class="slider-group">
+                                <label class="slider-label">Pigment Strength (Opacity)</label>
+                                <div class="slider-wrapper">
+                                    <div class="slider-container">
+                                        <span class="range-bubble" id="edit-bubble-pigment">70</span>
+                                        <input type="range" class="form-range" name="pigment" id="edit-range-pigment" min="0" max="100" step="5" value="70">
+                                    </div>
+                                    <input type="number" class="form-control number-input" id="edit-num-pigment" min="0" max="100" step="5" value="70">
+                                </div>
+                            </div>
+                            <div class="slider-group">
+                                <label class="slider-label">Shine Level (Reflection)</label>
+                                <div class="slider-wrapper">
+                                    <div class="slider-container">
+                                        <span class="range-bubble" id="edit-bubble-shine">30</span>
+                                        <input type="range" class="form-range" name="shine" id="edit-range-shine" min="0" max="100" step="5" value="30">
+                                    </div>
+                                    <input type="number" class="form-control number-input" id="edit-num-shine" min="0" max="100" step="5" value="30">
+                                    </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="slider-label">Reflective Effect</label>
+                                <select name="effect" id="edit-effect" class="form-select">
+                                    <option value="none">None (Standard Cream/Matte)</option>
+                                    <option value="metallic">Metallic / Frost</option>
+                                    <option value="glitter">Glitter / Shimmer</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="edit-props-mascara" class="properties-section">
+                            <h6 class="section-header">Mascara Properties</h6>
+                            <div class="alert alert-light border"><small>Mascara rendering uses default volume/length physics.</small></div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-dark px-4">Update Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ZOOM FUNCTION
@@ -244,6 +420,78 @@
         }
         setupSyncedSlider('range-pigment', 'num-pigment', 'bubble-pigment');
         setupSyncedSlider('range-shine', 'num-shine', 'bubble-shine');
+        setupSyncedSlider('edit-range-pigment', 'edit-num-pigment', 'edit-bubble-pigment');
+        setupSyncedSlider('edit-range-shine', 'edit-num-shine', 'edit-bubble-shine');
+
+        // Delete Modal Functions using data attributes (secure against XSS)
+        function openDeleteModalFromData(button) {
+            const productId = button.dataset.id;
+            const productName = button.dataset.name;
+            document.getElementById('deleteProductId').value = productId;
+            document.getElementById('deleteProductName').textContent = productName;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            deleteModal.show();
+        }
+
+        // Edit Modal Functions using data attributes (secure against XSS)
+        function openEditModalFromData(button) {
+            const id = button.dataset.id;
+            const category = button.dataset.category;
+            const brand = button.dataset.brand;
+            const productName = button.dataset.name;
+            const hexColor = button.dataset.color;
+            const price = button.dataset.price;
+            const description = button.dataset.description;
+            const pigment = parseInt(button.dataset.pigment);
+            const shine = parseInt(button.dataset.shine);
+            const effect = button.dataset.effect;
+            
+            document.getElementById('edit-product-id').value = id;
+            document.getElementById('edit-category-select').value = category;
+            document.getElementById('edit-brand').value = brand;
+            document.getElementById('edit-product-name').value = productName;
+            document.getElementById('edit-hex-color').value = hexColor;
+            document.getElementById('edit-price').value = price;
+            document.getElementById('edit-description').value = description;
+            
+            if(category === 'lipstick') {
+                document.getElementById('edit-range-pigment').value = pigment;
+                document.getElementById('edit-num-pigment').value = pigment;
+                document.getElementById('edit-range-shine').value = shine;
+                document.getElementById('edit-num-shine').value = shine;
+                document.getElementById('edit-effect').value = effect;
+                
+                // Update bubble positions after setting values
+                const pigmentRange = document.getElementById('edit-range-pigment');
+                const pigmentBubble = document.getElementById('edit-bubble-pigment');
+                const shineRange = document.getElementById('edit-range-shine');
+                const shineBubble = document.getElementById('edit-bubble-shine');
+                
+                if(pigmentRange && pigmentBubble) {
+                    const pigmentPercent = Number(((pigment - 0) * 100) / (100 - 0));
+                    pigmentBubble.innerHTML = pigment;
+                    pigmentBubble.style.left = `calc(${pigmentPercent}% + (${8 - pigmentPercent * 0.15}px))`;
+                }
+                
+                if(shineRange && shineBubble) {
+                    const shinePercent = Number(((shine - 0) * 100) / (100 - 0));
+                    shineBubble.innerHTML = shine;
+                    shineBubble.style.left = `calc(${shinePercent}% + (${8 - shinePercent * 0.15}px))`;
+                }
+            }
+            
+            toggleEditProperties();
+            
+            var editModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+            editModal.show();
+        }
+
+        function toggleEditProperties() {
+            const category = document.getElementById('edit-category-select').value;
+            document.querySelectorAll('#editProductModal .properties-section').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById('edit-props-' + category);
+            if(target) target.classList.add('active');
+        }
     </script>
 </body>
 </html>
