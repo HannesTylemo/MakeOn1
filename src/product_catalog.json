@@ -17,9 +17,9 @@
     "category": "lipstick",
     "brand": "MAC Cosmetics",
     "product_name": "Retro Matte - Ruby Woo",
-    "hex_color": "#D62B38",
+    "hex_color": "#D21532",
     "price": "22.00",
-    "description": "The iconic vivid blue-red with a retro matte finish.",
+    "description": "The iconic matte red lipstick.",
     "image_url": "/static/uploads/lipstick_demo.jpg",
     "pigment": 90,
     "shine": 10,
@@ -40,9 +40,9 @@
     "category": "lipstick",
     "brand": "Urban Decay",
     "product_name": "Vice Lipstick - Hitch Hike",
-    "hex_color": "#B4635D",
+    "hex_color": "#AC5851",
     "price": "19.00",
-    "description": "Comfort matte finish in a brick rose shade.",
+    "description": "Comfort matte finish in a brick-rose shade.",
     "image_url": "/static/uploads/vice_lipstick.jpg",
     "pigment": 85,
     "shine": 20,
@@ -55,7 +55,7 @@
     "product_name": "Better Than Sex Mascara",
     "hex_color": "#000000",
     "price": "28.00",
-    "description": "An intensely black, volumizing mascara with an hourglass-shaped brush.",
+    "description": "An intensely black, volumizing mascara.",
     "image_url": "/static/uploads/better_than_sex.jpg"
   }
 ]
