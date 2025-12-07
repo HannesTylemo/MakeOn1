@@ -542,7 +542,6 @@
                     <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn">Purchase The Whole Look</button>
                 </div>`;
         }
-        }
 
         function goToNext() {
             if (isAnimating) return;
@@ -721,10 +720,10 @@
             if (existing) {
                 existing.quantity++;
             } else {
-                shoppingCart.push({...product, quantity: 1});
+                shoppingCart.push(Object.assign({}, product, {quantity: 1}));
             }
             
-            showCartAdded([{...product, quantity: existing ? existing.quantity : 1}]);
+            showCartAdded([Object.assign({}, product, {quantity: existing ? existing.quantity : 1})]);
         }
         
         function purchaseWholeLook() {
@@ -734,9 +733,9 @@
                 if (existing) {
                     existing.quantity++;
                 } else {
-                    shoppingCart.push({...p, quantity: 1});
+                    shoppingCart.push(Object.assign({}, p, {quantity: 1}));
                 }
-                allProducts.push({...p, quantity: existing ? existing.quantity : 1});
+                allProducts.push(Object.assign({}, p, {quantity: existing ? existing.quantity : 1}));
             });
             showCartAdded(allProducts);
         }
