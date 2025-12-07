@@ -292,7 +292,8 @@ def upload_selfie():
         active_image_data = img
         return jsonify({'success': True})
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        print(f"Error in upload_selfie: {e}")  # Log server-side
+        return jsonify({'success': False, 'error': 'processing_failed'})
 
 @app.route('/api/products')
 def gp(): return jsonify({'products': products_db})
