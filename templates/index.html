@@ -101,7 +101,7 @@
         }
         
         /* SHOPPING CART MODALS */
-        #cartAddedModal, #cartViewModal, #checkoutConfirmModal, #deleteItemModal {
+        #cartAddedModal, #cartViewModal, #checkoutConfirmModal, #deleteItemModal, #exploreLooksModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 500;
             display: none; justify-content: center; align-items: center;
@@ -298,6 +298,251 @@
             background: #e0e0e0;
             transform: scale(1.05);
         }
+        
+        /* EDITOR MODE STYLES */
+        .editor-mode-active .video-container {
+            width: 50% !important;
+            flex-grow: 0 !important;
+        }
+        
+        .editor-products-panel {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: white;
+            z-index: 20;
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .editor-mode-active .editor-products-panel {
+            display: flex;
+        }
+        
+        .editor-products-panel h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .editor-products-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .editor-product-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .editor-product-image-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .editor-product-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f0f0f0;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        
+        .editor-product-img:hover {
+            opacity: 0.8;
+        }
+        
+        .editor-product-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .editor-product-details {
+            flex: 1;
+        }
+        
+        .editor-product-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+        
+        .editor-product-type {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .editor-add-btn {
+            background: #4a7c2a;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
+        .editor-add-btn:hover {
+            background: #3d6b1f;
+        }
+        
+        .editor-add-btn.added {
+            background: #999;
+            cursor: default;
+        }
+        
+        /* Product list modal */
+        #productListModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 600;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        #productListModal.visible {
+            display: flex;
+        }
+        
+        .product-list-header {
+            padding: 20px;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+        
+        .product-list-header h2 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .product-list-close {
+            background: none;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+        
+        .product-list-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .product-list-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .product-list-images {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .product-list-img {
+            flex: 1;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f0f0f0;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .product-list-img:hover {
+            border-color: #4a7c2a;
+        }
+        
+        .product-list-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .product-list-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .product-list-type {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        /* Image expand modal */
+        #imageExpandModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 700;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #imageExpandModal.visible {
+            display: flex;
+        }
+        
+        #imageExpandModal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        
+        .explore-looks-btn {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        
+        .explore-looks-btn:hover {
+            background: #333;
+        }
+        
+        /* Hide arrows in editor mode */
+        .editor-mode-active .desktop-arrows-container {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -454,7 +699,49 @@
                      </svg>
                 </button>
                 <button class="toolbar-button" id="editorBtn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                <button class="toolbar-button" id="addProductBtn" style="display:none;">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
+                </button>
             </div>
+        </div>
+        
+        <!-- Editor Products Panel -->
+        <div class="editor-products-panel" id="editorProductsPanel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2>Products Included</h2>
+                <button class="explore-looks-btn" onclick="showExploreLooksConfirm()">Explore New Looks</button>
+            </div>
+            <div class="editor-products-list" id="editorProductsList">
+                <p style="color:#666; text-align:center;">No products added yet</p>
+            </div>
+        </div>
+        
+        <!-- Explore Looks Confirmation Modal -->
+        <div id="exploreLooksModal">
+            <div class="modal-box">
+                <h3 style="color: #d9534f;">Leave Editor?</h3>
+                <p>Are you sure? Your progress will not be saved.</p>
+                <div class="modal-actions">
+                    <button class="modal-btn no" onclick="closeExploreLooksModal()">No, Stay</button>
+                    <button class="modal-btn yes" onclick="confirmExploreLoooks()">Yes, Leave</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product List Modal -->
+        <div id="productListModal">
+            <div class="product-list-header">
+                <h2>Add Products</h2>
+                <button class="product-list-close" onclick="closeProductList()">&times;</button>
+            </div>
+            <div class="product-list-grid" id="productListGrid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Image Expand Modal -->
+        <div id="imageExpandModal" onclick="closeImageExpand()">
+            <img id="expandedImage" src="" alt="">
         </div>
 
         <div id="preload-container"></div>
@@ -890,6 +1177,160 @@
         document.getElementById('closePanel').onclick = (e) => { e.stopPropagation(); toggleSidePanel(false); };
         document.getElementById('panelOverlay').onclick = e => { e.stopPropagation(); toggleSidePanel(false); };
         document.getElementById('bottomToolbar').addEventListener('click', e => e.stopPropagation());
+
+        // Editor Mode Variables
+        let editorMode = false;
+        let editorProducts = [];
+        const phoneContainer = document.getElementById('phone');
+        const addProductBtn = document.getElementById('addProductBtn');
+        
+        // Editor Mode Functions
+        document.getElementById('editorBtn').onclick = (e) => {
+            e.stopPropagation();
+            toggleEditorMode();
+        };
+        
+        if (addProductBtn) {
+            addProductBtn.onclick = (e) => {
+                e.stopPropagation();
+                showProductList();
+            };
+        }
+        
+        function toggleEditorMode() {
+            editorMode = !editorMode;
+            if (editorMode) {
+                phoneContainer.classList.add('editor-mode-active');
+                document.getElementById('lipstickBtn').style.display = 'none';
+                addProductBtn.style.display = 'flex';
+                toggleSidePanel(false); // Close side panel
+            } else {
+                phoneContainer.classList.remove('editor-mode-active');
+                document.getElementById('lipstickBtn').style.display = 'flex';
+                addProductBtn.style.display = 'none';
+                editorProducts = [];
+                updateEditorProductsList();
+            }
+        }
+        
+        function showExploreLooksConfirm() {
+            document.getElementById('exploreLooksModal').style.display = 'flex';
+        }
+        
+        function closeExploreLooksModal() {
+            document.getElementById('exploreLooksModal').style.display = 'none';
+        }
+        
+        function confirmExploreLoooks() {
+            closeExploreLooksModal();
+            toggleEditorMode(); // Exit editor mode
+        }
+        
+        function showProductList() {
+            const grid = document.getElementById('productListGrid');
+            grid.innerHTML = products.map(p => `
+                <div class="product-list-item">
+                    <div class="product-list-images">
+                        <img src="${p.image_url}" class="product-list-img" onclick="expandImage('${p.image_url}')" onerror="this.style.display='none'">
+                        <img src="/frame?id=${p.id}&preview=true" class="product-list-img" onclick="expandImage('/frame?id=${p.id}&preview=true')" onerror="this.style.display='none'">
+                    </div>
+                    <div class="product-list-info">
+                        <div>
+                            <div class="product-list-name">${p.product_name}</div>
+                            <div class="product-list-type">${p.category}</div>
+                        </div>
+                        <button class="editor-add-btn" onclick="addProductToEditor('${p.id}')" id="addBtn_${p.id}">Add +</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update button states for already added products
+            editorProducts.forEach(pid => {
+                const btn = document.getElementById(`addBtn_${pid}`);
+                if (btn) {
+                    btn.textContent = 'Added';
+                    btn.classList.add('added');
+                    btn.disabled = true;
+                }
+            });
+            
+            document.getElementById('productListModal').classList.add('visible');
+        }
+        
+        function closeProductList() {
+            document.getElementById('productListModal').classList.remove('visible');
+        }
+        
+        function addProductToEditor(productId) {
+            if (!editorProducts.includes(productId)) {
+                editorProducts.push(productId);
+                updateEditorProductsList();
+                
+                // Update button in product list
+                const btn = document.getElementById(`addBtn_${productId}`);
+                if (btn) {
+                    btn.textContent = 'Added';
+                    btn.classList.add('added');
+                    btn.disabled = true;
+                }
+            }
+        }
+        
+        function removeProductFromEditor(productId) {
+            editorProducts = editorProducts.filter(id => id !== productId);
+            updateEditorProductsList();
+            
+            // Update button in product list if modal is open
+            const btn = document.getElementById(`addBtn_${productId}`);
+            if (btn) {
+                btn.textContent = 'Add +';
+                btn.classList.remove('added');
+                btn.disabled = false;
+            }
+        }
+        
+        function updateEditorProductsList() {
+            const listContainer = document.getElementById('editorProductsList');
+            
+            if (editorProducts.length === 0) {
+                listContainer.innerHTML = '<p style="color:#666; text-align:center;">No products added yet</p>';
+                return;
+            }
+            
+            listContainer.innerHTML = editorProducts.map(pid => {
+                const product = products.find(p => p.id === pid);
+                if (!product) return '';
+                
+                return `
+                    <div class="editor-product-item">
+                        <div class="editor-product-image-container">
+                            <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
+                            <div class="editor-product-info">
+                                <div class="editor-product-details">
+                                    <div class="editor-product-name">${product.product_name}</div>
+                                    <div class="editor-product-type">${product.category}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="editor-product-image-container">
+                            <img src="/frame?id=${product.id}&preview=true" class="editor-product-img" onclick="expandImage('/frame?id=${product.id}&preview=true')" onerror="this.style.display='none'">
+                            <div class="editor-product-info">
+                                <button class="modal-btn delete-item" onclick="removeProductFromEditor('${product.id}')" style="margin:0; padding:6px 12px; font-size:11px;">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function expandImage(imageSrc) {
+            document.getElementById('expandedImage').src = imageSrc;
+            document.getElementById('imageExpandModal').classList.add('visible');
+        }
+        
+        function closeImageExpand() {
+            document.getElementById('imageExpandModal').classList.remove('visible');
+        }
 
         document.getElementById('arrowUpBtn').onclick = (e) => { e.stopPropagation(); goToPrevious(); };
         document.getElementById('arrowDownBtn').onclick = (e) => { e.stopPropagation(); goToNext(); };
