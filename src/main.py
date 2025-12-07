@@ -121,6 +121,48 @@ def add_product():
     save_products()
     return redirect(url_for('dashboard'))
 
+@app.route('/edit_product', methods=['POST'])
+@login_required
+def edit_product():
+    global products_db
+    prod_id = request.form.get('id')
+    
+    # Find the product to edit
+    product = next((p for p in products_db if p['id'] == prod_id), None)
+    if not product:
+        return redirect(url_for('dashboard'))
+    
+    # Handle image upload if provided
+    file = request.files.get('product_image')
+    if file and file.filename:
+        filename = secure_filename(file.filename)
+        unique_name = f"{uuid.uuid4().hex[:6]}_{filename}"
+        file.save(os.path.join(UPLOADS_FOLDER, unique_name))
+        product['image_url'] = f"/static/uploads/{unique_name}"
+    
+    # Update basic product fields
+    category = request.form.get('category')
+    product['category'] = category
+    product['brand'] = request.form.get('brand')
+    product['product_name'] = request.form.get('product_name')
+    product['hex_color'] = request.form.get('hex_color')
+    product['price'] = request.form.get('price', "25.00")
+    product['description'] = request.form.get('description', "")
+    
+    # Update category-specific fields
+    if category == 'lipstick':
+        product['pigment'] = int(request.form.get('pigment', 70))
+        product['shine'] = int(request.form.get('shine', 30))
+        product['effect'] = request.form.get('effect', 'none')
+    else:
+        # Remove lipstick-specific properties if changed to mascara
+        product.pop('pigment', None)
+        product.pop('shine', None)
+        product.pop('effect', None)
+    
+    save_products()
+    return redirect(url_for('dashboard'))
+
 @app.route('/delete_product', methods=['POST'])
 @login_required
 def delete_product():
