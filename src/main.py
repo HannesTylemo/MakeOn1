@@ -277,12 +277,22 @@ def upload_selfie():
     try:
         d = request.json.get('image').split(',')[1]
         n = np.frombuffer(base64.b64decode(d), np.uint8)
-        active_image_data = cv2.imdecode(n, cv2.IMREAD_COLOR)
-        h, w = active_image_data.shape[:2]
+        img = cv2.imdecode(n, cv2.IMREAD_COLOR)
+        h, w = img.shape[:2]
         s = min(720/w, 960/h)
-        active_image_data = cv2.resize(active_image_data, (int(w*s), int(h*s)))
+        img = cv2.resize(img, (int(w*s), int(h*s)))
+        
+        # Check for face detection
+        rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        results = face_mesh.process(rgb)
+        
+        if not results.multi_face_landmarks:
+            return jsonify({'success': False, 'error': 'no_face_detected'})
+        
+        active_image_data = img
         return jsonify({'success': True})
-    except: return jsonify({'success': False})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/api/products')
 def gp(): return jsonify({'products': products_db})
