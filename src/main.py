@@ -189,6 +189,10 @@ def wjs(): return send_from_directory(STATIC_FOLDER, 'widget.js')
 @app.route('/static/<path:f>')
 def st(f): return send_from_directory(STATIC_FOLDER, f)
 
+# --- ERROR CODES ---
+ERROR_NO_FACE = 'no_face_detected'
+ERROR_PROCESSING_FAILED = 'processing_failed'
+
 # --- VTO LOGIC ---
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True, max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5)
@@ -287,13 +291,13 @@ def upload_selfie():
         results = face_mesh.process(rgb)
         
         if not results.multi_face_landmarks:
-            return jsonify({'success': False, 'error': 'no_face_detected'})
+            return jsonify({'success': False, 'error': ERROR_NO_FACE})
         
         active_image_data = img
         return jsonify({'success': True})
     except Exception as e:
         print(f"Error in upload_selfie: {e}")  # Log server-side
-        return jsonify({'success': False, 'error': 'processing_failed'})
+        return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
 
 @app.route('/api/products')
 def gp(): return jsonify({'products': products_db})
