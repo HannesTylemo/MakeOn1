@@ -116,7 +116,6 @@
             display: none; 
             border-top: 2px solid var(--beige-dark); 
             margin-top: 20px; 
-            padding-top: 20px;
             background: var(--beige-light);
             padding: 20px;
             border-radius: 8px;
@@ -158,8 +157,8 @@
             background: var(--primary-green);
             color: white;
             border-bottom: none;
-            border-top-left-radius: 9px; 
-            border-top-right-radius: 9px;
+            border-top-left-radius: calc(12px - 3px); 
+            border-top-right-radius: calc(12px - 3px);
         }
         .modal-title { 
             margin-bottom: 0; 
@@ -184,8 +183,8 @@
             background: white;
             border-top: 2px solid var(--beige-dark);
             gap: 0.5rem;
-            border-bottom-right-radius: 9px;
-            border-bottom-left-radius: 9px;
+            border-bottom-right-radius: calc(12px - 3px);
+            border-bottom-left-radius: calc(12px - 3px);
         }
         .modal-backdrop { position: fixed; top: 0; left: 0; z-index: 1040; width: 100vw; height: 100vh; background-color: #000; }
         .modal-backdrop.show { opacity: 0.6; }
