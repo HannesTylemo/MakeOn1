@@ -749,6 +749,11 @@
     </div>
 
     <script>
+        // Check URL parameters for editor mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldEnterEditorMode = urlParams.get('mode') === 'editor';
+        const productParam = urlParams.get('product');
+        
         const overlay = document.getElementById('startupOverlay');
         const exitModal = document.getElementById('exitModal');
         const webcamModal = document.getElementById('webcamModal');
@@ -772,6 +777,8 @@
         let touchStartY = 0; let currentTouchY = 0; let isDragging = false;
         let stream = null;
         let imageCache = {};
+        let editorMode = false; // Track if in editor mode (UI state)
+        let editorProducts = []; // Track products added in editor
 
         window.addEventListener('load', () => { loadHistory(); fetchProducts(); });
         window.addEventListener('message', (e) => { if (e.data === 'request-close-confirmation') toggleExitModal(true); });
@@ -952,8 +959,23 @@
                 if(d.success) {
                     if(save) saveToHistory(b64);
                     overlay.classList.add('hidden');
-                    initSlides();
-                    preloadAround(currentIndex);
+                    
+                    // Check if we should enter editor mode based on URL parameter
+                    if(shouldEnterEditorMode && productParam) {
+                        // Enter editor mode and add the specified product
+                        // First load products normally
+                        initSlides();
+                        preloadAround(currentIndex);
+                        // Then activate editor mode
+                        setTimeout(() => {
+                            toggleEditorMode();
+                            // TODO: Apply the specific product from productParam
+                        }, 500);
+                    } else {
+                        // Normal mode - show scrolling page
+                        initSlides();
+                        preloadAround(currentIndex);
+                    }
                 } else {
                     if(d.error === 'no_face_detected') {
                         showFaceError();
