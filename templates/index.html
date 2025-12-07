@@ -91,9 +91,28 @@
             display: none; justify-content: center; align-items: center;
             backdrop-filter: blur(3px);
         }
+
+        /* FACE DETECTION ERROR MODAL */
+        #faceErrorModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 500;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
         .modal-box {
             background: white; padding: 30px; border-radius: 20px; width: 300px; text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .modal-box h3 {
+            color: #d9534f;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .modal-box p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px;}
         .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
@@ -105,6 +124,22 @@
         .video-slide { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .video-slide.no-transition { transition: none; }
         .video-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        /* DRAG INDICATOR LINE */
+        .drag-indicator {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            background: black;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 15;
+            transition: opacity 0.2s;
+        }
+        .drag-indicator.visible {
+            opacity: 0.5;
+        }
 
         /* TOOLBAR */
         .bottom-toolbar {
@@ -181,6 +216,24 @@
         .panel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 35; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .panel-overlay.visible { opacity: 1; pointer-events: auto; }
         #preload-container { display: none; }
+
+        /* Shopping cart button styling */
+        .cart-btn {
+            flex: 0 0 30%;
+            background: #f0f0f0;
+            border: 2px solid #000;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            transition: all 0.2s ease;
+        }
+        .cart-btn:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -196,6 +249,17 @@
                 <div class="modal-actions">
                     <button class="modal-btn no" onclick="toggleExitModal(false)">No</button>
                     <button class="modal-btn yes" onclick="confirmExit()">Yes</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="faceErrorModal">
+            <div class="modal-box">
+                <h3>Cannot Locate a Face</h3>
+                <p>Please ensure your face is clearly visible and well-lit, then try again.</p>
+                <div class="modal-actions">
+                    <button class="modal-btn no" onclick="closeFaceError()">Exit</button>
+                    <button class="modal-btn yes" onclick="retakePhoto()">Take a New Photo</button>
                 </div>
             </div>
         </div>
@@ -225,6 +289,7 @@
         </div>
 
         <div class="video-container" id="videoContainer">
+            <div class="drag-indicator" id="dragIndicator"></div>
             <div class="video-slide" id="slide-prev" style="transform: translateY(-100%)"><img src="" alt=""></div>
             <div class="video-slide" id="slide-current" style="transform: translateY(0)"><img src="" alt=""></div>
             <div class="video-slide" id="slide-next" style="transform: translateY(100%)"><img src="" alt=""></div>
@@ -277,6 +342,7 @@
         const sidePanel = document.getElementById('sidePanel');
         const productInfo = document.getElementById('productInfoContainer');
         const videoContainer = document.getElementById('videoContainer');
+        const dragIndicator = document.getElementById('dragIndicator');
 
         // DOM ROTATION SETUP
         let slideElements = [
@@ -351,7 +417,16 @@
                     <p style="font-weight:bold; font-size:16px; margin-bottom:5px;">${p.product_name}</p>
                     <p style="color:#666;">${p.shade_name}</p>
                     <p style="margin-top:5px; font-size:12px; color:#999;">${p.brand}</p>
-                    <a href="${p.url}" target="_blank" style="display:block; margin-top:10px; text-align:center; background:#000; color:white; padding:10px; border-radius:8px; text-decoration:none;">Shop Now</a>
+                    <div style="display:flex; gap:10px; margin-top:15px;">
+                        <a href="${p.url}" target="_blank" style="flex:0 0 70%; display:block; text-align:center; background:#000; color:white; padding:10px; border-radius:8px; text-decoration:none; font-weight:bold;">View Product</a>
+                        <button onclick="addToCart('${p.id}')" class="cart-btn">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#000" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>`;
         }
 
@@ -464,8 +539,15 @@
                     initSlides();
                     preloadAround(currentIndex);
                 } else {
-                    if(save) alert(d.error || "Face not detected. Try brighter lighting.");
+                    if(d.error === 'no_face_detected') {
+                        showFaceError();
+                    } else {
+                        alert("Error processing image. Please try again.");
+                    }
                 }
+            }).catch(err => {
+                console.error("Upload error:", err);
+                alert("Error uploading image. Please try again.");
             });
         }
 
@@ -499,6 +581,24 @@
         function toggleExitModal(show) { exitModal.style.display = show ? 'flex' : 'none'; }
         function confirmExit() { window.parent.postMessage('close-skintoner-widget', '*'); toggleExitModal(false); }
 
+        // Face error modal functions
+        function showFaceError() {
+            document.getElementById('faceErrorModal').style.display = 'flex';
+        }
+        function closeFaceError() {
+            document.getElementById('faceErrorModal').style.display = 'none';
+        }
+        function retakePhoto() {
+            document.getElementById('faceErrorModal').style.display = 'none';
+            handleCameraClick();
+        }
+
+        // Shopping cart function
+        // TODO: Implement proper shopping cart functionality
+        function addToCart(productId) {
+            alert('Product added to cart! (Shopping cart functionality to be implemented)');
+        }
+
         document.getElementById('lipstickBtn').onclick = (e) => { e.stopPropagation(); toggleSidePanel(); };
         document.getElementById('closePanel').onclick = (e) => { e.stopPropagation(); toggleSidePanel(false); };
         document.getElementById('panelOverlay').onclick = e => { e.stopPropagation(); toggleSidePanel(false); };
@@ -530,6 +630,11 @@
             if(isAnimating)return;
             isDragging=true; touchStartY=y; currentTouchY=y;
             slideElements.forEach(s=>s.classList.add('no-transition'));
+            
+            // Show drag indicator line
+            dragIndicator.classList.add('visible');
+            dragIndicator.style.top = y + 'px';
+            dragIndicator.style.height = '0px';
         }
         function moveDrag(y) {
             currentTouchY=y; const d = y-touchStartY;
@@ -537,11 +642,23 @@
             slideElements[0].style.transform=`translateY(${-100+pct}%)`;
             slideElements[1].style.transform=`translateY(${pct}%)`;
             slideElements[2].style.transform=`translateY(${100+pct}%)`;
+            
+            // Update drag indicator line
+            const startY = touchStartY;
+            const endY = currentTouchY;
+            const minY = Math.min(startY, endY);
+            const lineHeight = Math.abs(endY - startY);
+            dragIndicator.style.top = minY + 'px';
+            dragIndicator.style.height = lineHeight + 'px';
         }
         function endDrag() {
             if(!isDragging) return; isDragging=false;
             const d = currentTouchY-touchStartY;
             slideElements.forEach(s=>{s.classList.remove('no-transition');s.classList.add('animating')});
+            
+            // Hide drag indicator line
+            dragIndicator.classList.remove('visible');
+            
             if(d < -80) goToNext();
             else if(d > 80) goToPrevious();
             else {
