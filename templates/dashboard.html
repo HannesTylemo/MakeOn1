@@ -17,6 +17,9 @@
             --border-color: #c9c4b0;
             --danger-color: #c44536;
             --danger-bg: #d9534f;
+            --modal-border-radius: 12px;
+            --modal-border-width: 3px;
+            --modal-inner-radius: calc(var(--modal-border-radius) - var(--modal-border-width));
         }
         
         body { 
@@ -143,8 +146,8 @@
             pointer-events: auto; 
             background-color: #fff; 
             background-clip: padding-box; 
-            border: 3px solid var(--primary-green); 
-            border-radius: 12px; 
+            border: var(--modal-border-width) solid var(--primary-green); 
+            border-radius: var(--modal-border-radius); 
             outline: 0;
             box-shadow: 0 10px 40px rgba(45, 80, 22, 0.3);
         }
@@ -157,8 +160,8 @@
             background: var(--primary-green);
             color: white;
             border-bottom: none;
-            border-top-left-radius: calc(12px - 3px); 
-            border-top-right-radius: calc(12px - 3px);
+            border-top-left-radius: var(--modal-inner-radius); 
+            border-top-right-radius: var(--modal-inner-radius);
         }
         .modal-title { 
             margin-bottom: 0; 
@@ -183,8 +186,8 @@
             background: white;
             border-top: 2px solid var(--beige-dark);
             gap: 0.5rem;
-            border-bottom-right-radius: calc(12px - 3px);
-            border-bottom-left-radius: calc(12px - 3px);
+            border-bottom-right-radius: var(--modal-inner-radius);
+            border-bottom-left-radius: var(--modal-inner-radius);
         }
         .modal-backdrop { position: fixed; top: 0; left: 0; z-index: 1040; width: 100vw; height: 100vh; background-color: #000; }
         .modal-backdrop.show { opacity: 0.6; }
