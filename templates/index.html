@@ -101,7 +101,7 @@
         }
         
         /* SHOPPING CART MODALS */
-        #cartAddedModal, #cartViewModal, #checkoutConfirmModal {
+        #cartAddedModal, #cartViewModal, #checkoutConfirmModal, #deleteItemModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 500;
             display: none; justify-content: center; align-items: center;
@@ -178,9 +178,10 @@
             line-height: 1.5;
         }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px;}
-        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; }
         .modal-btn.yes { background: #000; color: white; }
         .modal-btn.no { background: #f0f0f0; color: #000; }
+        .modal-btn.delete-item { background: #d9534f; color: white; flex: 0 0 auto; min-width: 80px; }
 
         /* VIDEO SLIDES */
         .video-container { position: relative; flex-grow: 1; width: 100%; background: white; z-index: 10; }
@@ -375,6 +376,18 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Delete Cart Item Confirmation Modal -->
+        <div id="deleteItemModal">
+            <div class="modal-box">
+                <h3 style="color: #d9534f;">Delete Item?</h3>
+                <p id="deleteItemText">Are you sure you want to remove this item from your cart?</p>
+                <div class="modal-actions">
+                    <button class="modal-btn no" onclick="closeDeleteItem()">Cancel</button>
+                    <button class="modal-btn delete-item" onclick="confirmDeleteItemAction()">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
 
         <div class="startup-overlay" id="startupOverlay">
             <div class="startup-content">
@@ -411,7 +424,10 @@
 
         <div class="side-panel" id="sidePanel">
             <button class="close-panel" id="closePanel">&times;</button>
-            <h2 style="margin-bottom:20px;">The Recipe</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0;">The Recipe</h2>
+                <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:0; padding:8px 15px; font-size:12px; width:auto;">Purchase The Whole Look</button>
+            </div>
             <div id="productInfoContainer">Loading...</div>
         </div>
 
@@ -539,8 +555,8 @@
                             </svg>
                         </button>
                     </div>
-                    <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn">Purchase The Whole Look</button>
                 </div>`;
+        }
         }
 
         function goToNext() {
@@ -748,7 +764,7 @@
                     <div class="cart-item-info">
                         <div class="cart-item-name">${p.product_name}</div>
                         <div class="cart-item-brand">${p.brand}</div>
-                        <div class="cart-item-quantity">Qty: ${p.quantity}</div>
+                        <div class="cart-item-quantity">Quantity: ${p.quantity}</div>
                     </div>
                     <div class="cart-item-price">$${p.price}</div>
                 </div>
@@ -781,12 +797,16 @@
                         <div class="cart-item-name">${p.product_name}</div>
                         <div class="cart-item-brand">${p.brand}</div>
                         <div class="cart-item-quantity">
+                            <span style="margin-right:10px;">Quantity:</span>
                             <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', -1)">-</button>
                             <span>${p.quantity}</span>
                             <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', 1)">+</button>
                         </div>
                     </div>
-                    <div class="cart-item-price">$${(parseFloat(p.price) * p.quantity).toFixed(2)}</div>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+                        <div class="cart-item-price">$${(parseFloat(p.price) * p.quantity).toFixed(2)}</div>
+                        <button class="modal-btn delete-item" onclick="confirmDeleteItem('${p.id}')">Delete</button>
+                    </div>
                 </div>
             `).join('');
             
@@ -839,6 +859,31 @@
                 window.open(pendingProductUrl, '_blank');
             }
             closeProductPageConfirm();
+        }
+        
+        // Delete item functions
+        let pendingDeleteItemId = '';
+        
+        function confirmDeleteItem(productId) {
+            const item = shoppingCart.find(p => p.id === productId);
+            if (item) {
+                document.getElementById('deleteItemText').textContent = `Are you sure you want to remove "${item.product_name}" from your cart?`;
+                pendingDeleteItemId = productId;
+                document.getElementById('deleteItemModal').style.display = 'flex';
+            }
+        }
+        
+        function closeDeleteItem() {
+            document.getElementById('deleteItemModal').style.display = 'none';
+            pendingDeleteItemId = '';
+        }
+        
+        function confirmDeleteItemAction() {
+            if (pendingDeleteItemId) {
+                shoppingCart = shoppingCart.filter(p => p.id !== pendingDeleteItemId);
+                updateCartView();
+            }
+            closeDeleteItem();
         }
 
         document.getElementById('lipstickBtn').onclick = (e) => { e.stopPropagation(); toggleSidePanel(); };
