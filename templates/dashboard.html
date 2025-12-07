@@ -204,7 +204,7 @@
                                         <input type="range" class="form-range" name="shine" id="range-shine" min="0" max="100" step="5" value="30">
                                     </div>
                                     <input type="number" class="form-control number-input" id="num-shine" min="0" max="100" step="5" value="30">
-                                    </div>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="slider-label">Reflective Effect</label>
@@ -268,7 +268,7 @@
                     <div class="modal-body">
                         <div class="mb-4">
                             <label class="form-label fw-bold">Select Category</label>
-                            <select name="category" id="edit-category-select" class="form-select form-select-lg" onchange="toggleEditProperties()">
+                            <select name="category" id="edit-category-select" class="form-select form-select-lg">
                                 <option value="lipstick">Lipstick</option>
                                 <option value="mascara">Mascara</option>
                             </select>
@@ -325,7 +325,7 @@
                                         <input type="range" class="form-range" name="shine" id="edit-range-shine" min="0" max="100" step="5" value="30">
                                     </div>
                                     <input type="number" class="form-control number-input" id="edit-num-shine" min="0" max="100" step="5" value="30">
-                                    </div>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="slider-label">Reflective Effect</label>
@@ -403,6 +403,9 @@
                 openDeleteModal(productId, productName);
             });
         });
+        
+        // Add event listener to edit category select
+        document.getElementById('edit-category-select').addEventListener('change', toggleEditProperties);
 
         // EDIT MODAL
         function openEditModal(id, category, brand, productName, hexColor, price, description, pigment, shine, effect, imageUrl) {
