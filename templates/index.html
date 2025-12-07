@@ -91,20 +91,119 @@
             display: none; justify-content: center; align-items: center;
             backdrop-filter: blur(3px);
         }
+        
+        /* FACE DETECTION ERROR MODAL */
+        #faceErrorModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 500;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        /* SHOPPING CART MODALS */
+        #cartAddedModal, #cartViewModal, #checkoutConfirmModal, #deleteItemModal, #exploreLooksModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 500;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .cart-modal-box {
+            background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 80vh; overflow-y: auto;
+        }
+        
+        .cart-item {
+            display: flex; gap: 15px; padding: 15px; border: 1px solid #eee;
+            border-radius: 10px; margin-bottom: 15px; align-items: center;
+        }
+        
+        .cart-item-image {
+            width: 60px; height: 60px; object-fit: cover; border-radius: 8px;
+            background: #f0f0f0;
+        }
+        
+        .cart-item-info {
+            flex: 1;
+        }
+        
+        .cart-item-name {
+            font-weight: bold; font-size: 14px; margin-bottom: 5px;
+        }
+        
+        .cart-item-brand {
+            color: #666; font-size: 12px;
+        }
+        
+        .cart-item-price {
+            font-weight: bold; color: #000; font-size: 16px;
+        }
+        
+        .cart-item-quantity {
+            display: flex; align-items: center; gap: 10px; margin-top: 5px;
+        }
+        
+        .cart-quantity-btn {
+            width: 25px; height: 25px; border: 1px solid #000; background: white;
+            border-radius: 5px; cursor: pointer; font-weight: bold;
+        }
+        
+        .cart-total {
+            font-size: 20px; font-weight: bold; text-align: right; margin-top: 20px;
+            padding-top: 20px; border-top: 2px solid #eee;
+        }
+        
+        .purchase-whole-look-btn {
+            width: 100%; padding: 15px; margin-top: 20px; background: white;
+            border: 2px solid #000; border-radius: 10px; cursor: pointer;
+            font-weight: bold; transition: all 0.3s ease;
+        }
+        
+        .purchase-whole-look-btn:hover {
+            background: #000; color: white;
+        }
+        
         .modal-box {
             background: white; padding: 30px; border-radius: 20px; width: 300px; text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
+        .modal-box h3 {
+            color: #d9534f;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .modal-box p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px;}
-        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; }
         .modal-btn.yes { background: #000; color: white; }
         .modal-btn.no { background: #f0f0f0; color: #000; }
+        .modal-btn.delete-item { background: #d9534f; color: white; flex: 0 0 auto; min-width: 80px; }
 
         /* VIDEO SLIDES */
-        .video-container { position: relative; flex-grow: 1; width: 100%; background: white; z-index: 10; }
+        .video-container { position: relative; flex-grow: 1; width: 100%; background: white; z-index: 10; overflow: hidden; }
         .video-slide { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .video-slide.no-transition { transition: none; }
         .video-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        /* DRAG INDICATOR LINE */
+        .drag-indicator {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            background: black;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 15;
+            transition: opacity 0.2s;
+        }
+        .drag-indicator.visible {
+            opacity: 0.5;
+        }
 
         /* TOOLBAR */
         .bottom-toolbar {
@@ -181,6 +280,269 @@
         .panel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 35; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .panel-overlay.visible { opacity: 1; pointer-events: auto; }
         #preload-container { display: none; }
+        
+        /* Shopping cart button styling */
+        .cart-btn {
+            flex: 0 0 30%;
+            background: #f0f0f0;
+            border: 2px solid #000;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            transition: all 0.2s ease;
+        }
+        .cart-btn:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+        
+        /* EDITOR MODE STYLES */
+        .editor-mode-active .video-container {
+            width: 50% !important;
+            flex-grow: 0 !important;
+        }
+        
+        .editor-products-panel {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: white;
+            z-index: 20;
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .editor-mode-active .editor-products-panel {
+            display: flex;
+        }
+        
+        .editor-products-panel h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .editor-products-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .editor-product-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .editor-product-image-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .editor-product-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f0f0f0;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        
+        .editor-product-img:hover {
+            opacity: 0.8;
+        }
+        
+        .editor-product-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .editor-product-details {
+            flex: 1;
+        }
+        
+        .editor-product-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+        
+        .editor-product-type {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .editor-add-btn {
+            background: #4a7c2a;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
+        .editor-add-btn:hover {
+            background: #3d6b1f;
+        }
+        
+        .editor-add-btn.added {
+            background: #999;
+            cursor: default;
+        }
+        
+        /* Product list modal */
+        #productListModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 600;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        #productListModal.visible {
+            display: flex;
+        }
+        
+        .product-list-header {
+            padding: 20px;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+        
+        .product-list-header h2 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .product-list-close {
+            background: none;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+        
+        .product-list-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .product-list-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .product-list-images {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .product-list-img {
+            flex: 1;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f0f0f0;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .product-list-img:hover {
+            border-color: #4a7c2a;
+        }
+        
+        .product-list-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .product-list-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .product-list-type {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        /* Image expand modal */
+        #imageExpandModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 700;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #imageExpandModal.visible {
+            display: flex;
+        }
+        
+        #imageExpandModal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        
+        .explore-looks-btn {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        
+        .explore-looks-btn:hover {
+            background: #333;
+        }
+        
+        /* Hide arrows in editor mode */
+        .editor-mode-active .desktop-arrows-container {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -196,6 +558,78 @@
                 <div class="modal-actions">
                     <button class="modal-btn no" onclick="toggleExitModal(false)">No</button>
                     <button class="modal-btn yes" onclick="confirmExit()">Yes</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="faceErrorModal">
+            <div class="modal-box">
+                <h3>Cannot Locate a Face</h3>
+                <p>Please ensure your face is clearly visible and well-lit, then try again.</p>
+                <div class="modal-actions">
+                    <button class="modal-btn no" onclick="closeFaceError()">Exit</button>
+                    <button class="modal-btn yes" onclick="retakePhoto()">Take a New Photo</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Added to Cart Modal -->
+        <div id="cartAddedModal">
+            <div class="cart-modal-box">
+                <h3 style="margin-bottom: 20px; font-size: 20px;">Added to Cart</h3>
+                <div id="cartAddedContent"></div>
+                <div class="modal-actions" style="margin-top: 20px;">
+                    <button class="modal-btn no" onclick="closeCartAdded()">Continue Exploring</button>
+                    <button class="modal-btn yes" onclick="viewCart()">View Shopping Cart</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Shopping Cart View Modal -->
+        <div id="cartViewModal">
+            <div class="cart-modal-box">
+                <h3 style="margin-bottom: 20px; font-size: 20px;">Shopping Cart</h3>
+                <div id="cartViewContent"></div>
+                <div class="cart-total" id="cartTotalDisplay"></div>
+                <div class="modal-actions" style="margin-top: 20px;">
+                    <button class="modal-btn no" onclick="closeCartView()">Continue Exploring</button>
+                    <button class="modal-btn yes" onclick="proceedToCheckout()">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Checkout Confirmation Modal -->
+        <div id="checkoutConfirmModal">
+            <div class="modal-box">
+                <h3 style="color: #000;">Leave to Checkout?</h3>
+                <p>You will be redirected to complete your purchase.</p>
+                <div class="modal-actions">
+                    <button class="modal-btn no" onclick="closeCheckoutConfirm()">Cancel</button>
+                    <button class="modal-btn yes" onclick="confirmCheckout()">Yes, Continue</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Page Confirmation Modal -->
+        <div id="productPageConfirmModal">
+            <div class="modal-box">
+                <h3 style="color: #000;">Visit Product Page?</h3>
+                <p>You will be redirected to the product's website.</p>
+                <div class="modal-actions">
+                    <button class="modal-btn no" onclick="closeProductPageConfirm()">Cancel</button>
+                    <button class="modal-btn yes" onclick="confirmProductPage()">Yes, Continue</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Delete Cart Item Confirmation Modal -->
+        <div id="deleteItemModal">
+            <div class="modal-box">
+                <h3 style="color: #d9534f;">Delete Item?</h3>
+                <p id="deleteItemText">Are you sure you want to remove this item from your cart?</p>
+                <div class="modal-actions">
+                    <button class="modal-btn no" onclick="closeDeleteItem()">Cancel</button>
+                    <button class="modal-btn delete-item" onclick="confirmDeleteItemAction()">Yes, Delete</button>
                 </div>
             </div>
         </div>
@@ -225,6 +659,7 @@
         </div>
 
         <div class="video-container" id="videoContainer">
+            <div class="drag-indicator" id="dragIndicator"></div>
             <div class="video-slide" id="slide-prev" style="transform: translateY(-100%)"><img src="" alt=""></div>
             <div class="video-slide" id="slide-current" style="transform: translateY(0)"><img src="" alt=""></div>
             <div class="video-slide" id="slide-next" style="transform: translateY(100%)"><img src="" alt=""></div>
@@ -234,7 +669,10 @@
 
         <div class="side-panel" id="sidePanel">
             <button class="close-panel" id="closePanel">&times;</button>
-            <h2 style="margin-bottom:20px;">The Recipe</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0;">The Recipe</h2>
+                <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:0; padding:8px 15px; font-size:12px; width:auto;">Purchase The Whole Look</button>
+            </div>
             <div id="productInfoContainer">Loading...</div>
         </div>
 
@@ -261,7 +699,49 @@
                      </svg>
                 </button>
                 <button class="toolbar-button" id="editorBtn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                <button class="toolbar-button" id="addProductBtn" style="display:none;">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
+                </button>
             </div>
+        </div>
+        
+        <!-- Editor Products Panel -->
+        <div class="editor-products-panel" id="editorProductsPanel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2>Products Included</h2>
+                <button class="explore-looks-btn" onclick="showExploreLooksConfirm()">Explore New Looks</button>
+            </div>
+            <div class="editor-products-list" id="editorProductsList">
+                <p style="color:#666; text-align:center;">No products added yet</p>
+            </div>
+        </div>
+        
+        <!-- Explore Looks Confirmation Modal -->
+        <div id="exploreLooksModal">
+            <div class="modal-box">
+                <h3 style="color: #d9534f;">Leave Editor?</h3>
+                <p>Are you sure? Your progress will not be saved.</p>
+                <div class="modal-actions">
+                    <button class="modal-btn no" onclick="closeExploreLooksModal()">No, Stay</button>
+                    <button class="modal-btn yes" onclick="confirmExploreLoooks()">Yes, Leave</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product List Modal -->
+        <div id="productListModal">
+            <div class="product-list-header">
+                <h2>Add Products</h2>
+                <button class="product-list-close" onclick="closeProductList()">&times;</button>
+            </div>
+            <div class="product-list-grid" id="productListGrid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Image Expand Modal -->
+        <div id="imageExpandModal" onclick="closeImageExpand()">
+            <img id="expandedImage" src="" alt="">
         </div>
 
         <div id="preload-container"></div>
@@ -269,6 +749,11 @@
     </div>
 
     <script>
+        // Check URL parameters for editor mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldEnterEditorMode = urlParams.get('mode') === 'editor';
+        const productParam = urlParams.get('product');
+        
         const overlay = document.getElementById('startupOverlay');
         const exitModal = document.getElementById('exitModal');
         const webcamModal = document.getElementById('webcamModal');
@@ -277,6 +762,7 @@
         const sidePanel = document.getElementById('sidePanel');
         const productInfo = document.getElementById('productInfoContainer');
         const videoContainer = document.getElementById('videoContainer');
+        const dragIndicator = document.getElementById('dragIndicator');
 
         // DOM ROTATION SETUP
         let slideElements = [
@@ -291,6 +777,8 @@
         let touchStartY = 0; let currentTouchY = 0; let isDragging = false;
         let stream = null;
         let imageCache = {};
+        let editorMode = false; // Track if in editor mode (UI state)
+        let editorProducts = []; // Track products added in editor
 
         window.addEventListener('load', () => { loadHistory(); fetchProducts(); });
         window.addEventListener('message', (e) => { if (e.data === 'request-close-confirmation') toggleExitModal(true); });
@@ -351,8 +839,18 @@
                     <p style="font-weight:bold; font-size:16px; margin-bottom:5px;">${p.product_name}</p>
                     <p style="color:#666;">${p.shade_name}</p>
                     <p style="margin-top:5px; font-size:12px; color:#999;">${p.brand}</p>
-                    <a href="${p.url}" target="_blank" style="display:block; margin-top:10px; text-align:center; background:#000; color:white; padding:10px; border-radius:8px; text-decoration:none;">Shop Now</a>
+                    <div style="display:flex; gap:10px; margin-top:15px;">
+                        <button onclick="showProductPageConfirm('${p.url}')" style="flex:0 0 70%; display:block; text-align:center; background:#000; color:white; padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">View Product</button>
+                        <button onclick="addToCart('${p.id}')" class="cart-btn">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#000" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>`;
+        }
         }
 
         function goToNext() {
@@ -461,11 +959,33 @@
                 if(d.success) {
                     if(save) saveToHistory(b64);
                     overlay.classList.add('hidden');
-                    initSlides();
-                    preloadAround(currentIndex);
+                    
+                    // Check if we should enter editor mode based on URL parameter
+                    if(shouldEnterEditorMode && productParam) {
+                        // Enter editor mode and add the specified product
+                        // First load products normally
+                        initSlides();
+                        preloadAround(currentIndex);
+                        // Then activate editor mode
+                        setTimeout(() => {
+                            toggleEditorMode();
+                            // TODO: Apply the specific product from productParam
+                        }, 500);
+                    } else {
+                        // Normal mode - show scrolling page
+                        initSlides();
+                        preloadAround(currentIndex);
+                    }
                 } else {
-                    if(save) alert(d.error || "Face not detected. Try brighter lighting.");
+                    if(d.error === 'no_face_detected') {
+                        showFaceError();
+                    } else {
+                        alert("Error processing image. Please try again.");
+                    }
                 }
+            }).catch(err => {
+                console.error("Upload error:", err);
+                alert("Error uploading image. Please try again.");
             });
         }
 
@@ -498,11 +1018,341 @@
 
         function toggleExitModal(show) { exitModal.style.display = show ? 'flex' : 'none'; }
         function confirmExit() { window.parent.postMessage('close-skintoner-widget', '*'); toggleExitModal(false); }
+        
+        // Face error modal functions
+        function showFaceError() {
+            document.getElementById('faceErrorModal').style.display = 'flex';
+        }
+        function closeFaceError() {
+            document.getElementById('faceErrorModal').style.display = 'none';
+        }
+        function retakePhoto() {
+            document.getElementById('faceErrorModal').style.display = 'none';
+            handleCameraClick();
+        }
+        
+        // Shopping cart storage
+        let shoppingCart = [];
+        let pendingProductUrl = '';
+        let checkoutUrl = '/checkout'; // Placeholder checkout URL
+        
+        // Shopping cart functions
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const existing = shoppingCart.find(item => item.id === productId);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                shoppingCart.push(Object.assign({}, product, {quantity: 1}));
+            }
+            
+            showCartAdded([Object.assign({}, product, {quantity: existing ? existing.quantity : 1})]);
+        }
+        
+        function purchaseWholeLook() {
+            const allProducts = [];
+            products.forEach(p => {
+                const existing = shoppingCart.find(item => item.id === p.id);
+                if (existing) {
+                    existing.quantity++;
+                } else {
+                    shoppingCart.push(Object.assign({}, p, {quantity: 1}));
+                }
+                allProducts.push(Object.assign({}, p, {quantity: existing ? existing.quantity : 1}));
+            });
+            showCartAdded(allProducts);
+        }
+        
+        function showCartAdded(addedProducts) {
+            const content = document.getElementById('cartAddedContent');
+            content.innerHTML = addedProducts.map(p => `
+                <div class="cart-item">
+                    <img src="${p.image_url}" class="cart-item-image" onerror="this.style.display='none'">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${p.product_name}</div>
+                        <div class="cart-item-brand">${p.brand}</div>
+                        <div class="cart-item-quantity">Quantity: ${p.quantity}</div>
+                    </div>
+                    <div class="cart-item-price">$${p.price}</div>
+                </div>
+            `).join('');
+            document.getElementById('cartAddedModal').style.display = 'flex';
+        }
+        
+        function closeCartAdded() {
+            document.getElementById('cartAddedModal').style.display = 'none';
+        }
+        
+        function viewCart() {
+            closeCartAdded();
+            updateCartView();
+            document.getElementById('cartViewModal').style.display = 'flex';
+        }
+        
+        function updateCartView() {
+            const content = document.getElementById('cartViewContent');
+            if (shoppingCart.length === 0) {
+                content.innerHTML = '<p style="text-align:center; color:#666;">Your cart is empty</p>';
+                document.getElementById('cartTotalDisplay').innerHTML = '';
+                return;
+            }
+            
+            content.innerHTML = shoppingCart.map(p => `
+                <div class="cart-item">
+                    <img src="${p.image_url}" class="cart-item-image" onerror="this.style.display='none'">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${p.product_name}</div>
+                        <div class="cart-item-brand">${p.brand}</div>
+                        <div class="cart-item-quantity">
+                            <span style="margin-right:10px;">Quantity:</span>
+                            <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', -1)">-</button>
+                            <span>${p.quantity}</span>
+                            <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', 1)">+</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+                        <div class="cart-item-price">$${(parseFloat(p.price) * p.quantity).toFixed(2)}</div>
+                        <button class="modal-btn delete-item" onclick="confirmDeleteItem('${p.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            const total = shoppingCart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+            document.getElementById('cartTotalDisplay').innerHTML = `Total: $${total.toFixed(2)}`;
+        }
+        
+        function updateQuantity(productId, change) {
+            const item = shoppingCart.find(p => p.id === productId);
+            if (!item) return;
+            
+            item.quantity += change;
+            if (item.quantity <= 0) {
+                shoppingCart = shoppingCart.filter(p => p.id !== productId);
+            }
+            updateCartView();
+        }
+        
+        function closeCartView() {
+            document.getElementById('cartViewModal').style.display = 'none';
+        }
+        
+        function proceedToCheckout() {
+            document.getElementById('checkoutConfirmModal').style.display = 'flex';
+        }
+        
+        function closeCheckoutConfirm() {
+            document.getElementById('checkoutConfirmModal').style.display = 'none';
+        }
+        
+        function confirmCheckout() {
+            closeCheckoutConfirm();
+            closeCartView();
+            // Redirect to checkout page
+            window.location.href = checkoutUrl;
+        }
+        
+        function showProductPageConfirm(url) {
+            pendingProductUrl = url;
+            document.getElementById('productPageConfirmModal').style.display = 'flex';
+        }
+        
+        function closeProductPageConfirm() {
+            document.getElementById('productPageConfirmModal').style.display = 'none';
+            pendingProductUrl = '';
+        }
+        
+        function confirmProductPage() {
+            if (pendingProductUrl) {
+                window.open(pendingProductUrl, '_blank');
+            }
+            closeProductPageConfirm();
+        }
+        
+        // Delete item functions
+        let pendingDeleteItemId = '';
+        
+        function confirmDeleteItem(productId) {
+            const item = shoppingCart.find(p => p.id === productId);
+            if (item) {
+                document.getElementById('deleteItemText').textContent = `Are you sure you want to remove "${item.product_name}" from your cart?`;
+                pendingDeleteItemId = productId;
+                document.getElementById('deleteItemModal').style.display = 'flex';
+            }
+        }
+        
+        function closeDeleteItem() {
+            document.getElementById('deleteItemModal').style.display = 'none';
+            pendingDeleteItemId = '';
+        }
+        
+        function confirmDeleteItemAction() {
+            if (pendingDeleteItemId) {
+                shoppingCart = shoppingCart.filter(p => p.id !== pendingDeleteItemId);
+                updateCartView();
+            }
+            closeDeleteItem();
+        }
 
         document.getElementById('lipstickBtn').onclick = (e) => { e.stopPropagation(); toggleSidePanel(); };
         document.getElementById('closePanel').onclick = (e) => { e.stopPropagation(); toggleSidePanel(false); };
         document.getElementById('panelOverlay').onclick = e => { e.stopPropagation(); toggleSidePanel(false); };
         document.getElementById('bottomToolbar').addEventListener('click', e => e.stopPropagation());
+
+        // Editor Mode Variables
+        let editorMode = false;
+        let editorProducts = [];
+        const phoneContainer = document.getElementById('phone');
+        const addProductBtn = document.getElementById('addProductBtn');
+        
+        // Editor Mode Functions
+        document.getElementById('editorBtn').onclick = (e) => {
+            e.stopPropagation();
+            toggleEditorMode();
+        };
+        
+        if (addProductBtn) {
+            addProductBtn.onclick = (e) => {
+                e.stopPropagation();
+                showProductList();
+            };
+        }
+        
+        function toggleEditorMode() {
+            editorMode = !editorMode;
+            if (editorMode) {
+                phoneContainer.classList.add('editor-mode-active');
+                document.getElementById('lipstickBtn').style.display = 'none';
+                addProductBtn.style.display = 'flex';
+                toggleSidePanel(false); // Close side panel
+            } else {
+                phoneContainer.classList.remove('editor-mode-active');
+                document.getElementById('lipstickBtn').style.display = 'flex';
+                addProductBtn.style.display = 'none';
+                editorProducts = [];
+                updateEditorProductsList();
+            }
+        }
+        
+        function showExploreLooksConfirm() {
+            document.getElementById('exploreLooksModal').style.display = 'flex';
+        }
+        
+        function closeExploreLooksModal() {
+            document.getElementById('exploreLooksModal').style.display = 'none';
+        }
+        
+        function confirmExploreLoooks() {
+            closeExploreLooksModal();
+            toggleEditorMode(); // Exit editor mode
+        }
+        
+        function showProductList() {
+            const grid = document.getElementById('productListGrid');
+            grid.innerHTML = products.map(p => `
+                <div class="product-list-item">
+                    <div class="product-list-images">
+                        <img src="${p.image_url}" class="product-list-img" onclick="expandImage('${p.image_url}')" onerror="this.style.display='none'">
+                        <img src="/frame?id=${p.id}&preview=true" class="product-list-img" onclick="expandImage('/frame?id=${p.id}&preview=true')" onerror="this.style.display='none'">
+                    </div>
+                    <div class="product-list-info">
+                        <div>
+                            <div class="product-list-name">${p.product_name}</div>
+                            <div class="product-list-type">${p.category}</div>
+                        </div>
+                        <button class="editor-add-btn" onclick="addProductToEditor('${p.id}')" id="addBtn_${p.id}">Add +</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update button states for already added products
+            editorProducts.forEach(pid => {
+                const btn = document.getElementById(`addBtn_${pid}`);
+                if (btn) {
+                    btn.textContent = 'Added';
+                    btn.classList.add('added');
+                    btn.disabled = true;
+                }
+            });
+            
+            document.getElementById('productListModal').classList.add('visible');
+        }
+        
+        function closeProductList() {
+            document.getElementById('productListModal').classList.remove('visible');
+        }
+        
+        function addProductToEditor(productId) {
+            if (!editorProducts.includes(productId)) {
+                editorProducts.push(productId);
+                updateEditorProductsList();
+                
+                // Update button in product list
+                const btn = document.getElementById(`addBtn_${productId}`);
+                if (btn) {
+                    btn.textContent = 'Added';
+                    btn.classList.add('added');
+                    btn.disabled = true;
+                }
+            }
+        }
+        
+        function removeProductFromEditor(productId) {
+            editorProducts = editorProducts.filter(id => id !== productId);
+            updateEditorProductsList();
+            
+            // Update button in product list if modal is open
+            const btn = document.getElementById(`addBtn_${productId}`);
+            if (btn) {
+                btn.textContent = 'Add +';
+                btn.classList.remove('added');
+                btn.disabled = false;
+            }
+        }
+        
+        function updateEditorProductsList() {
+            const listContainer = document.getElementById('editorProductsList');
+            
+            if (editorProducts.length === 0) {
+                listContainer.innerHTML = '<p style="color:#666; text-align:center;">No products added yet</p>';
+                return;
+            }
+            
+            listContainer.innerHTML = editorProducts.map(pid => {
+                const product = products.find(p => p.id === pid);
+                if (!product) return '';
+                
+                return `
+                    <div class="editor-product-item">
+                        <div class="editor-product-image-container">
+                            <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
+                            <div class="editor-product-info">
+                                <div class="editor-product-details">
+                                    <div class="editor-product-name">${product.product_name}</div>
+                                    <div class="editor-product-type">${product.category}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="editor-product-image-container">
+                            <img src="/frame?id=${product.id}&preview=true" class="editor-product-img" onclick="expandImage('/frame?id=${product.id}&preview=true')" onerror="this.style.display='none'">
+                            <div class="editor-product-info">
+                                <button class="modal-btn delete-item" onclick="removeProductFromEditor('${product.id}')" style="margin:0; padding:6px 12px; font-size:11px;">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function expandImage(imageSrc) {
+            document.getElementById('expandedImage').src = imageSrc;
+            document.getElementById('imageExpandModal').classList.add('visible');
+        }
+        
+        function closeImageExpand() {
+            document.getElementById('imageExpandModal').classList.remove('visible');
+        }
 
         document.getElementById('arrowUpBtn').onclick = (e) => { e.stopPropagation(); goToPrevious(); };
         document.getElementById('arrowDownBtn').onclick = (e) => { e.stopPropagation(); goToNext(); };
@@ -530,6 +1380,11 @@
             if(isAnimating)return;
             isDragging=true; touchStartY=y; currentTouchY=y;
             slideElements.forEach(s=>s.classList.add('no-transition'));
+            
+            // Show drag indicator line
+            dragIndicator.classList.add('visible');
+            dragIndicator.style.top = y + 'px';
+            dragIndicator.style.height = '0px';
         }
         function moveDrag(y) {
             currentTouchY=y; const d = y-touchStartY;
@@ -537,11 +1392,23 @@
             slideElements[0].style.transform=`translateY(${-100+pct}%)`;
             slideElements[1].style.transform=`translateY(${pct}%)`;
             slideElements[2].style.transform=`translateY(${100+pct}%)`;
+            
+            // Update drag indicator line
+            const startY = touchStartY;
+            const endY = currentTouchY;
+            const minY = Math.min(startY, endY);
+            const lineHeight = Math.abs(endY - startY);
+            dragIndicator.style.top = minY + 'px';
+            dragIndicator.style.height = lineHeight + 'px';
         }
         function endDrag() {
             if(!isDragging) return; isDragging=false;
             const d = currentTouchY-touchStartY;
             slideElements.forEach(s=>{s.classList.remove('no-transition');s.classList.add('animating')});
+            
+            // Hide drag indicator line
+            dragIndicator.classList.remove('visible');
+            
             if(d < -80) goToNext();
             else if(d > 80) goToPrevious();
             else {

@@ -121,6 +121,48 @@ def add_product():
     save_products()
     return redirect(url_for('dashboard'))
 
+@app.route('/edit_product', methods=['POST'])
+@login_required
+def edit_product():
+    global products_db
+    prod_id = request.form.get('id')
+    
+    # Find the product to edit
+    product = next((p for p in products_db if p['id'] == prod_id), None)
+    if not product:
+        return redirect(url_for('dashboard'))
+    
+    # Handle image upload if provided
+    file = request.files.get('product_image')
+    if file and file.filename:
+        filename = secure_filename(file.filename)
+        unique_name = f"{uuid.uuid4().hex[:6]}_{filename}"
+        file.save(os.path.join(UPLOADS_FOLDER, unique_name))
+        product['image_url'] = f"/static/uploads/{unique_name}"
+    
+    # Update basic product fields
+    category = request.form.get('category')
+    product['category'] = category
+    product['brand'] = request.form.get('brand')
+    product['product_name'] = request.form.get('product_name')
+    product['hex_color'] = request.form.get('hex_color')
+    product['price'] = request.form.get('price', "25.00")
+    product['description'] = request.form.get('description', "")
+    
+    # Update category-specific fields
+    if category == 'lipstick':
+        product['pigment'] = int(request.form.get('pigment', 70))
+        product['shine'] = int(request.form.get('shine', 30))
+        product['effect'] = request.form.get('effect', 'none')
+    else:
+        # Remove lipstick-specific properties if changed to mascara
+        product.pop('pigment', None)
+        product.pop('shine', None)
+        product.pop('effect', None)
+    
+    save_products()
+    return redirect(url_for('dashboard'))
+
 @app.route('/delete_product', methods=['POST'])
 @login_required
 def delete_product():
@@ -139,13 +181,17 @@ def product_detail(product_id):
 
 @app.route('/mock')
 def mock_site():
-    return render_template('shopify_mock.html')
+    return render_template('shopify_mockup.html')
 
 @app.route('/widget.js')
 def wjs(): return send_from_directory(STATIC_FOLDER, 'widget.js')
 
 @app.route('/static/<path:f>')
 def st(f): return send_from_directory(STATIC_FOLDER, f)
+
+# --- ERROR CODES ---
+ERROR_NO_FACE = 'no_face_detected'
+ERROR_PROCESSING_FAILED = 'processing_failed'
 
 # --- VTO LOGIC ---
 mp_face_mesh = mp.solutions.face_mesh
@@ -235,12 +281,23 @@ def upload_selfie():
     try:
         d = request.json.get('image').split(',')[1]
         n = np.frombuffer(base64.b64decode(d), np.uint8)
-        active_image_data = cv2.imdecode(n, cv2.IMREAD_COLOR)
-        h, w = active_image_data.shape[:2]
+        img = cv2.imdecode(n, cv2.IMREAD_COLOR)
+        h, w = img.shape[:2]
         s = min(720/w, 960/h)
-        active_image_data = cv2.resize(active_image_data, (int(w*s), int(h*s)))
+        img = cv2.resize(img, (int(w*s), int(h*s)))
+        
+        # Check for face detection
+        rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        results = face_mesh.process(rgb)
+        
+        if not results.multi_face_landmarks:
+            return jsonify({'success': False, 'error': ERROR_NO_FACE})
+        
+        active_image_data = img
         return jsonify({'success': True})
-    except: return jsonify({'success': False})
+    except Exception as e:
+        print(f"Error in upload_selfie: {e}")  # Log server-side
+        return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
 
 @app.route('/api/products')
 def gp(): return jsonify({'products': products_db})
