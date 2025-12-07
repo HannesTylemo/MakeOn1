@@ -100,8 +100,21 @@
                             <span class="ms-2 small text-muted">{{ product.hex_color }}</span>
                         </td>
                         <td class="text-end">
-                            <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal('{{ product.id }}', '{{ product.category }}', '{{ product.brand }}', '{{ product.product_name }}', '{{ product.hex_color }}', '{{ product.price }}', '{{ product.description }}', {{ product.pigment|default(70) }}, {{ product.shine|default(30) }}, '{{ product.effect|default('none') }}', '{{ product.image_url }}')">Edit</button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="openDeleteModal('{{ product.id }}', '{{ product.product_name }}')">Delete</button>
+                            <button class="btn btn-sm btn-outline-primary me-2 edit-btn" 
+                                data-id="{{ product.id }}" 
+                                data-category="{{ product.category }}" 
+                                data-brand="{{ product.brand | e }}" 
+                                data-product-name="{{ product.product_name | e }}" 
+                                data-hex-color="{{ product.hex_color }}" 
+                                data-price="{{ product.price }}" 
+                                data-description="{{ product.description | e }}" 
+                                data-pigment="{{ product.pigment|default(70) }}" 
+                                data-shine="{{ product.shine|default(30) }}" 
+                                data-effect="{{ product.effect|default('none') }}" 
+                                data-image-url="{{ product.image_url }}">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger delete-btn" 
+                                data-id="{{ product.id }}" 
+                                data-product-name="{{ product.product_name | e }}">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -381,6 +394,15 @@
             document.getElementById('deleteProductName').textContent = productName;
             showModal('deleteConfirmModal');
         }
+        
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+                const productName = this.getAttribute('data-product-name');
+                openDeleteModal(productId, productName);
+            });
+        });
 
         // EDIT MODAL
         function openEditModal(id, category, brand, productName, hexColor, price, description, pigment, shine, effect, imageUrl) {
@@ -406,6 +428,25 @@
             toggleEditProperties();
             showModal('editProductModal');
         }
+        
+        // Add event listeners to edit buttons
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const category = this.getAttribute('data-category');
+                const brand = this.getAttribute('data-brand');
+                const productName = this.getAttribute('data-product-name');
+                const hexColor = this.getAttribute('data-hex-color');
+                const price = this.getAttribute('data-price');
+                const description = this.getAttribute('data-description');
+                const pigment = parseInt(this.getAttribute('data-pigment'));
+                const shine = parseInt(this.getAttribute('data-shine'));
+                const effect = this.getAttribute('data-effect');
+                const imageUrl = this.getAttribute('data-image-url');
+                
+                openEditModal(id, category, brand, productName, hexColor, price, description, pigment, shine, effect, imageUrl);
+            });
+        });
 
         function toggleEditProperties() {
             const category = document.getElementById('edit-category-select').value;
