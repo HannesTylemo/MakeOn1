@@ -354,39 +354,35 @@
     </div>
 
     <script>
-        // Sample product data
+        // Product data - using actual product IDs from the database
         const products = [
             {
-                id: 'prod_1',
-                name: 'Gucci Rouge à Lèvres Mat',
-                brand: 'Gucci',
+                id: 'prod_ca490861',
+                name: 'homo',
+                brand: 'gucci',
                 price: 25.00,
-                image: '/static/uploads/56d624_642.390-2067730124.png',
-                url: 'https://www.gucci.com/us/en/pr/beauty/makeup-c-makeup/lipstick-c-makeup-lipstick/rouge-a-levres-mat-matte-lipstick-p-651520Z9B0N6433'
+                image: '/static/uploads/56d624_642.390-2067730124.png'
             },
             {
-                id: 'prod_2',
+                id: 'prod_demo2',
                 name: 'Lash Sensational',
                 brand: 'Maybelline',
                 price: 12.00,
-                image: '/static/uploads/mascara_demo.jpg',
-                url: 'https://www.maybelline.com/eye-makeup/mascara/lash-sensational-mascara'
+                image: '/static/uploads/mascara_demo.jpg'
             },
             {
-                id: 'prod_3',
+                id: 'prod_new_1',
                 name: 'Vice Lipstick - Hitch Hike',
                 brand: 'Urban Decay',
                 price: 19.00,
-                image: '/static/uploads/vice_lipstick.jpg',
-                url: 'https://www.urbandecay.com/vice-lipstick/437.html'
+                image: '/static/uploads/vice_lipstick.jpg'
             },
             {
-                id: 'prod_4',
+                id: 'prod_new_2',
                 name: 'Better Than Sex Mascara',
                 brand: 'Too Faced',
                 price: 28.00,
-                image: '/static/uploads/better_than_sex.jpg',
-                url: 'https://www.toofaced.com/product/23480/48486/eye-makeup/mascara/better-than-sex-mascara'
+                image: '/static/uploads/better_than_sex.jpg'
             }
         ];
 
@@ -404,8 +400,8 @@
                     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                         <button class="add-to-cart-btn" onclick="addToCart('${p.id}')">Add to Cart</button>
                     </div>
-                    <a href="${p.url}" target="_blank" style="display: block; text-align: center; padding: 8px; border: 2px solid #000; border-radius: 8px; text-decoration: none; color: #000; font-weight: bold; background: white; transition: all 0.2s ease;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">View Product</a>
-                    <a href="/?mode=editor&product=${p.id}" style="display: block; text-align: center; padding: 8px; margin-top: 10px; background: #4a7c2a; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; transition: all 0.2s ease;" onmouseover="this.style.background='#3d6b1f'" onmouseout="this.style.background='#4a7c2a'">Try On</a>
+                    <a href="/product/${p.id}" style="display: block; text-align: center; padding: 8px; border: 2px solid #000; border-radius: 8px; text-decoration: none; color: #000; font-weight: bold; background: white; transition: all 0.2s ease;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='white'">View Product</a>
+                    <a href="/?mode=editor&product=${p.id}" style="display: block; text-align: center; padding: 8px; margin-top: 10px; background: #000; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; transition: all 0.2s ease;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'">Try On</a>
                 </div>
             `).join('');
         }

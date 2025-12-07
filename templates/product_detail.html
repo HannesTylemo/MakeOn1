@@ -17,17 +17,17 @@
         }
         .product-image { max-width: 100%; max-height: 100%; object-fit: cover; }
 
-        /* New Try-On Button Style (Bottom Right, Smaller) */
         .btn-try-on-overlay {
             position: absolute; bottom: 15px; right: 15px;
-            background: white; color: black; border: 1px solid black;
+            background: black; color: white; border: 1px solid black;
             padding: 10px 15px; font-weight: 700; font-size: 12px;
             text-transform: uppercase; display: flex; align-items: center; gap: 8px;
             cursor: pointer; z-index: 10;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transform: scale(0.9); /* Reduced size */
+            border-radius: 5px;
+            transition: all 0.2s ease;
         }
-        .btn-try-on-overlay:hover { background: #f0f0f0; }
+        .btn-try-on-overlay:hover { background: #333; color: white; }
 
         .brand { text-transform: uppercase; letter-spacing: 1px; color: #666; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
         .title { font-size: 36px; font-weight: 700; margin-bottom: 15px; }
@@ -52,7 +52,7 @@
 
     <!-- Header with Functional Cart Icon -->
     <div style="padding: 20px 40px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; background:white; z-index:100;">
-        <a href="/" style="text-decoration:none; color:black; font-weight:900; font-size:24px; letter-spacing:2px;">BEAUTY STORE</a>
+        <a href="/mock" style="text-decoration:none; color:black; font-weight:900; font-size:24px; letter-spacing:2px;">BEAUTY STORE</a>
         <div style="font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="showCart()">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
@@ -69,10 +69,10 @@
                 <div class="product-image-container">
                     {% if product.image_url %}
                         <img src="{{ product.image_url }}" class="product-image">
-                        <!-- Moved Try-On Button Inside Image -->
-                        <button class="btn-try-on-overlay" onclick="Skintoner.open('{{ product.id }}')">
+                        <!-- Try-On Button Inside Image (Bottom Right) -->
+                        <a href="/?mode=editor&product={{ product.id }}" class="btn-try-on-overlay" style="text-decoration: none; color: black;">
                             📷 Virtual Try-On
-                        </button>
+                        </a>
                     {% else %}
                         <div class="text-muted">No Image Available</div>
                     {% endif %}
@@ -114,9 +114,6 @@
             <button class="btn-black mt-3" onclick="document.getElementById('cartModal').style.display='none'">Close</button>
         </div>
     </div>
-
-    <!-- Widget Script -->
-    <script src="http://127.0.0.1:5000/static/widget.js"></script>
 
     <!-- Cart Logic -->
     <script>
