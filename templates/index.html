@@ -301,15 +301,16 @@
 
         /* EDITOR MODE STYLES */
         .editor-mode-active .video-container {
-            width: 50% !important;
+            width: 60% !important;
             flex-grow: 0 !important;
+            border-right: 3px solid #000;
         }
 
         .editor-products-panel {
             position: absolute;
             top: 0;
-            right: 0;
-            width: 50%;
+            right: 90px;
+            width: calc(40% - 90px);
             height: 100%;
             background: white;
             z-index: 20;
@@ -321,6 +322,17 @@
 
         .editor-mode-active .editor-products-panel {
             display: flex;
+        }
+        
+        @media (max-width: 767px) {
+            .editor-mode-active .video-container {
+                width: 100% !important;
+                border-right: none;
+            }
+            .editor-products-panel {
+                right: 0;
+                width: 100%;
+            }
         }
 
         .editor-products-panel h2 {
@@ -538,6 +550,33 @@
         .explore-looks-btn:hover {
             background: #333;
         }
+        
+        /* Scroll back button in sidebar */
+        .scroll-back-btn {
+            background: transparent;
+            border: 2px solid #000;
+            color: #000;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .scroll-back-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .scroll-back-btn svg {
+            width: 24px;
+            height: 24px;
+        }
 
         /* Hide arrows in editor mode */
         .editor-mode-active .desktop-arrows-container {
@@ -669,11 +708,17 @@
 
         <div class="side-panel" id="sidePanel">
             <button class="close-panel" id="closePanel">&times;</button>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="margin:0;">The Recipe</h2>
-                <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:0; padding:8px 15px; font-size:12px; width:auto;">Purchase The Whole Look</button>
+            <div style="display:flex; flex-direction:column; margin-bottom:20px;">
+                <h2 style="margin:0 0 15px 0;">The Recipe</h2>
+                <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:0; padding:6px 10px; font-size:10px; width:100%;">Purchase The Whole Look</button>
             </div>
             <div id="productInfoContainer">Loading...</div>
+            <button class="scroll-back-btn" id="scrollBackBtn" style="display:none;" onclick="showScrollBackConfirm()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12l7-7 7 7"/>
+                </svg>
+                Back to Explore
+            </button>
         </div>
 
         <div class="bottom-toolbar" id="bottomToolbar">
@@ -707,23 +752,22 @@
 
         <!-- Editor Products Panel -->
         <div class="editor-products-panel" id="editorProductsPanel">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div style="margin-bottom:20px;">
                 <h2>Products Included</h2>
-                <button class="explore-looks-btn" onclick="showExploreLooksConfirm()">Explore New Looks</button>
             </div>
             <div class="editor-products-list" id="editorProductsList">
                 <p style="color:#666; text-align:center;">No products added yet</p>
             </div>
         </div>
 
-        <!-- Explore Looks Confirmation Modal -->
-        <div id="exploreLooksModal">
+        <!-- Scroll Back Confirmation Modal -->
+        <div id="scrollBackModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
             <div class="modal-box">
                 <h3 style="color: #d9534f;">Leave Editor?</h3>
                 <p>Are you sure? Your progress will not be saved.</p>
                 <div class="modal-actions">
-                    <button class="modal-btn no" onclick="closeExploreLooksModal()">No, Stay</button>
-                    <button class="modal-btn yes" onclick="confirmExploreLoooks()">Yes, Leave</button>
+                    <button class="modal-btn no" onclick="closeScrollBackModal()">No, Stay</button>
+                    <button class="modal-btn yes" onclick="confirmScrollBack()">Yes, Leave</button>
                 </div>
             </div>
         </div>
@@ -1219,26 +1263,28 @@
                 phoneContainer.classList.add('editor-mode-active');
                 document.getElementById('lipstickBtn').style.display = 'none';
                 addProductBtn.style.display = 'flex';
+                document.getElementById('scrollBackBtn').style.display = 'flex';
                 toggleSidePanel(false); // Close side panel
             } else {
                 phoneContainer.classList.remove('editor-mode-active');
                 document.getElementById('lipstickBtn').style.display = 'flex';
                 addProductBtn.style.display = 'none';
+                document.getElementById('scrollBackBtn').style.display = 'none';
                 editorProducts = [];
                 updateEditorProductsList();
             }
         }
 
-        function showExploreLooksConfirm() {
-            document.getElementById('exploreLooksModal').style.display = 'flex';
+        function showScrollBackConfirm() {
+            document.getElementById('scrollBackModal').style.display = 'flex';
         }
 
-        function closeExploreLooksModal() {
-            document.getElementById('exploreLooksModal').style.display = 'none';
+        function closeScrollBackModal() {
+            document.getElementById('scrollBackModal').style.display = 'none';
         }
 
-        function confirmExploreLoooks() {
-            closeExploreLooksModal();
+        function confirmScrollBack() {
+            closeScrollBackModal();
             toggleEditorMode(); // Exit editor mode
         }
 
