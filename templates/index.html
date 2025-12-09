@@ -317,9 +317,9 @@
         /* SIDE PANEL */
         .side-panel {
             position: absolute; top: 0; right: -100%; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.95); z-index: 40;
+            background: white; z-index: 40;
             transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 30px; padding-top: 80px; backdrop-filter: blur(5px);
+            padding: 30px; padding-top: 80px;
         }
         .side-panel.open { right: 0; }
         .close-panel { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 30px; cursor: pointer; }
@@ -332,7 +332,7 @@
                 background: white; border-left: 1px solid #f0f0f0; border-top: none;
                 flex-direction: column; justify-content: space-between; padding: 30px 0;
             }
-            .nav-buttons-container { flex-direction: column; height: auto; gap: 20px; justify-content: flex-end; }
+            .nav-buttons-container { flex-direction: column; height: auto; gap: 20px; justify-content: flex-end; align-items: center; }
             .toolbar-button { height: 60px; width: 100%; }
             .toolbar-button svg { width: 32px; height: 32px; }
             .side-panel {
@@ -343,6 +343,7 @@
             .close-panel { display: none; }
             .desktop-arrows-container { display: flex; justify-content: center; align-items: center; flex-grow: 1; }
             .new-photo-btn { display: flex !important; }
+            .new-photo-editor-btn { display: flex !important; }
         }
 
         .history-section { margin-top: 40px; text-align: left; }
@@ -372,12 +373,13 @@
 
         /* EDITOR MODE STYLES */
         .editor-mode-active .video-container {
-            width: 100% !important;
-            flex-grow: 1 !important;
+            width: calc(100% - 36.4% + var(--sidebar-width, 90px)) !important;
+            flex-grow: 0 !important;
             position: relative;
+            margin-left: auto;
         }
 
-        /* Keep image centered and contained in editor mode */
+        /* Keep image to the right in editor mode */
         .editor-mode-active .video-slide img {
             object-fit: contain;
             background: white;
@@ -386,7 +388,7 @@
         .editor-products-panel {
             position: absolute;
             top: 0;
-            right: -100%;
+            left: 0;
             width: calc(36.4% - var(--sidebar-width, 90px));
             height: 100%;
             background: white;
@@ -395,25 +397,26 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
-            border-left: 3px solid #000;
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 3px solid #000;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .editor-mode-active .editor-products-panel.open {
-            right: var(--sidebar-width, 90px);
+        .editor-mode-active .editor-products-panel {
+            left: 0;
         }
 
         @media (max-width: 767px) {
             .editor-mode-active .video-container {
                 width: 100% !important;
                 border-right: none;
+                margin-left: 0;
             }
             .editor-products-panel {
-                right: -100%;
+                left: -100%;
                 width: 100%;
             }
-            .editor-mode-active .editor-products-panel.open {
-                right: 0;
+            .editor-mode-active .editor-products-panel {
+                left: 0;
             }
         }
 
@@ -866,7 +869,7 @@
                 <h2 style="margin:0 0 15px 0;">The Recipe</h2>
             </div>
             <div id="productInfoContainer">Loading...</div>
-            <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:20px auto 0; padding:4px 8px; font-size:10px; width:50%;">Add All Items To Cart</button>
+            <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:20px auto 0; padding:4px 8px; font-size:10px; width:50%; display:block;">Add All Items To Cart</button>
             <button class="scroll-back-btn" id="scrollBackBtn" style="display:none;" onclick="showScrollBackConfirm()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 5v14M5 12l7-7 7 7"/>
@@ -1344,17 +1347,17 @@
                             <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', -1)">-</button>
                             <span>${p.quantity}</span>
                             <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', 1)">+</button>
+                            <button class="cart-quantity-btn" onclick="confirmDeleteItem('${p.id}')" title="Remove" style="margin-left:10px;">
+                                <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none" style="width:14px; height:14px;">
+                                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    <line x1="10" y1="11" x2="10" y2="17"/>
+                                    <line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px; margin-right: 50px;">
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
                         <div class="cart-item-price">$${(parseFloat(p.price) * p.quantity).toFixed(2)}</div>
-                        <button class="editor-trash-btn" onclick="confirmDeleteItem('${p.id}')" title="Remove">
-                            <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
-                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                <line x1="10" y1="11" x2="10" y2="17"/>
-                                <line x1="14" y1="11" x2="14" y2="17"/>
-                            </svg>
-                        </button>
                     </div>
                 </div>
             `).join('');
@@ -1466,10 +1469,9 @@
                 // Hide scroll mode buttons
                 document.getElementById('lipstickBtn').style.display = 'none';
                 document.getElementById('editorBtn').style.display = 'none';
-                // Show editor mode buttons (bottom to top: back, add, product, new photo)
+                // Show editor mode buttons (bottom to top: back, add, new photo) - lipstick removed
                 document.getElementById('scrollBackBtnToolbar').style.display = 'flex';
                 addProductBtn.style.display = 'flex';
-                document.getElementById('lipstickBtnEditor').style.display = 'flex';
                 document.getElementById('newPhotoEditorBtn').style.display = 'flex';
                 toggleSidePanel(false); // Close side panel
             } else {
@@ -1480,7 +1482,6 @@
                 // Hide editor mode buttons
                 document.getElementById('scrollBackBtnToolbar').style.display = 'none';
                 addProductBtn.style.display = 'none';
-                document.getElementById('lipstickBtnEditor').style.display = 'none';
                 document.getElementById('newPhotoEditorBtn').style.display = 'none';
                 document.getElementById('scrollBackBtn').style.display = 'none';
                 editorProducts = [];
@@ -1554,10 +1555,8 @@
                     btn.disabled = true;
                 }
 
-                // Close the product list modal after adding and open the editor panel
+                // Close the product list modal after adding (panel is always visible now)
                 closeProductList();
-                const panel = document.getElementById('editorProductsPanel');
-                panel.classList.add('open');
             }
         }
 
@@ -1684,6 +1683,24 @@
             }
             setTimeout(()=>slideElements.forEach(s=>s.classList.remove('animating')), 300);
         }
+
+        // Auto-retract sidebars when scrolling/dragging
+        let scrollTimeout;
+        videoContainer.addEventListener('touchmove', () => {
+            if (sidePanel.classList.contains('open')) {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    toggleSidePanel(false);
+                }, 300);
+            }
+            const editorPanel = document.getElementById('editorProductsPanel');
+            if (editorPanel && editorPanel.classList.contains('open')) {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    editorPanel.classList.remove('open');
+                }, 300);
+            }
+        });
     </script>
 </body>
 </html>
