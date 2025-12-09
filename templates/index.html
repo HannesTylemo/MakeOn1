@@ -1438,12 +1438,6 @@
             toggleEditorMode();
         };
 
-        // Lipstick button in editor mode - toggles the editor products panel
-        document.getElementById('lipstickBtnEditor').onclick = (e) => {
-            e.stopPropagation();
-            toggleEditorProductsPanel();
-        };
-
         if (addProductBtn) {
             addProductBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -1500,11 +1494,6 @@
         function confirmScrollBack() {
             closeScrollBackModal();
             toggleEditorMode(); // Exit editor mode
-        }
-
-        function toggleEditorProductsPanel() {
-            const panel = document.getElementById('editorProductsPanel');
-            panel.classList.toggle('open');
         }
 
         function showProductList() {
@@ -1684,22 +1673,25 @@
             setTimeout(()=>slideElements.forEach(s=>s.classList.remove('animating')), 300);
         }
 
-        // Auto-retract sidebars when scrolling/dragging
+        // Auto-retract scroll panel when scrolling/dragging (not during active drag)
         let scrollTimeout;
+        let lastDragTime = 0;
+        
         videoContainer.addEventListener('touchmove', () => {
-            if (sidePanel.classList.contains('open')) {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    toggleSidePanel(false);
-                }, 300);
+            // Only auto-close if not currently dragging and some time has passed
+            if (!isDragging && Date.now() - lastDragTime > 500) {
+                if (sidePanel.classList.contains('open')) {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        toggleSidePanel(false);
+                    }, 300);
+                }
             }
-            const editorPanel = document.getElementById('editorProductsPanel');
-            if (editorPanel && editorPanel.classList.contains('open')) {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    editorPanel.classList.remove('open');
-                }, 300);
-            }
+        });
+        
+        // Track when dragging ends to prevent immediate closure
+        videoContainer.addEventListener('touchend', () => {
+            lastDragTime = Date.now();
         });
     </script>
 </body>
