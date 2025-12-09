@@ -9,7 +9,7 @@
 
         :root {
             --sidebar-width: 90px;
-            --editor-panel-width: 300px;
+            --editor-panel-width: 250px; /* Reduced from 300px to make it narrower */
             --popup-width: 90%;
             --popup-max-width: 1200px;
             --popup-height: 90%;
@@ -388,12 +388,12 @@
             flex-grow: 1 !important; /* Allow to grow to fill available space */
             position: relative;
             margin-left: 0;
-            margin-right: auto; /* Push to left side */
+            margin-right: 0; /* No right margin */
         }
 
-        /* Keep image visible and contained in editor mode */
+        /* Keep image visible, fill container, and positioned at left in editor mode */
         .editor-mode-active .video-slide img {
-            object-fit: contain;
+            object-fit: cover; /* Changed from contain to cover to fill space */
             background: white;
             margin-left: 0;
         }
@@ -470,10 +470,19 @@
 
         .editor-product-item {
             display: flex;
-            gap: 15px;
+            flex-direction: column;
             margin-bottom: 20px;
             padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 2px solid #000; /* Changed to black 2px line for emphasis */
+        }
+
+        .editor-product-category-header {
+            font-weight: bold;
+            font-size: 13px;
+            color: #000;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
         }
 
         .editor-product-image-container {
@@ -511,13 +520,6 @@
         .editor-product-name {
             font-weight: bold;
             font-size: 14px;
-            margin-bottom: 3px;
-        }
-
-        .editor-product-type {
-            color: #666;
-            font-size: 12px;
-            text-transform: uppercase;
         }
 
         .editor-add-btn {
@@ -1580,23 +1582,48 @@
         }
 
         function addProductToEditor(productId) {
+            const newProduct = products.find(p => p.id === productId);
+            if (!newProduct) return;
+            
+            // Check if there's already a product with the same category
+            const existingProductIndex = editorProducts.findIndex(pid => {
+                const existingProduct = products.find(p => p.id === pid);
+                return existingProduct && existingProduct.category === newProduct.category;
+            });
+            
+            // If a product with the same category exists, remove it
+            if (existingProductIndex !== -1) {
+                const oldProductId = editorProducts[existingProductIndex];
+                editorProducts.splice(existingProductIndex, 1);
+                
+                // Update the old product's button in the product list
+                const oldBtn = document.getElementById(`addBtn_${oldProductId}`);
+                if (oldBtn) {
+                    oldBtn.textContent = '+';
+                    oldBtn.classList.remove('added');
+                    oldBtn.disabled = false;
+                }
+            }
+            
+            // Add the new product
             if (!editorProducts.includes(productId)) {
                 editorProducts.push(productId);
-                updateEditorProductsList();
-
-                // Update button in product list
-                const btn = document.getElementById(`addBtn_${productId}`);
-                if (btn) {
-                    btn.textContent = '✓';
-                    btn.classList.add('added');
-                    btn.disabled = true;
-                }
-
-                // Close the product list modal after adding and open the editor panel
-                closeProductList();
-                const panel = document.getElementById('editorProductsPanel');
-                panel.classList.add('open');
             }
+            
+            updateEditorProductsList();
+
+            // Update button in product list
+            const btn = document.getElementById(`addBtn_${productId}`);
+            if (btn) {
+                btn.textContent = '✓';
+                btn.classList.add('added');
+                btn.disabled = true;
+            }
+
+            // Close the product list modal after adding and open the editor panel
+            closeProductList();
+            const panel = document.getElementById('editorProductsPanel');
+            panel.classList.add('open');
         }
 
         function removeProductFromEditor(productId) {
@@ -1620,31 +1647,48 @@
                 return;
             }
 
-            listContainer.innerHTML = editorProducts.map(pid => {
+            // Group products by category
+            const productsByCategory = {};
+            editorProducts.forEach(pid => {
                 const product = products.find(p => p.id === pid);
-                if (!product) return '';
+                if (product) {
+                    if (!productsByCategory[product.category]) {
+                        productsByCategory[product.category] = [];
+                    }
+                    productsByCategory[product.category].push(product);
+                }
+            });
 
-                return `
-                    <div class="editor-product-item">
-                        <div class="editor-product-image-container">
-                            <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
-                            <div class="editor-product-info">
-                                <div class="editor-product-details">
-                                    <div class="editor-product-name">${product.product_name}</div>
-                                    <div class="editor-product-type">${product.category}</div>
+            // Generate HTML with category headers
+            let html = '';
+            Object.keys(productsByCategory).forEach(category => {
+                const categoryProducts = productsByCategory[category];
+                
+                categoryProducts.forEach(product => {
+                    html += `
+                        <div class="editor-product-item">
+                            <div class="editor-product-category-header">${category}</div>
+                            <div class="editor-product-image-container">
+                                <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
+                                <div class="editor-product-info">
+                                    <div class="editor-product-details">
+                                        <div class="editor-product-name">${product.product_name}</div>
+                                    </div>
+                                    <button class="editor-trash-btn" onclick="removeProductFromEditor('${product.id}')" title="Remove">
+                                        <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
+                                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                            <line x1="10" y1="11" x2="10" y2="17"/>
+                                            <line x1="14" y1="11" x2="14" y2="17"/>
+                                        </svg>
+                                    </button>
                                 </div>
-                                <button class="editor-trash-btn" onclick="removeProductFromEditor('${product.id}')" title="Remove">
-                                    <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
-                                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                        <line x1="10" y1="11" x2="10" y2="17"/>
-                                        <line x1="14" y1="11" x2="14" y2="17"/>
-                                    </svg>
-                                </button>
                             </div>
                         </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                });
+            });
+
+            listContainer.innerHTML = html;
         }
 
         function expandImage(imageSrc) {
