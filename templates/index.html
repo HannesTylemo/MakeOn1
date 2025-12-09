@@ -9,7 +9,7 @@
 
         :root {
             --sidebar-width: 90px;
-            --editor-panel-width: 288px; /* Increased by 15% from 250px (287.5px rounded) */
+            --editor-panel-width: 288px; /* Increased by 15% from 250px (250 * 1.15 = 287.5, rounded to 288) */
             --popup-width: 90%;
             --popup-max-width: 1200px;
             --popup-height: 90%;
@@ -1345,10 +1345,11 @@
                 const existing = shoppingCart.find(item => item.id === product.id);
                 if (existing) {
                     existing.quantity++;
+                    allProducts.push(Object.assign({}, product, {quantity: existing.quantity}));
                 } else {
                     shoppingCart.push(Object.assign({}, product, {quantity: 1}));
+                    allProducts.push(Object.assign({}, product, {quantity: 1}));
                 }
-                allProducts.push(Object.assign({}, product, {quantity: existing ? existing.quantity : 1}));
             });
             
             showCartAdded(allProducts);
