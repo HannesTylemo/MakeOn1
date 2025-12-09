@@ -41,7 +41,7 @@
         // Construct URL with product ID if provided
         let finalUrl = IFRAME_URL;
         if (productId) {
-            finalUrl += `?product_id=${productId}`;
+            finalUrl += `?mode=editor&product=${productId}`;
         }
 
         iframe.src = finalUrl;

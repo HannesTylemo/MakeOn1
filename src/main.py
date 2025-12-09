@@ -181,7 +181,7 @@ def product_detail(product_id):
 
 @app.route('/mock')
 def mock_site():
-    return render_template('shopify_mockup.html')
+    return send_from_directory(CURRENT_DIR, 'shopify_mock.html')
 
 @app.route('/widget.js')
 def wjs(): return send_from_directory(STATIC_FOLDER, 'widget.js')
