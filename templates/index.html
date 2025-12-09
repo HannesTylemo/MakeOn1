@@ -7,15 +7,38 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        :root {
+            --sidebar-width: 90px;
+            --popup-width: 90%;
+            --popup-max-width: 1200px;
+            --popup-height: 90%;
+            --popup-max-height: 900px;
+            --popup-bg: #fff;
+        }
+
         body, html {
-            width: 100%; height: 100%; background: white;
+            width: 100%; height: 100%;
+            /* Semi-transparent backdrop for popup modal effect */
+            background: rgba(0, 0, 0, 0.5);
             overflow: hidden; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
 
         .phone-container {
-            width: 100%; height: 100%;
-            background: #fff; position: relative; touch-action: none;
-            display: flex; flex-direction: column; overflow: hidden;
+            width: var(--popup-width);
+            max-width: var(--popup-max-width);
+            height: var(--popup-height);
+            max-height: var(--popup-max-height);
+            background: var(--popup-bg);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            touch-action: none;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
         /* FIX 1: Increased z-index to 600 to be above EVERYTHING (Webcam is 300, Overlay is 200) */
@@ -109,8 +132,32 @@
         }
 
         .cart-modal-box {
-            background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 80vh; overflow-y: auto;
+            background: white;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .cart-modal-header {
+            padding: 30px 30px 20px 30px;
+            flex-shrink: 0;
+        }
+
+        .cart-modal-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 30px;
+        }
+
+        .cart-modal-footer {
+            padding: 20px 30px 30px 30px;
+            flex-shrink: 0;
         }
 
         .cart-item {
@@ -257,7 +304,7 @@
             .video-slide img { object-fit: contain; background: white; }
             .bottom-toolbar {
                 position: absolute; top: 0; right: 0; bottom: 0; left: auto;
-                width: 90px; height: 100%;
+                width: var(--sidebar-width); height: 100%;
                 background: white; border-left: 1px solid #f0f0f0; border-top: none;
                 flex-direction: column; justify-content: space-between; padding: 30px 0;
             }
@@ -268,7 +315,7 @@
                 width: 300px; right: -300px; top: 0; height: 100%; z-index: 45;
                 border-left: 1px solid #eee; padding-top: 30px;
             }
-            .side-panel.open { right: 90px; }
+            .side-panel.open { right: var(--sidebar-width); }
             .close-panel { display: none; }
             .desktop-arrows-container { display: flex; justify-content: center; align-items: center; flex-grow: 1; }
             .new-photo-btn { display: flex !important; }
@@ -301,15 +348,22 @@
 
         /* EDITOR MODE STYLES */
         .editor-mode-active .video-container {
-            width: 50% !important;
-            flex-grow: 0 !important;
+            width: 100% !important;
+            flex-grow: 1 !important;
+            position: relative;
+        }
+
+        /* Keep image centered and contained in editor mode */
+        .editor-mode-active .video-slide img {
+            object-fit: contain;
+            background: white;
         }
 
         .editor-products-panel {
             position: absolute;
             top: 0;
-            right: 0;
-            width: 50%;
+            right: var(--sidebar-width, 90px);
+            width: calc(28% - var(--sidebar-width, 90px));
             height: 100%;
             background: white;
             z-index: 20;
@@ -317,10 +371,22 @@
             padding: 20px;
             display: none;
             flex-direction: column;
+            border-left: 3px solid #000;
         }
 
         .editor-mode-active .editor-products-panel {
             display: flex;
+        }
+
+        @media (max-width: 767px) {
+            .editor-mode-active .video-container {
+                width: 100% !important;
+                border-right: none;
+            }
+            .editor-products-panel {
+                right: 0;
+                width: 100%;
+            }
         }
 
         .editor-products-panel h2 {
@@ -332,6 +398,26 @@
         .editor-products-list {
             flex: 1;
             overflow-y: auto;
+        }
+
+        .editor-purchase-btn {
+            width: 17.5%;
+            min-width: 100px; /* Ensure minimum tappable width */
+            margin: 20px auto 0;
+            padding: 6px 8px; /* 30% smaller */
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 10px;
+            text-align: center;
+            min-height: 28px; /* Ensure minimum tappable height */
+        }
+
+        .editor-purchase-btn:hover {
+            background: #333;
         }
 
         .editor-product-item {
@@ -387,23 +473,30 @@
         }
 
         .editor-add-btn {
-            background: #4a7c2a;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            background: transparent;
+            color: #000;
+            border: 2px solid #000;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 12px;
-            white-space: nowrap;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
         }
 
         .editor-add-btn:hover {
-            background: #3d6b1f;
+            background: #f0f0f0;
         }
 
         .editor-add-btn.added {
             background: #999;
+            border-color: #999;
+            color: white;
             cursor: default;
         }
 
@@ -479,7 +572,7 @@
         }
 
         .product-list-img:hover {
-            border-color: #4a7c2a;
+            border-color: #000;
         }
 
         .product-list-info {
@@ -539,6 +632,52 @@
             background: #333;
         }
 
+        /* Scroll back button in sidebar */
+        .scroll-back-btn {
+            background: transparent;
+            border: 2px solid #000;
+            color: #000;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .scroll-back-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .scroll-back-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Modal overlay base style */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 500;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+        }
+
         /* Hide arrows in editor mode */
         .editor-mode-active .desktop-arrows-container {
             display: none !important;
@@ -576,11 +715,17 @@
         <!-- Product Added to Cart Modal -->
         <div id="cartAddedModal">
             <div class="cart-modal-box">
-                <h3 style="margin-bottom: 20px; font-size: 20px;">Added to Cart</h3>
-                <div id="cartAddedContent"></div>
-                <div class="modal-actions" style="margin-top: 20px;">
-                    <button class="modal-btn no" onclick="closeCartAdded()">Continue Exploring</button>
-                    <button class="modal-btn yes" onclick="viewCart()">View Shopping Cart</button>
+                <div class="cart-modal-header">
+                    <h3 style="margin: 0; font-size: 20px;">Added to Cart</h3>
+                </div>
+                <div class="cart-modal-content">
+                    <div id="cartAddedContent"></div>
+                </div>
+                <div class="cart-modal-footer">
+                    <div class="modal-actions">
+                        <button class="modal-btn no" onclick="closeCartAdded()">Continue Exploring</button>
+                        <button class="modal-btn yes" onclick="viewCart()">View Shopping Cart</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -588,12 +733,18 @@
         <!-- Shopping Cart View Modal -->
         <div id="cartViewModal">
             <div class="cart-modal-box">
-                <h3 style="margin-bottom: 20px; font-size: 20px;">Shopping Cart</h3>
-                <div id="cartViewContent"></div>
-                <div class="cart-total" id="cartTotalDisplay"></div>
-                <div class="modal-actions" style="margin-top: 20px;">
-                    <button class="modal-btn no" onclick="closeCartView()">Continue Exploring</button>
-                    <button class="modal-btn yes" onclick="proceedToCheckout()">Proceed to Checkout</button>
+                <div class="cart-modal-header">
+                    <h3 style="margin: 0; font-size: 20px;">Shopping Cart</h3>
+                </div>
+                <div class="cart-modal-content">
+                    <div id="cartViewContent"></div>
+                </div>
+                <div class="cart-modal-footer">
+                    <div class="cart-total" id="cartTotalDisplay"></div>
+                    <div class="modal-actions" style="margin-top: 20px;">
+                        <button class="modal-btn no" onclick="closeCartView()">Continue Exploring</button>
+                        <button class="modal-btn yes" onclick="proceedToCheckout()">Proceed to Checkout</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -606,18 +757,6 @@
                 <div class="modal-actions">
                     <button class="modal-btn no" onclick="closeCheckoutConfirm()">Cancel</button>
                     <button class="modal-btn yes" onclick="confirmCheckout()">Yes, Continue</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Product Page Confirmation Modal -->
-        <div id="productPageConfirmModal">
-            <div class="modal-box">
-                <h3 style="color: #000;">Visit Product Page?</h3>
-                <p>You will be redirected to the product's website.</p>
-                <div class="modal-actions">
-                    <button class="modal-btn no" onclick="closeProductPageConfirm()">Cancel</button>
-                    <button class="modal-btn yes" onclick="confirmProductPage()">Yes, Continue</button>
                 </div>
             </div>
         </div>
@@ -669,11 +808,17 @@
 
         <div class="side-panel" id="sidePanel">
             <button class="close-panel" id="closePanel">&times;</button>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="margin:0;">The Recipe</h2>
-                <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:0; padding:8px 15px; font-size:12px; width:auto;">Purchase The Whole Look</button>
+            <div style="display:flex; flex-direction:column; margin-bottom:20px;">
+                <h2 style="margin:0 0 15px 0;">The Recipe</h2>
+                <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:0; padding:6px 10px; font-size:10px; width:100%;">Purchase The Whole Look</button>
             </div>
             <div id="productInfoContainer">Loading...</div>
+            <button class="scroll-back-btn" id="scrollBackBtn" style="display:none;" onclick="showScrollBackConfirm()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12l7-7 7 7"/>
+                </svg>
+                Back to Explore
+            </button>
         </div>
 
         <div class="bottom-toolbar" id="bottomToolbar">
@@ -698,32 +843,44 @@
                         <path d="M17 10 L17 4 L21 2 L21 10 Z" fill="#000" />
                      </svg>
                 </button>
-                <button class="toolbar-button" id="editorBtn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                <button class="toolbar-button" id="editorBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                </button>
                 <button class="toolbar-button" id="addProductBtn" style="display:none;">
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
+                </button>
+                <button class="toolbar-button" id="newPhotoEditorBtn" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
                 </button>
             </div>
         </div>
 
         <!-- Editor Products Panel -->
         <div class="editor-products-panel" id="editorProductsPanel">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2>Products Included</h2>
-                <button class="explore-looks-btn" onclick="showExploreLooksConfirm()">Explore New Looks</button>
+            <div style="margin-bottom:20px;">
+                <h2 style="font-size: 20px; font-weight: bold;">The Look</h2>
             </div>
             <div class="editor-products-list" id="editorProductsList">
                 <p style="color:#666; text-align:center;">No products added yet</p>
             </div>
+            <button onclick="purchaseWholeLook()" class="editor-purchase-btn">Purchase The Whole Look</button>
         </div>
 
-        <!-- Explore Looks Confirmation Modal -->
-        <div id="exploreLooksModal">
+        <!-- Scroll Back Confirmation Modal -->
+        <div id="scrollBackModal" class="modal-overlay">
             <div class="modal-box">
                 <h3 style="color: #d9534f;">Leave Editor?</h3>
                 <p>Are you sure? Your progress will not be saved.</p>
                 <div class="modal-actions">
-                    <button class="modal-btn no" onclick="closeExploreLooksModal()">No, Stay</button>
-                    <button class="modal-btn yes" onclick="confirmExploreLoooks()">Yes, Leave</button>
+                    <button class="modal-btn no" onclick="closeScrollBackModal()">No, Stay</button>
+                    <button class="modal-btn yes" onclick="confirmScrollBack()">Yes, Leave</button>
                 </div>
             </div>
         </div>
@@ -779,6 +936,7 @@
         let imageCache = {};
         let editorMode = false; // Track if in editor mode (UI state)
         let editorProducts = []; // Track products added in editor
+        let previousMode = 'scroll'; // Track previous mode: 'scroll' or 'editor'
 
         window.addEventListener('load', () => { loadHistory(); fetchProducts(); });
         window.addEventListener('message', (e) => { if (e.data === 'request-close-confirmation') toggleExitModal(true); });
@@ -840,7 +998,7 @@
                     <p style="color:#666;">${p.shade_name}</p>
                     <p style="margin-top:5px; font-size:12px; color:#999;">${p.brand}</p>
                     <div style="display:flex; gap:10px; margin-top:15px;">
-                        <button onclick="showProductPageConfirm('${p.url}')" style="flex:0 0 70%; display:block; text-align:center; background:#000; color:white; padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">View Product</button>
+                        <button onclick="window.open('${p.url}', '_blank')" style="flex:0 0 70%; display:block; text-align:center; background:#000; color:white; padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">View Product</button>
                         <button onclick="addToCart('${p.id}')" class="cart-btn">
                             <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#000" stroke-width="2">
                                 <circle cx="9" cy="21" r="1"></circle>
@@ -850,7 +1008,6 @@
                         </button>
                     </div>
                 </div>`;
-        }
         }
 
         function goToNext() {
@@ -960,21 +1117,23 @@
                     if(save) saveToHistory(b64);
                     overlay.classList.add('hidden');
 
-                    // Check if we should enter editor mode based on URL parameter
+                    // Initialize slides first
+                    initSlides();
+                    preloadAround(currentIndex);
+
+                    // Check if we should enter editor mode based on URL parameter OR previous mode
                     if(shouldEnterEditorMode && productParam) {
-                        // Enter editor mode and add the specified product
-                        // First load products normally
-                        initSlides();
-                        preloadAround(currentIndex);
-                        // Then activate editor mode
+                        // Immediately activate editor mode without showing scroll window first
+                        toggleEditorMode();
+                        // Wait a brief moment for the mode to activate, then add product
                         setTimeout(() => {
-                            toggleEditorMode();
-                            // TODO: Apply the specific product from productParam
+                            addProductToEditor(productParam);
+                        }, 100);
+                    } else if(previousMode === 'editor') {
+                        // Restore editor mode if user was previously in it
+                        setTimeout(() => {
+                            if(!editorMode) toggleEditorMode();
                         }, 500);
-                    } else {
-                        // Normal mode - show scrolling page
-                        initSlides();
-                        preloadAround(currentIndex);
                     }
                 } else {
                     if(d.error === 'no_face_detected') {
@@ -1017,7 +1176,17 @@
         }
 
         function toggleExitModal(show) { exitModal.style.display = show ? 'flex' : 'none'; }
-        function confirmExit() { window.parent.postMessage('close-skintoner-widget', '*'); toggleExitModal(false); }
+        function confirmExit() {
+            // Try to close widget first (if in iframe)
+            window.parent.postMessage('close-skintoner-widget', '*');
+            toggleExitModal(false);
+            // If standalone (not in iframe), navigate back after a delay
+            setTimeout(() => {
+                if (window.self === window.top) {
+                    window.location.href = '/mock';
+                }
+            }, 100);
+        }
 
         // Face error modal functions
         function showFaceError() {
@@ -1033,7 +1202,6 @@
 
         // Shopping cart storage
         let shoppingCart = [];
-        let pendingProductUrl = '';
         let checkoutUrl = '/checkout'; // Placeholder checkout URL
 
         // Shopping cart functions
@@ -1153,22 +1321,7 @@
             window.location.href = checkoutUrl;
         }
 
-        function showProductPageConfirm(url) {
-            pendingProductUrl = url;
-            document.getElementById('productPageConfirmModal').style.display = 'flex';
-        }
-
-        function closeProductPageConfirm() {
-            document.getElementById('productPageConfirmModal').style.display = 'none';
-            pendingProductUrl = '';
-        }
-
-        function confirmProductPage() {
-            if (pendingProductUrl) {
-                window.open(pendingProductUrl, '_blank');
-            }
-            closeProductPageConfirm();
-        }
+        // (Product page modal functions removed - now directly opens URLs)
 
         // Delete item functions
         let pendingDeleteItemId = '';
@@ -1200,9 +1353,7 @@
         document.getElementById('panelOverlay').onclick = e => { e.stopPropagation(); toggleSidePanel(false); };
         document.getElementById('bottomToolbar').addEventListener('click', e => e.stopPropagation());
 
-        // Editor Mode Variables
-        let editorMode = false;
-        let editorProducts = [];
+        // Editor Mode Variables (already declared above, just get references)
         const phoneContainer = document.getElementById('phone');
         const addProductBtn = document.getElementById('addProductBtn');
 
@@ -1219,32 +1370,47 @@
             };
         }
 
+        // New photo button for editor mode
+        const newPhotoEditorBtn = document.getElementById('newPhotoEditorBtn');
+        if (newPhotoEditorBtn) {
+            newPhotoEditorBtn.onclick = (e) => {
+                e.stopPropagation();
+                // Save current mode before showing upload overlay
+                previousMode = editorMode ? 'editor' : 'scroll';
+                overlay.classList.remove('hidden');
+            };
+        }
+
         function toggleEditorMode() {
             editorMode = !editorMode;
             if (editorMode) {
                 phoneContainer.classList.add('editor-mode-active');
                 document.getElementById('lipstickBtn').style.display = 'none';
                 addProductBtn.style.display = 'flex';
+                document.getElementById('newPhotoEditorBtn').style.display = 'flex';
+                document.getElementById('scrollBackBtn').style.display = 'flex';
                 toggleSidePanel(false); // Close side panel
             } else {
                 phoneContainer.classList.remove('editor-mode-active');
                 document.getElementById('lipstickBtn').style.display = 'flex';
                 addProductBtn.style.display = 'none';
+                document.getElementById('newPhotoEditorBtn').style.display = 'none';
+                document.getElementById('scrollBackBtn').style.display = 'none';
                 editorProducts = [];
                 updateEditorProductsList();
             }
         }
 
-        function showExploreLooksConfirm() {
-            document.getElementById('exploreLooksModal').style.display = 'flex';
+        function showScrollBackConfirm() {
+            document.getElementById('scrollBackModal').classList.add('visible');
         }
 
-        function closeExploreLooksModal() {
-            document.getElementById('exploreLooksModal').style.display = 'none';
+        function closeScrollBackModal() {
+            document.getElementById('scrollBackModal').classList.remove('visible');
         }
 
-        function confirmExploreLoooks() {
-            closeExploreLooksModal();
+        function confirmScrollBack() {
+            closeScrollBackModal();
             toggleEditorMode(); // Exit editor mode
         }
 
@@ -1261,7 +1427,7 @@
                             <div class="product-list-name">${p.product_name}</div>
                             <div class="product-list-type">${p.category}</div>
                         </div>
-                        <button class="editor-add-btn" onclick="addProductToEditor('${p.id}')" id="addBtn_${p.id}">Add +</button>
+                        <button class="editor-add-btn" onclick="addProductToEditor('${p.id}')" id="addBtn_${p.id}">+</button>
                     </div>
                 </div>
             `).join('');
@@ -1270,7 +1436,7 @@
             editorProducts.forEach(pid => {
                 const btn = document.getElementById(`addBtn_${pid}`);
                 if (btn) {
-                    btn.textContent = 'Added';
+                    btn.textContent = '✓';
                     btn.classList.add('added');
                     btn.disabled = true;
                 }
@@ -1291,10 +1457,13 @@
                 // Update button in product list
                 const btn = document.getElementById(`addBtn_${productId}`);
                 if (btn) {
-                    btn.textContent = 'Added';
+                    btn.textContent = '✓';
                     btn.classList.add('added');
                     btn.disabled = true;
                 }
+
+                // Close the product list modal after adding
+                closeProductList();
             }
         }
 
@@ -1305,7 +1474,7 @@
             // Update button in product list if modal is open
             const btn = document.getElementById(`addBtn_${productId}`);
             if (btn) {
-                btn.textContent = 'Add +';
+                btn.textContent = '+';
                 btn.classList.remove('added');
                 btn.disabled = false;
             }
@@ -1326,17 +1495,12 @@
                 return `
                     <div class="editor-product-item">
                         <div class="editor-product-image-container">
-                            <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
+                            <img src="/frame?id=${product.id}&preview=true" class="editor-product-img" onclick="expandImage('/frame?id=${product.id}&preview=true')" onerror="this.style.display='none'">
                             <div class="editor-product-info">
                                 <div class="editor-product-details">
                                     <div class="editor-product-name">${product.product_name}</div>
                                     <div class="editor-product-type">${product.category}</div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="editor-product-image-container">
-                            <img src="/frame?id=${product.id}&preview=true" class="editor-product-img" onclick="expandImage('/frame?id=${product.id}&preview=true')" onerror="this.style.display='none'">
-                            <div class="editor-product-info">
                                 <button class="modal-btn delete-item" onclick="removeProductFromEditor('${product.id}')" style="margin:0; padding:6px 12px; font-size:11px;">Remove</button>
                             </div>
                         </div>
@@ -1359,6 +1523,8 @@
 
         document.getElementById('newPhotoBtn').onclick = (e) => {
             e.stopPropagation();
+            // Save current mode before showing upload overlay
+            previousMode = editorMode ? 'editor' : 'scroll';
             overlay.classList.remove('hidden');
         };
 

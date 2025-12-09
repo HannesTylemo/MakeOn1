@@ -7,6 +7,7 @@
     <style>
         /* Professional Admin Panel Design - Beige & Dark Green Theme */
         :root {
+            --sidebar-width: 90px;
             --primary-green: #2d5016;
             --secondary-green: #3d6b1f;
             --accent-green: #4a7c2a;
@@ -137,8 +138,10 @@
         /* Simple Modal Styles (Bootstrap fallback) */
         .modal { display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; outline: 0; }
         .modal.show { display: block !important; }
-        .modal-dialog { position: relative; width: auto; margin: 1.75rem auto; max-width: 500px; }
+        .modal-open { overflow: hidden; }
+        .modal-dialog { position: relative; width: auto; margin: 1.75rem auto; max-width: 500px; pointer-events: all; }
         .modal-dialog-centered { display: flex; align-items: center; min-height: calc(100% - 3.5rem); }
+        .modal { overflow-y: auto; }
         .modal-content {
             position: relative;
             display: flex;
@@ -158,8 +161,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 1.5rem;
-            background: var(--primary-green);
-            color: white;
+            background: var(--beige);
+            color: var(--text-dark);
             border-bottom: none;
             border-top-left-radius: var(--modal-inner-radius);
             border-top-right-radius: var(--modal-inner-radius);
@@ -197,8 +200,8 @@
             width: 1em;
             height: 1em;
             padding: 0.25em;
-            color: white;
-            background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+            color: var(--text-dark);
+            background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%232d2d2d'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
             border: 0;
             border-radius: 0.25rem;
             opacity: 0.8;
@@ -711,6 +714,7 @@
             backdrop.id = modalId + '-backdrop';
             backdrop.onclick = function() { hideModal(modalId); };
             document.body.appendChild(backdrop);
+            document.body.classList.add('modal-open');
             modal.classList.add('show');
             modal.style.display = 'block';
         }
@@ -719,6 +723,7 @@
             const modal = document.getElementById(modalId);
             const backdrop = document.getElementById(modalId + '-backdrop');
             if (backdrop) backdrop.remove();
+            document.body.classList.remove('modal-open');
             modal.classList.remove('show');
             modal.style.display = 'none';
         }
