@@ -215,7 +215,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .modal-box h3 {
-            color: #d9534f;
+            color: #000;
             margin-bottom: 15px;
             font-size: 20px;
         }
@@ -290,12 +290,36 @@
         .new-photo-btn:hover { background: #f0f0f0; }
         @media (max-width: 767px) { .new-photo-btn { display: none !important; } }
 
+        /* New photo button for editor mode (same style as scroll mode) */
+        .new-photo-editor-btn {
+            background: white;
+            border: 2px solid black;
+            color: black;
+            font-family: 'Helvetica Neue', sans-serif;
+            font-weight: bold;
+            font-size: 10px;
+            padding: 0;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            line-height: 1.1;
+        }
+        .new-photo-editor-btn:hover { background: #f0f0f0; }
+        @media (max-width: 767px) { .new-photo-editor-btn { width: 44px; height: 44px; font-size: 8px; } }
+
         /* SIDE PANEL */
         .side-panel {
             position: absolute; top: 0; right: -100%; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.95); z-index: 40;
+            background: white; z-index: 40;
             transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 30px; padding-top: 80px; backdrop-filter: blur(5px);
+            padding: 30px; padding-top: 80px;
         }
         .side-panel.open { right: 0; }
         .close-panel { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 30px; cursor: pointer; }
@@ -308,7 +332,7 @@
                 background: white; border-left: 1px solid #f0f0f0; border-top: none;
                 flex-direction: column; justify-content: space-between; padding: 30px 0;
             }
-            .nav-buttons-container { flex-direction: column; height: auto; gap: 20px; justify-content: flex-end; }
+            .nav-buttons-container { flex-direction: column; height: auto; gap: 20px; justify-content: flex-end; align-items: center; }
             .toolbar-button { height: 60px; width: 100%; }
             .toolbar-button svg { width: 32px; height: 32px; }
             .side-panel {
@@ -319,6 +343,7 @@
             .close-panel { display: none; }
             .desktop-arrows-container { display: flex; justify-content: center; align-items: center; flex-grow: 1; }
             .new-photo-btn { display: flex !important; }
+            .new-photo-editor-btn { display: flex !important; }
         }
 
         .history-section { margin-top: 40px; text-align: left; }
@@ -348,12 +373,13 @@
 
         /* EDITOR MODE STYLES */
         .editor-mode-active .video-container {
-            width: 100% !important;
-            flex-grow: 1 !important;
+            width: calc(100% - 36.4% + var(--sidebar-width, 90px)) !important;
+            flex-grow: 0 !important;
             position: relative;
+            margin-left: auto;
         }
 
-        /* Keep image centered and contained in editor mode */
+        /* Keep image to the right in editor mode */
         .editor-mode-active .video-slide img {
             object-fit: contain;
             background: white;
@@ -362,30 +388,35 @@
         .editor-products-panel {
             position: absolute;
             top: 0;
-            right: var(--sidebar-width, 90px);
-            width: calc(28% - var(--sidebar-width, 90px));
+            left: 0;
+            width: calc(36.4% - var(--sidebar-width, 90px));
             height: 100%;
             background: white;
             z-index: 20;
             overflow-y: auto;
             padding: 20px;
-            display: none;
+            display: flex;
             flex-direction: column;
-            border-left: 3px solid #000;
+            border-right: 3px solid #000;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .editor-mode-active .editor-products-panel {
-            display: flex;
+            left: 0;
         }
 
         @media (max-width: 767px) {
             .editor-mode-active .video-container {
                 width: 100% !important;
                 border-right: none;
+                margin-left: 0;
             }
             .editor-products-panel {
-                right: 0;
+                left: -100%;
                 width: 100%;
+            }
+            .editor-mode-active .editor-products-panel {
+                left: 0;
             }
         }
 
@@ -498,6 +529,32 @@
             border-color: #999;
             color: white;
             cursor: default;
+        }
+
+        /* Trash button for removing items in editor panel */
+        .editor-trash-btn {
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: background 0.2s ease;
+        }
+
+        .editor-trash-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .editor-trash-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: #000;
+            fill: none;
         }
 
         /* Product list modal */
@@ -752,7 +809,7 @@
         <!-- Checkout Confirmation Modal -->
         <div id="checkoutConfirmModal">
             <div class="modal-box">
-                <h3 style="color: #000;">Leave to Checkout?</h3>
+                <h3>Leave to Checkout?</h3>
                 <p>You will be redirected to complete your purchase.</p>
                 <div class="modal-actions">
                     <button class="modal-btn no" onclick="closeCheckoutConfirm()">Cancel</button>
@@ -764,7 +821,7 @@
         <!-- Delete Cart Item Confirmation Modal -->
         <div id="deleteItemModal">
             <div class="modal-box">
-                <h3 style="color: #d9534f;">Delete Item?</h3>
+                <h3>Delete Item?</h3>
                 <p id="deleteItemText">Are you sure you want to remove this item from your cart?</p>
                 <div class="modal-actions">
                     <button class="modal-btn no" onclick="closeDeleteItem()">Cancel</button>
@@ -808,11 +865,11 @@
 
         <div class="side-panel" id="sidePanel">
             <button class="close-panel" id="closePanel">&times;</button>
-            <div style="display:flex; flex-direction:column; margin-bottom:20px;">
+            <div style="margin-bottom:20px;">
                 <h2 style="margin:0 0 15px 0;">The Recipe</h2>
-                <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:0; padding:6px 10px; font-size:10px; width:100%;">Purchase The Whole Look</button>
             </div>
             <div id="productInfoContainer">Loading...</div>
+            <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:20px auto 0; padding:4px 8px; font-size:10px; width:50%; display:block;">Add All Items To Cart</button>
             <button class="scroll-back-btn" id="scrollBackBtn" style="display:none;" onclick="showScrollBackConfirm()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 5v14M5 12l7-7 7 7"/>
@@ -833,6 +890,7 @@
                 </button>
             </div>
             <div class="nav-buttons-container">
+                <!-- Scroll mode: lipstick and editor buttons -->
                 <button class="toolbar-button" id="lipstickBtn">
                      <svg viewBox="0 0 24 24">
                         <circle cx="8" cy="11" r="5" stroke="#000" stroke-width="2" fill="none" />
@@ -850,13 +908,24 @@
                         <polyline points="21 15 16 10 5 21"></polyline>
                     </svg>
                 </button>
+                <!-- Editor mode: New Photo, Product icon, Add new item, Back to scroll (bottom to top) -->
+                <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
+                <button class="toolbar-button" id="lipstickBtnEditor" style="display:none;">
+                     <svg viewBox="0 0 24 24">
+                        <circle cx="8" cy="11" r="5" stroke="#000" stroke-width="2" fill="none" />
+                        <path d="M5 11 L7 9" stroke="#000" stroke-width="1.5" />
+                        <rect x="2" y="17" width="12" height="2" rx="1" fill="#000" />
+                        <rect x="17" y="13" width="4" height="6" rx="0.5" stroke="#000" stroke-width="2" fill="none" />
+                        <rect x="17" y="10" width="4" height="3" fill="#000" />
+                        <path d="M17 10 L17 4 L21 2 L21 10 Z" fill="#000" />
+                     </svg>
+                </button>
                 <button class="toolbar-button" id="addProductBtn" style="display:none;">
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
                 </button>
-                <button class="toolbar-button" id="newPhotoEditorBtn" style="display:none;">
+                <button class="toolbar-button" id="scrollBackBtnToolbar" style="display:none;" onclick="showScrollBackConfirm()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                        <circle cx="12" cy="13" r="4"></circle>
+                        <path d="M12 5v14M5 12l7-7 7 7"/>
                     </svg>
                 </button>
             </div>
@@ -870,13 +939,13 @@
             <div class="editor-products-list" id="editorProductsList">
                 <p style="color:#666; text-align:center;">No products added yet</p>
             </div>
-            <button onclick="purchaseWholeLook()" class="editor-purchase-btn">Purchase The Whole Look</button>
+            <button onclick="purchaseWholeLook()" class="editor-purchase-btn">Add All Items To Cart</button>
         </div>
 
         <!-- Scroll Back Confirmation Modal -->
         <div id="scrollBackModal" class="modal-overlay">
             <div class="modal-box">
-                <h3 style="color: #d9534f;">Leave Editor?</h3>
+                <h3>Leave Editor?</h3>
                 <p>Are you sure? Your progress will not be saved.</p>
                 <div class="modal-actions">
                     <button class="modal-btn no" onclick="closeScrollBackModal()">No, Stay</button>
@@ -1278,11 +1347,17 @@
                             <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', -1)">-</button>
                             <span>${p.quantity}</span>
                             <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', 1)">+</button>
+                            <button class="cart-quantity-btn" onclick="confirmDeleteItem('${p.id}')" title="Remove" style="margin-left:10px;">
+                                <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none" style="width:14px; height:14px;">
+                                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    <line x1="10" y1="11" x2="10" y2="17"/>
+                                    <line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
                         <div class="cart-item-price">$${(parseFloat(p.price) * p.quantity).toFixed(2)}</div>
-                        <button class="modal-btn delete-item" onclick="confirmDeleteItem('${p.id}')">Delete</button>
                     </div>
                 </div>
             `).join('');
@@ -1385,14 +1460,21 @@
             editorMode = !editorMode;
             if (editorMode) {
                 phoneContainer.classList.add('editor-mode-active');
+                // Hide scroll mode buttons
                 document.getElementById('lipstickBtn').style.display = 'none';
+                document.getElementById('editorBtn').style.display = 'none';
+                // Show editor mode buttons (bottom to top: back, add, new photo) - lipstick removed
+                document.getElementById('scrollBackBtnToolbar').style.display = 'flex';
                 addProductBtn.style.display = 'flex';
                 document.getElementById('newPhotoEditorBtn').style.display = 'flex';
-                document.getElementById('scrollBackBtn').style.display = 'flex';
                 toggleSidePanel(false); // Close side panel
             } else {
                 phoneContainer.classList.remove('editor-mode-active');
+                // Show scroll mode buttons
                 document.getElementById('lipstickBtn').style.display = 'flex';
+                document.getElementById('editorBtn').style.display = 'flex';
+                // Hide editor mode buttons
+                document.getElementById('scrollBackBtnToolbar').style.display = 'none';
                 addProductBtn.style.display = 'none';
                 document.getElementById('newPhotoEditorBtn').style.display = 'none';
                 document.getElementById('scrollBackBtn').style.display = 'none';
@@ -1462,7 +1544,7 @@
                     btn.disabled = true;
                 }
 
-                // Close the product list modal after adding
+                // Close the product list modal after adding (panel is always visible now)
                 closeProductList();
             }
         }
@@ -1495,13 +1577,19 @@
                 return `
                     <div class="editor-product-item">
                         <div class="editor-product-image-container">
-                            <img src="/frame?id=${product.id}&preview=true" class="editor-product-img" onclick="expandImage('/frame?id=${product.id}&preview=true')" onerror="this.style.display='none'">
+                            <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
                             <div class="editor-product-info">
                                 <div class="editor-product-details">
                                     <div class="editor-product-name">${product.product_name}</div>
                                     <div class="editor-product-type">${product.category}</div>
                                 </div>
-                                <button class="modal-btn delete-item" onclick="removeProductFromEditor('${product.id}')" style="margin:0; padding:6px 12px; font-size:11px;">Remove</button>
+                                <button class="editor-trash-btn" onclick="removeProductFromEditor('${product.id}')" title="Remove">
+                                    <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
+                                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        <line x1="10" y1="11" x2="10" y2="17"/>
+                                        <line x1="14" y1="11" x2="14" y2="17"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1584,6 +1672,27 @@
             }
             setTimeout(()=>slideElements.forEach(s=>s.classList.remove('animating')), 300);
         }
+
+        // Auto-retract scroll panel when scrolling/dragging (not during active drag)
+        let scrollTimeout;
+        let lastDragTime = 0;
+        
+        videoContainer.addEventListener('touchmove', () => {
+            // Only auto-close if not currently dragging and some time has passed
+            if (!isDragging && Date.now() - lastDragTime > 500) {
+                if (sidePanel.classList.contains('open')) {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        toggleSidePanel(false);
+                    }, 300);
+                }
+            }
+        });
+        
+        // Track when dragging ends to prevent immediate closure
+        videoContainer.addEventListener('touchend', () => {
+            lastDragTime = Date.now();
+        });
     </script>
 </body>
 </html>
