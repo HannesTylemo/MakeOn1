@@ -810,15 +810,27 @@
             <button class="close-panel" id="closePanel">&times;</button>
             <div style="display:flex; flex-direction:column; margin-bottom:20px;">
                 <h2 style="margin:0 0 15px 0;">The Recipe</h2>
-                <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:0; padding:6px 10px; font-size:10px; width:100%;">Purchase The Whole Look</button>
             </div>
             <div id="productInfoContainer">Loading...</div>
+            <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin-top:20px; padding:6px 10px; font-size:10px; width:70%; display:block; margin-left:auto; margin-right:auto;">Purchase The Whole Look</button>
             <button class="scroll-back-btn" id="scrollBackBtn" style="display:none;" onclick="showScrollBackConfirm()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 5v14M5 12l7-7 7 7"/>
                 </svg>
                 Back to Explore
             </button>
+        </div>
+
+        <!-- The Look Panel (for scroll mode) -->
+        <div class="side-panel" id="lookPanel">
+            <button class="close-panel" id="closeLookPanel">&times;</button>
+            <div style="display:flex; flex-direction:column; margin-bottom:20px;">
+                <h2 style="margin:0 0 15px 0;">The Look</h2>
+            </div>
+            <div id="lookProductsContainer">
+                <p style="color:#666; text-align:center;">Browse products and add them to your look</p>
+            </div>
+            <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin-top:20px; padding:6px 10px; font-size:10px; width:70%; display:block; margin-left:auto; margin-right:auto;">Purchase The Whole Look</button>
         </div>
 
         <div class="bottom-toolbar" id="bottomToolbar">
@@ -843,11 +855,23 @@
                         <path d="M17 10 L17 4 L21 2 L21 10 Z" fill="#000" />
                      </svg>
                 </button>
-                <button class="toolbar-button" id="editorBtn">
+                <button class="toolbar-button" id="lookBtn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
+                        <circle cx="12" cy="8" r="4"></circle>
+                        <path d="M3 21v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"></path>
+                    </svg>
+                </button>
+                <button class="toolbar-button" id="editorBtn">
+                    <!-- Photo/Image icon - shown in scroll mode -->
+                    <svg id="editorIconPhoto" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                         <circle cx="8.5" cy="8.5" r="1.5"></circle>
                         <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <!-- Person icon - shown in editor mode -->
+                    <svg id="editorIconPerson" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" style="display: none;">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
                     </svg>
                 </button>
                 <button class="toolbar-button" id="addProductBtn" style="display:none;">
@@ -993,20 +1017,9 @@
             const p = products[idx];
             if(!p) return;
             productInfo.innerHTML = `
-                <div style="background:#fff; border:1px solid #eee; padding:15px; border-radius:10px;">
-                    <p style="font-weight:bold; font-size:16px; margin-bottom:5px;">${p.product_name}</p>
-                    <p style="color:#666;">${p.shade_name}</p>
-                    <p style="margin-top:5px; font-size:12px; color:#999;">${p.brand}</p>
-                    <div style="display:flex; gap:10px; margin-top:15px;">
-                        <button onclick="window.open('${p.url}', '_blank')" style="flex:0 0 70%; display:block; text-align:center; background:#000; color:white; padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">View Product</button>
-                        <button onclick="addToCart('${p.id}')" class="cart-btn">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#000" stroke-width="2">
-                                <circle cx="9" cy="21" r="1"></circle>
-                                <circle cx="20" cy="21" r="1"></circle>
-                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                            </svg>
-                        </button>
-                    </div>
+                <div style="background:#fff; border:1px solid #eee; padding:15px; border-radius:10px; text-align:center;">
+                    <img src="/frame?id=${p.id}&preview=true" style="width:100%; height:120px; object-fit:cover; border-radius:8px; margin-bottom:10px;" onerror="this.style.display='none'">
+                    <p style="font-weight:bold; font-size:16px; margin-bottom:0;">${p.product_name}</p>
                 </div>`;
         }
 
@@ -1349,8 +1362,10 @@
         }
 
         document.getElementById('lipstickBtn').onclick = (e) => { e.stopPropagation(); toggleSidePanel(); };
+        document.getElementById('lookBtn').onclick = (e) => { e.stopPropagation(); toggleLookPanel(); };
         document.getElementById('closePanel').onclick = (e) => { e.stopPropagation(); toggleSidePanel(false); };
-        document.getElementById('panelOverlay').onclick = e => { e.stopPropagation(); toggleSidePanel(false); };
+        document.getElementById('closeLookPanel').onclick = (e) => { e.stopPropagation(); toggleLookPanel(false); };
+        document.getElementById('panelOverlay').onclick = e => { e.stopPropagation(); toggleSidePanel(false); toggleLookPanel(false); };
         document.getElementById('bottomToolbar').addEventListener('click', e => e.stopPropagation());
 
         // Editor Mode Variables (already declared above, just get references)
@@ -1386,16 +1401,27 @@
             if (editorMode) {
                 phoneContainer.classList.add('editor-mode-active');
                 document.getElementById('lipstickBtn').style.display = 'none';
+                document.getElementById('lookBtn').style.display = 'none';
                 addProductBtn.style.display = 'flex';
-                document.getElementById('newPhotoEditorBtn').style.display = 'flex';
+                document.getElementById('newPhotoEditorBtn').style.display = 'none'; // Hide camera icon in editor
+                document.getElementById('newPhotoBtn').style.display = 'flex'; // Show circular "New Photo" button
                 document.getElementById('scrollBackBtn').style.display = 'flex';
+                // Toggle editor button icons
+                document.getElementById('editorIconPhoto').style.display = 'none';
+                document.getElementById('editorIconPerson').style.display = 'block';
                 toggleSidePanel(false); // Close side panel
+                toggleLookPanel(false); // Close look panel
             } else {
                 phoneContainer.classList.remove('editor-mode-active');
                 document.getElementById('lipstickBtn').style.display = 'flex';
+                document.getElementById('lookBtn').style.display = 'flex';
                 addProductBtn.style.display = 'none';
                 document.getElementById('newPhotoEditorBtn').style.display = 'none';
+                document.getElementById('newPhotoBtn').style.display = 'flex'; // Keep showing in scroll mode (desktop)
                 document.getElementById('scrollBackBtn').style.display = 'none';
+                // Toggle editor button icons back
+                document.getElementById('editorIconPhoto').style.display = 'block';
+                document.getElementById('editorIconPerson').style.display = 'none';
                 editorProducts = [];
                 updateEditorProductsList();
             }
@@ -1530,8 +1556,41 @@
 
         function toggleSidePanel(forceState) {
             if (typeof forceState !== 'undefined') {
-                forceState ? sidePanel.classList.add('open') : sidePanel.classList.remove('open');
-            } else { sidePanel.classList.toggle('open'); }
+                if (forceState) {
+                    sidePanel.classList.add('open');
+                    document.getElementById('panelOverlay').classList.add('visible');
+                    toggleLookPanel(false); // Close look panel
+                } else {
+                    sidePanel.classList.remove('open');
+                    document.getElementById('panelOverlay').classList.remove('visible');
+                }
+            } else {
+                sidePanel.classList.toggle('open');
+                document.getElementById('panelOverlay').classList.toggle('visible');
+                if (sidePanel.classList.contains('open')) {
+                    toggleLookPanel(false); // Close look panel
+                }
+            }
+        }
+
+        function toggleLookPanel(forceState) {
+            const lookPanel = document.getElementById('lookPanel');
+            if (typeof forceState !== 'undefined') {
+                if (forceState) {
+                    lookPanel.classList.add('open');
+                    document.getElementById('panelOverlay').classList.add('visible');
+                    toggleSidePanel(false); // Close recipe panel
+                } else {
+                    lookPanel.classList.remove('open');
+                    document.getElementById('panelOverlay').classList.remove('visible');
+                }
+            } else {
+                lookPanel.classList.toggle('open');
+                document.getElementById('panelOverlay').classList.toggle('visible');
+                if (lookPanel.classList.contains('open')) {
+                    toggleSidePanel(false); // Close recipe panel
+                }
+            }
         }
 
         videoContainer.addEventListener('mousedown', e => startDrag(e.clientY));
