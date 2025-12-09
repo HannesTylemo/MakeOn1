@@ -851,7 +851,6 @@
                     </div>
                 </div>`;
         }
-        }
 
         function goToNext() {
             if (isAnimating) return;
@@ -960,21 +959,18 @@
                     if(save) saveToHistory(b64);
                     overlay.classList.add('hidden');
 
+                    // Initialize slides first
+                    initSlides();
+                    preloadAround(currentIndex);
+
                     // Check if we should enter editor mode based on URL parameter
                     if(shouldEnterEditorMode && productParam) {
-                        // Enter editor mode and add the specified product
-                        // First load products normally
-                        initSlides();
-                        preloadAround(currentIndex);
-                        // Then activate editor mode
+                        // Wait for products to load, then activate editor mode
                         setTimeout(() => {
                             toggleEditorMode();
-                            // TODO: Apply the specific product from productParam
+                            // Add the specified product to editor
+                            addProductToEditor(productParam);
                         }, 500);
-                    } else {
-                        // Normal mode - show scrolling page
-                        initSlides();
-                        preloadAround(currentIndex);
                     }
                 } else {
                     if(d.error === 'no_face_detected') {
@@ -1200,9 +1196,7 @@
         document.getElementById('panelOverlay').onclick = e => { e.stopPropagation(); toggleSidePanel(false); };
         document.getElementById('bottomToolbar').addEventListener('click', e => e.stopPropagation());
 
-        // Editor Mode Variables
-        let editorMode = false;
-        let editorProducts = [];
+        // Editor Mode Variables (already declared above, just get references)
         const phoneContainer = document.getElementById('phone');
         const addProductBtn = document.getElementById('addProductBtn');
 
