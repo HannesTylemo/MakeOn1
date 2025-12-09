@@ -6,6 +6,10 @@
     <title>Skintoner Try-On</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --sidebar-width: 90px;
+        }
 
         body, html {
             width: 100%; height: 100%; background: white;
@@ -257,7 +261,7 @@
             .video-slide img { object-fit: contain; background: white; }
             .bottom-toolbar {
                 position: absolute; top: 0; right: 0; bottom: 0; left: auto;
-                width: 90px; height: 100%;
+                width: var(--sidebar-width); height: 100%;
                 background: white; border-left: 1px solid #f0f0f0; border-top: none;
                 flex-direction: column; justify-content: space-between; padding: 30px 0;
             }
@@ -268,7 +272,7 @@
                 width: 300px; right: -300px; top: 0; height: 100%; z-index: 45;
                 border-left: 1px solid #eee; padding-top: 30px;
             }
-            .side-panel.open { right: 90px; }
+            .side-panel.open { right: var(--sidebar-width); }
             .close-panel { display: none; }
             .desktop-arrows-container { display: flex; justify-content: center; align-items: center; flex-grow: 1; }
             .new-photo-btn { display: flex !important; }
@@ -309,8 +313,8 @@
         .editor-products-panel {
             position: absolute;
             top: 0;
-            right: 90px;
-            width: calc(40% - 90px);
+            right: var(--sidebar-width, 90px);
+            width: calc(40% - var(--sidebar-width, 90px));
             height: 100%;
             background: white;
             z-index: 20;
@@ -577,6 +581,25 @@
             width: 24px;
             height: 24px;
         }
+        
+        /* Modal overlay base style */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 500;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-overlay.visible {
+            display: flex;
+        }
 
         /* Hide arrows in editor mode */
         .editor-mode-active .desktop-arrows-container {
@@ -761,7 +784,7 @@
         </div>
 
         <!-- Scroll Back Confirmation Modal -->
-        <div id="scrollBackModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 500; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+        <div id="scrollBackModal" class="modal-overlay">
             <div class="modal-box">
                 <h3 style="color: #d9534f;">Leave Editor?</h3>
                 <p>Are you sure? Your progress will not be saved.</p>
@@ -1276,11 +1299,11 @@
         }
 
         function showScrollBackConfirm() {
-            document.getElementById('scrollBackModal').style.display = 'flex';
+            document.getElementById('scrollBackModal').classList.add('visible');
         }
 
         function closeScrollBackModal() {
-            document.getElementById('scrollBackModal').style.display = 'none';
+            document.getElementById('scrollBackModal').classList.remove('visible');
         }
 
         function confirmScrollBack() {
