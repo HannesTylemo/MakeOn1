@@ -9,6 +9,7 @@
 
         :root {
             --sidebar-width: 90px;
+            --editor-panel-width: 300px;
             --popup-width: 90%;
             --popup-max-width: 1200px;
             --popup-height: 90%;
@@ -185,7 +186,7 @@
         .cart-item-price {
             font-weight: bold;
             color: #000;
-            font-size: 11.2px; /* 30% smaller than 16px */
+            font-size: 11.2px; /* 70% of original 16px (30% reduction) */
         }
 
         .cart-item-price-container {
@@ -386,7 +387,7 @@
 
         /* EDITOR MODE STYLES */
         .editor-mode-active .video-container {
-            width: calc(100% - 300px - var(--sidebar-width, 90px)) !important; /* Make room for The Look sidebar and nav */
+            width: calc(100% - var(--editor-panel-width) - var(--sidebar-width, 90px)) !important; /* Make room for The Look sidebar and nav */
             flex-grow: 0 !important;
             position: relative;
             margin-left: 0; /* Position at left edge */
@@ -403,7 +404,7 @@
             position: absolute;
             top: 0;
             right: var(--sidebar-width, 90px); /* Always visible, positioned next to nav bar */
-            width: 300px; /* Fixed width instead of percentage */
+            width: var(--editor-panel-width); /* Fixed width using CSS variable */
             height: 100%;
             background: white;
             z-index: 20;
