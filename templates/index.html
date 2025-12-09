@@ -186,6 +186,10 @@
             font-weight: bold; color: #000; font-size: 16px;
         }
 
+        .cart-item-price-container {
+            display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+        }
+
         .cart-item-quantity {
             display: flex; align-items: center; gap: 10px; margin-top: 5px;
         }
@@ -1360,7 +1364,7 @@
                             </button>
                         </div>
                     </div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+                    <div class="cart-item-price-container">
                         <div class="cart-item-price">$${(parseFloat(p.price) * p.quantity).toFixed(2)}</div>
                     </div>
                 </div>
@@ -1650,6 +1654,12 @@
 
         function startDrag(y) {
             if (window.innerWidth >= 768) return;
+            
+            // Close sidebar when starting to scroll on mobile
+            if (sidePanel.classList.contains('open')) {
+                toggleSidePanel(false);
+            }
+            
             if(isAnimating)return;
             isDragging=true; touchStartY=y; currentTouchY=y;
             slideElements.forEach(s=>s.classList.add('no-transition'));
@@ -1658,11 +1668,6 @@
             dragIndicator.classList.add('visible');
             dragIndicator.style.top = y + 'px';
             dragIndicator.style.height = '0px';
-            
-            // Close sidebar when starting to scroll
-            if (sidePanel.classList.contains('open')) {
-                toggleSidePanel(false);
-            }
         }
         function moveDrag(y) {
             currentTouchY=y; const d = y-touchStartY;
