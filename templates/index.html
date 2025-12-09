@@ -362,7 +362,7 @@
         .editor-products-panel {
             position: absolute;
             top: 0;
-            right: calc(var(--sidebar-width, 90px) - 100%);
+            right: -100%;
             width: calc(28% - var(--sidebar-width, 90px));
             height: 100%;
             background: white;
@@ -502,6 +502,32 @@
             border-color: #999;
             color: white;
             cursor: default;
+        }
+
+        /* Trash button for removing items in editor panel */
+        .editor-trash-btn {
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: background 0.2s ease;
+        }
+
+        .editor-trash-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .editor-trash-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: #000;
+            fill: none;
         }
 
         /* Product list modal */
@@ -812,11 +838,11 @@
 
         <div class="side-panel" id="sidePanel">
             <button class="close-panel" id="closePanel">&times;</button>
-            <div style="display:flex; flex-direction:column; margin-bottom:20px;">
+            <div style="margin-bottom:20px;">
                 <h2 style="margin:0 0 15px 0;">The Recipe</h2>
-                <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:0; padding:6px 10px; font-size:10px; width:100%;">Purchase The Whole Look</button>
             </div>
             <div id="productInfoContainer">Loading...</div>
+            <button onclick="purchaseWholeLook()" class="purchase-whole-look-btn" style="margin:20px auto 0; padding:3px 5px; font-size:5px; width:50%;">Add All Items To Cart</button>
             <button class="scroll-back-btn" id="scrollBackBtn" style="display:none;" onclick="showScrollBackConfirm()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 5v14M5 12l7-7 7 7"/>
@@ -891,7 +917,7 @@
             <div class="editor-products-list" id="editorProductsList">
                 <p style="color:#666; text-align:center;">No products added yet</p>
             </div>
-            <button onclick="purchaseWholeLook()" class="editor-purchase-btn">Purchase The Whole Look</button>
+            <button onclick="purchaseWholeLook()" class="editor-purchase-btn">Add All Items To Cart</button>
         </div>
 
         <!-- Scroll Back Confirmation Modal -->
@@ -1544,7 +1570,13 @@
                                     <div class="editor-product-name">${product.product_name}</div>
                                     <div class="editor-product-type">${product.category}</div>
                                 </div>
-                                <button class="modal-btn delete-item" onclick="removeProductFromEditor('${product.id}')" style="margin:0; padding:6px 12px; font-size:11px;">Remove</button>
+                                <button class="editor-trash-btn" onclick="removeProductFromEditor('${product.id}')" title="Remove">
+                                    <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
+                                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        <line x1="10" y1="11" x2="10" y2="17"/>
+                                        <line x1="14" y1="11" x2="14" y2="17"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
