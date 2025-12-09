@@ -9,20 +9,26 @@
         
         :root {
             --sidebar-width: 90px;
+            --popup-width: 90%;
+            --popup-max-width: 1200px;
+            --popup-height: 90%;
+            --popup-max-height: 900px;
+            --popup-bg: #fff;
         }
 
         body, html {
             width: 100%; height: 100%; 
+            /* Semi-transparent backdrop for popup modal effect */
             background: rgba(0, 0, 0, 0.5);
             overflow: hidden; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
 
         .phone-container {
-            width: 90%; 
-            max-width: 1200px;
-            height: 90%;
-            max-height: 900px;
-            background: #fff; 
+            width: var(--popup-width); 
+            max-width: var(--popup-max-width);
+            height: var(--popup-height);
+            max-height: var(--popup-max-height);
+            background: var(--popup-bg); 
             position: absolute;
             top: 50%;
             left: 50%;
@@ -335,7 +341,7 @@
             right: var(--sidebar-width, 90px);
             width: calc(40% - var(--sidebar-width, 90px));
             height: 100%;
-            background: white;
+            background: var(--popup-bg);
             z-index: 20;
             overflow-y: auto;
             padding: 20px;
@@ -1128,9 +1134,9 @@
             // Try to close widget first (if in iframe)
             window.parent.postMessage('close-skintoner-widget', '*'); 
             toggleExitModal(false); 
-            // If standalone, navigate back after a delay
+            // If standalone (not in iframe), navigate back after a delay
             setTimeout(() => {
-                if (window.location === window.parent.location) {
+                if (window.self === window.top) {
                     window.location.href = '/mock';
                 }
             }, 100);
