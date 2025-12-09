@@ -351,7 +351,6 @@
             width: 100% !important;
             flex-grow: 1 !important;
             position: relative;
-            /* No border needed since products panel is overlaid */
         }
         
         /* Keep image centered and contained in editor mode */
@@ -403,16 +402,18 @@
         
         .editor-purchase-btn {
             width: 25%;
+            min-width: 120px; /* Ensure minimum tappable width */
             margin: 20px auto 0;
-            padding: 5px 8px;
+            padding: 8px 10px; /* Increased from 5px for better accessibility */
             background: #000;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 11px; /* Slightly increased from 10px for readability */
             text-align: center;
+            min-height: 32px; /* Ensure minimum tappable height */
         }
         
         .editor-purchase-btn:hover {
