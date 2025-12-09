@@ -163,6 +163,7 @@
         .cart-item {
             display: flex; gap: 15px; padding: 15px; border: 1px solid #eee;
             border-radius: 10px; margin-bottom: 15px; align-items: center;
+            flex-wrap: wrap;
         }
 
         .cart-item-image {
@@ -172,6 +173,30 @@
 
         .cart-item-info {
             flex: 1;
+            min-width: 0;
+        }
+        
+        .cart-item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        
+        .cart-delete-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cart-delete-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #d9534f;
         }
 
         .cart-item-name {
@@ -909,6 +934,18 @@
             </div>
         </div>
 
+        <!-- Editor Exit Confirmation Modal -->
+        <div id="editorExitModal" class="modal-overlay">
+            <div class="modal-box">
+                <h3 style="color: #d9534f;">Leaving The Editor</h3>
+                <p>Your Look Will Not Be Saved</p>
+                <div class="modal-actions">
+                    <button class="modal-btn no" onclick="closeEditorExitModal()">No, Cancel</button>
+                    <button class="modal-btn yes" onclick="confirmEditorExit()">Yes, Leave</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Product List Modal -->
         <div id="productListModal">
             <div class="product-list-header">
@@ -1293,9 +1330,13 @@
                             <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', 1)">+</button>
                         </div>
                     </div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+                    <div class="cart-item-actions">
                         <div class="cart-item-price">$${(parseFloat(p.price) * p.quantity).toFixed(2)}</div>
-                        <button class="modal-btn delete-item" onclick="confirmDeleteItem('${p.id}')">Delete</button>
+                        <button class="cart-delete-btn" onclick="confirmDeleteItem('${p.id}')" title="Delete item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -1375,7 +1416,12 @@
         // Editor Mode Functions
         document.getElementById('editorBtn').onclick = (e) => {
             e.stopPropagation();
-            toggleEditorMode();
+            if (editorMode) {
+                // Show confirmation modal when leaving editor mode
+                showEditorExitModal();
+            } else {
+                toggleEditorMode();
+            }
         };
 
         if (addProductBtn) {
@@ -1437,6 +1483,19 @@
 
         function confirmScrollBack() {
             closeScrollBackModal();
+            toggleEditorMode(); // Exit editor mode
+        }
+
+        function showEditorExitModal() {
+            document.getElementById('editorExitModal').classList.add('visible');
+        }
+
+        function closeEditorExitModal() {
+            document.getElementById('editorExitModal').classList.remove('visible');
+        }
+
+        function confirmEditorExit() {
+            closeEditorExitModal();
             toggleEditorMode(); // Exit editor mode
         }
 
