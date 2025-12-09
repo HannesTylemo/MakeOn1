@@ -196,7 +196,7 @@
         .cart-delete-btn svg {
             width: 20px;
             height: 20px;
-            fill: #d9534f;
+            stroke: #d9534f;
         }
 
         .cart-item-name {
@@ -1333,7 +1333,7 @@
                     <div class="cart-item-actions">
                         <div class="cart-item-price">$${(parseFloat(p.price) * p.quantity).toFixed(2)}</div>
                         <button class="cart-delete-btn" onclick="confirmDeleteItem('${p.id}')" title="Delete item">
-                            <svg viewBox="0 0 24 24">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/>
                             </svg>
                         </button>
@@ -1406,7 +1406,15 @@
         document.getElementById('lookBtn').onclick = (e) => { e.stopPropagation(); toggleLookPanel(); };
         document.getElementById('closePanel').onclick = (e) => { e.stopPropagation(); toggleSidePanel(false); };
         document.getElementById('closeLookPanel').onclick = (e) => { e.stopPropagation(); toggleLookPanel(false); };
-        document.getElementById('panelOverlay').onclick = e => { e.stopPropagation(); toggleSidePanel(false); toggleLookPanel(false); };
+        document.getElementById('panelOverlay').onclick = e => { 
+            e.stopPropagation(); 
+            // Close whichever panel is currently open
+            if (sidePanel.classList.contains('open')) {
+                toggleSidePanel(false);
+            } else if (document.getElementById('lookPanel').classList.contains('open')) {
+                toggleLookPanel(false);
+            }
+        };
         document.getElementById('bottomToolbar').addEventListener('click', e => e.stopPropagation());
 
         // Editor Mode Variables (already declared above, just get references)
