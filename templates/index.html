@@ -362,20 +362,21 @@
         .editor-products-panel {
             position: absolute;
             top: 0;
-            right: var(--sidebar-width, 90px);
+            right: calc(var(--sidebar-width, 90px) - 100%);
             width: calc(28% - var(--sidebar-width, 90px));
             height: 100%;
             background: white;
             z-index: 20;
             overflow-y: auto;
             padding: 20px;
-            display: none;
+            display: flex;
             flex-direction: column;
             border-left: 3px solid #000;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .editor-mode-active .editor-products-panel {
-            display: flex;
+        .editor-mode-active .editor-products-panel.open {
+            right: var(--sidebar-width, 90px);
         }
 
         @media (max-width: 767px) {
@@ -384,8 +385,11 @@
                 border-right: none;
             }
             .editor-products-panel {
-                right: 0;
+                right: -100%;
                 width: 100%;
+            }
+            .editor-mode-active .editor-products-panel.open {
+                right: 0;
             }
         }
 
@@ -833,6 +837,7 @@
                 </button>
             </div>
             <div class="nav-buttons-container">
+                <!-- Scroll mode: lipstick and editor buttons -->
                 <button class="toolbar-button" id="lipstickBtn">
                      <svg viewBox="0 0 24 24">
                         <circle cx="8" cy="11" r="5" stroke="#000" stroke-width="2" fill="none" />
@@ -850,13 +855,29 @@
                         <polyline points="21 15 16 10 5 21"></polyline>
                     </svg>
                 </button>
-                <button class="toolbar-button" id="addProductBtn" style="display:none;">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
-                </button>
+                <!-- Editor mode: New Photo, Product icon, Add new item, Back to scroll (bottom to top) -->
                 <button class="toolbar-button" id="newPhotoEditorBtn" style="display:none;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                         <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                </button>
+                <button class="toolbar-button" id="lipstickBtnEditor" style="display:none;">
+                     <svg viewBox="0 0 24 24">
+                        <circle cx="8" cy="11" r="5" stroke="#000" stroke-width="2" fill="none" />
+                        <path d="M5 11 L7 9" stroke="#000" stroke-width="1.5" />
+                        <rect x="2" y="17" width="12" height="2" rx="1" fill="#000" />
+                        <rect x="17" y="13" width="4" height="6" rx="0.5" stroke="#000" stroke-width="2" fill="none" />
+                        <rect x="17" y="10" width="4" height="3" fill="#000" />
+                        <path d="M17 10 L17 4 L21 2 L21 10 Z" fill="#000" />
+                     </svg>
+                </button>
+                <button class="toolbar-button" id="addProductBtn" style="display:none;">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
+                </button>
+                <button class="toolbar-button" id="scrollBackBtnToolbar" style="display:none;" onclick="showScrollBackConfirm()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
+                        <path d="M12 5v14M5 12l7-7 7 7"/>
                     </svg>
                 </button>
             </div>
@@ -1363,6 +1384,12 @@
             toggleEditorMode();
         };
 
+        // Lipstick button in editor mode - toggles the editor products panel
+        document.getElementById('lipstickBtnEditor').onclick = (e) => {
+            e.stopPropagation();
+            toggleEditorProductsPanel();
+        };
+
         if (addProductBtn) {
             addProductBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -1385,15 +1412,24 @@
             editorMode = !editorMode;
             if (editorMode) {
                 phoneContainer.classList.add('editor-mode-active');
+                // Hide scroll mode buttons
                 document.getElementById('lipstickBtn').style.display = 'none';
+                document.getElementById('editorBtn').style.display = 'none';
+                // Show editor mode buttons (bottom to top: back, add, product, new photo)
+                document.getElementById('scrollBackBtnToolbar').style.display = 'flex';
                 addProductBtn.style.display = 'flex';
+                document.getElementById('lipstickBtnEditor').style.display = 'flex';
                 document.getElementById('newPhotoEditorBtn').style.display = 'flex';
-                document.getElementById('scrollBackBtn').style.display = 'flex';
                 toggleSidePanel(false); // Close side panel
             } else {
                 phoneContainer.classList.remove('editor-mode-active');
+                // Show scroll mode buttons
                 document.getElementById('lipstickBtn').style.display = 'flex';
+                document.getElementById('editorBtn').style.display = 'flex';
+                // Hide editor mode buttons
+                document.getElementById('scrollBackBtnToolbar').style.display = 'none';
                 addProductBtn.style.display = 'none';
+                document.getElementById('lipstickBtnEditor').style.display = 'none';
                 document.getElementById('newPhotoEditorBtn').style.display = 'none';
                 document.getElementById('scrollBackBtn').style.display = 'none';
                 editorProducts = [];
@@ -1412,6 +1448,11 @@
         function confirmScrollBack() {
             closeScrollBackModal();
             toggleEditorMode(); // Exit editor mode
+        }
+
+        function toggleEditorProductsPanel() {
+            const panel = document.getElementById('editorProductsPanel');
+            panel.classList.toggle('open');
         }
 
         function showProductList() {
@@ -1462,8 +1503,10 @@
                     btn.disabled = true;
                 }
 
-                // Close the product list modal after adding
+                // Close the product list modal after adding and open the editor panel
                 closeProductList();
+                const panel = document.getElementById('editorProductsPanel');
+                panel.classList.add('open');
             }
         }
 
@@ -1495,7 +1538,7 @@
                 return `
                     <div class="editor-product-item">
                         <div class="editor-product-image-container">
-                            <img src="/frame?id=${product.id}&preview=true" class="editor-product-img" onclick="expandImage('/frame?id=${product.id}&preview=true')" onerror="this.style.display='none'">
+                            <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
                             <div class="editor-product-info">
                                 <div class="editor-product-details">
                                     <div class="editor-product-name">${product.product_name}</div>
