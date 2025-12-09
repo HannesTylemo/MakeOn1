@@ -183,15 +183,23 @@
         }
 
         .cart-item-price {
-            font-weight: bold; color: #000; font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            font-size: 16px;
         }
 
         .cart-item-price-container {
-            display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
         }
 
         .cart-item-quantity {
-            display: flex; align-items: center; gap: 10px; margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
         }
 
         .cart-quantity-btn {
@@ -1655,7 +1663,8 @@
         function startDrag(y) {
             if (window.innerWidth >= 768) return;
             
-            // Close sidebar when starting to scroll on mobile
+            // Close sidebar when user starts scrolling on mobile (as per requirements)
+            // This ensures the sidebar automatically retracts when scrolling begins
             if (sidePanel.classList.contains('open')) {
                 toggleSidePanel(false);
             }
