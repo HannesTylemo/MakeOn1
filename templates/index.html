@@ -185,14 +185,14 @@
         .cart-item-price {
             font-weight: bold;
             color: #000;
-            font-size: 16px;
+            font-size: 11.2px; /* 30% smaller than 16px */
         }
 
         .cart-item-price-container {
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
-            gap: 10px;
+            align-items: flex-start; /* Changed from flex-end to align left */
+            gap: 5px;
         }
 
         .cart-item-quantity {
@@ -386,22 +386,24 @@
 
         /* EDITOR MODE STYLES */
         .editor-mode-active .video-container {
-            width: 100% !important;
-            flex-grow: 1 !important;
+            width: calc(100% - 300px - var(--sidebar-width, 90px)) !important; /* Make room for The Look sidebar and nav */
+            flex-grow: 0 !important;
             position: relative;
+            margin-left: 0; /* Position at left edge */
         }
 
-        /* Keep image centered and contained in editor mode */
+        /* Keep image left-aligned in editor mode */
         .editor-mode-active .video-slide img {
             object-fit: contain;
             background: white;
+            margin-left: 0; /* Align to left edge */
         }
 
         .editor-products-panel {
             position: absolute;
             top: 0;
-            right: -100%;
-            width: calc(36.4% - var(--sidebar-width, 90px));
+            right: var(--sidebar-width, 90px); /* Always visible, positioned next to nav bar */
+            width: 300px; /* Fixed width instead of percentage */
             height: 100%;
             background: white;
             z-index: 20;
@@ -410,10 +412,11 @@
             display: flex;
             flex-direction: column;
             border-left: 3px solid #000;
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: none; /* Remove transition since it's always visible */
         }
 
-        .editor-mode-active .editor-products-panel.open {
+        .editor-mode-active .editor-products-panel {
+            /* Always visible in editor mode, no need for .open class */
             right: var(--sidebar-width, 90px);
         }
 
@@ -421,13 +424,17 @@
             .editor-mode-active .video-container {
                 width: 100% !important;
                 border-right: none;
+                margin-left: 0;
             }
             .editor-products-panel {
                 right: -100%;
                 width: 100%;
             }
+            .editor-mode-active .editor-products-panel {
+                right: -100%; /* Hidden by default on mobile */
+            }
             .editor-mode-active .editor-products-panel.open {
-                right: 0;
+                right: 0; /* Show when opened on mobile */
             }
         }
 
@@ -568,9 +575,10 @@
             fill: none;
         }
 
-        /* Cart trash button with left margin for inline alignment */
+        /* Cart trash button positioning */
         .editor-trash-btn.cart-inline {
-            margin-left: 10px;
+            margin-left: 0;
+            margin-top: 5px;
         }
 
         /* Product list modal */
@@ -1005,6 +1013,7 @@
         const productInfo = document.getElementById('productInfoContainer');
         const videoContainer = document.getElementById('videoContainer');
         const dragIndicator = document.getElementById('dragIndicator');
+        const editorProductsPanel = document.getElementById('editorProductsPanel');
 
         // DOM ROTATION SETUP
         let slideElements = [
@@ -1022,6 +1031,7 @@
         let editorMode = false; // Track if in editor mode (UI state)
         let editorProducts = []; // Track products added in editor
         let previousMode = 'scroll'; // Track previous mode: 'scroll' or 'editor'
+        let savedEditorProducts = []; // Save editor products when taking new photo
 
         window.addEventListener('load', () => { loadHistory(); fetchProducts(); });
         window.addEventListener('message', (e) => { if (e.data === 'request-close-confirmation') toggleExitModal(true); });
@@ -1218,6 +1228,11 @@
                         // Restore editor mode if user was previously in it
                         setTimeout(() => {
                             if(!editorMode) toggleEditorMode();
+                            // Restore saved editor products (Keep The Look)
+                            if(savedEditorProducts.length > 0) {
+                                editorProducts = [...savedEditorProducts];
+                                updateEditorProductsList();
+                            }
                         }, 500);
                     }
                 } else {
@@ -1363,17 +1378,17 @@
                             <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', -1)">-</button>
                             <span>${p.quantity}</span>
                             <button class="cart-quantity-btn" onclick="updateQuantity('${p.id}', 1)">+</button>
-                            <button class="editor-trash-btn cart-inline" onclick="confirmDeleteItem('${p.id}')" title="Remove">
-                                <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
-                                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                    <line x1="10" y1="11" x2="10" y2="17"/>
-                                    <line x1="14" y1="11" x2="14" y2="17"/>
-                                </svg>
-                            </button>
                         </div>
                     </div>
                     <div class="cart-item-price-container">
                         <div class="cart-item-price">$${(parseFloat(p.price) * p.quantity).toFixed(2)}</div>
+                        <button class="editor-trash-btn cart-inline" onclick="confirmDeleteItem('${p.id}')" title="Remove">
+                            <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
+                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                <line x1="10" y1="11" x2="10" y2="17"/>
+                                <line x1="14" y1="11" x2="14" y2="17"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -1454,11 +1469,11 @@
             toggleEditorMode();
         };
 
-        // Lipstick button in editor mode - toggles the editor products panel
-        document.getElementById('lipstickBtnEditor').onclick = (e) => {
-            e.stopPropagation();
-            toggleEditorProductsPanel();
-        };
+        // Lipstick button in editor mode - removed as per requirements
+        // document.getElementById('lipstickBtnEditor').onclick = (e) => {
+        //     e.stopPropagation();
+        //     toggleEditorProductsPanel();
+        // };
 
         if (addProductBtn) {
             addProductBtn.onclick = (e) => {
@@ -1472,8 +1487,9 @@
         if (newPhotoEditorBtn) {
             newPhotoEditorBtn.onclick = (e) => {
                 e.stopPropagation();
-                // Save current mode before showing upload overlay
+                // Save current mode and editor products before showing upload overlay
                 previousMode = editorMode ? 'editor' : 'scroll';
+                savedEditorProducts = [...editorProducts]; // Save current editor products
                 overlay.classList.remove('hidden');
             };
         }
@@ -1485,12 +1501,16 @@
                 // Hide scroll mode buttons
                 document.getElementById('lipstickBtn').style.display = 'none';
                 document.getElementById('editorBtn').style.display = 'none';
-                // Show editor mode buttons (bottom to top: back, add, product, new photo)
+                // Show editor mode buttons (bottom to top: back, add, new photo) - removed product icon
                 document.getElementById('scrollBackBtnToolbar').style.display = 'flex';
                 addProductBtn.style.display = 'flex';
-                document.getElementById('lipstickBtnEditor').style.display = 'flex';
+                // lipstickBtnEditor removed as requested
                 document.getElementById('newPhotoEditorBtn').style.display = 'flex';
                 toggleSidePanel(false); // Close side panel
+                // Show The Look panel (always visible on desktop, can be toggled on mobile)
+                if (window.innerWidth >= 768) {
+                    editorProductsPanel.classList.add('open'); // Always visible on desktop
+                }
             } else {
                 phoneContainer.classList.remove('editor-mode-active');
                 // Show scroll mode buttons
@@ -1499,11 +1519,11 @@
                 // Hide editor mode buttons
                 document.getElementById('scrollBackBtnToolbar').style.display = 'none';
                 addProductBtn.style.display = 'none';
-                document.getElementById('lipstickBtnEditor').style.display = 'none';
                 document.getElementById('newPhotoEditorBtn').style.display = 'none';
                 document.getElementById('scrollBackBtn').style.display = 'none';
                 editorProducts = [];
                 updateEditorProductsList();
+                editorProductsPanel.classList.remove('open'); // Hide The Look panel
             }
         }
 
@@ -1521,8 +1541,11 @@
         }
 
         function toggleEditorProductsPanel() {
-            const panel = document.getElementById('editorProductsPanel');
-            panel.classList.toggle('open');
+            // Only toggle on mobile, on desktop it's always visible
+            if (window.innerWidth < 768) {
+                const panel = document.getElementById('editorProductsPanel');
+                panel.classList.toggle('open');
+            }
         }
 
         function showProductList() {
@@ -1642,8 +1665,9 @@
 
         document.getElementById('newPhotoBtn').onclick = (e) => {
             e.stopPropagation();
-            // Save current mode before showing upload overlay
+            // Save current mode and clear saved products for scroll mode
             previousMode = editorMode ? 'editor' : 'scroll';
+            savedEditorProducts = []; // Clear saved products when taking photo from scroll mode
             overlay.classList.remove('hidden');
         };
 
