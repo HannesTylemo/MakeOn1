@@ -7,7 +7,7 @@
     "hex_color": "#cc0000",
     "price": "25.00",
     "description": "Long-wearing, full coverage finish.",
-    "url": "https://www.gucci.com/us/en/pr/beauty/makeup/lips/lipstick/rouge-a-levres-mat-satin-lipstick-p-727772999H71470",
+    "url": "/product/prod_ca490861",
     "image_url": "/static/uploads/de7766_IMG_4649.HEIC",
     "pigment": 55,
     "shine": 10,
@@ -21,7 +21,7 @@
     "hex_color": "#000000",
     "price": "12.00",
     "description": "Full fan effect volume.",
-    "url": "https://www.maybelline.com/eye-makeup/mascara/lash-sensational-mascara",
+    "url": "/product/prod_demo2",
     "image_url": "/static/uploads/mascara_demo.jpg"
   },
   {
@@ -32,7 +32,7 @@
     "hex_color": "#AC5851",
     "price": "19.00",
     "description": "Comfort matte finish in a brick-rose shade.",
-    "url": "https://www.urbandecay.com/vice-lipstick/ud860.html",
+    "url": "/product/prod_new_1",
     "image_url": "/static/uploads/vice_lipstick.jpg",
     "pigment": 85,
     "shine": 20,
@@ -46,7 +46,7 @@
     "hex_color": "#000000",
     "price": "28.00",
     "description": "An intensely black, volumizing mascara.",
-    "url": "https://www.toofaced.com/product/23422/11482/mascara/better-than-sex-mascara",
+    "url": "/product/prod_new_2",
     "image_url": "/static/uploads/better_than_sex.jpg"
   }
 ]
