@@ -9,7 +9,7 @@
 
         :root {
             --sidebar-width: 90px;
-            --editor-panel-width: 288px; /* Increased by 15% from 250px (250 * 1.15 = 287.5, rounded to 288) */
+            --editor-panel-width: 317px; /* Increased by 10% from 288px (288 * 1.10 = 316.8, rounded to 317) */
             --popup-width: 90%;
             --popup-max-width: 1200px;
             --popup-height: 90%;
@@ -411,11 +411,11 @@
             display: flex;
             flex-direction: column;
             border-left: 3px solid #000;
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Add transition back */
+            transition: none; /* Remove animation */
         }
 
         .editor-mode-active .editor-products-panel {
-            /* Visible in editor mode */
+            /* Visible in editor mode - no animation */
             right: var(--sidebar-width, 90px);
         }
 
@@ -1090,7 +1090,8 @@
             if(!p) return;
             productInfo.innerHTML = `
                 <div style="background:#fff; border:1px solid #eee; padding:15px; border-radius:10px;">
-                    <p style="font-weight:bold; font-size:16px; margin-bottom:5px;">${p.product_name}</p>
+                    <p style="font-weight:bold; font-size:16px; margin-bottom:10px;">${p.product_name}</p>
+                    <img src="${p.image_url}" style="width:100%; max-width:150px; height:auto; object-fit:contain; border-radius:8px; margin-bottom:10px; display:block;" onerror="this.style.display='none'">
                     <p style="color:#666;">${p.shade_name}</p>
                     <p style="margin-top:5px; font-size:12px; color:#999;">${p.brand}</p>
                     <div style="display:flex; gap:10px; margin-top:15px;">
@@ -1683,7 +1684,7 @@
                 categoryProducts.forEach(product => {
                     html += `
                         <div class="editor-product-item">
-                            <div class="editor-product-category-header">${category}</div>
+                            <div class="editor-product-category-header">${category}:</div>
                             <div class="editor-product-image-container">
                                 <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
                                 <div class="editor-product-info">
