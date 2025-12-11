@@ -1351,11 +1351,18 @@
                     } else if(previousMode === 'editor') {
                         // Restore editor mode if user was previously in it
                         setTimeout(() => {
-                            if(!editorMode) toggleEditorMode();
+                            // Ensure we're in scroll mode first, then toggle to editor
+                            if(editorMode) {
+                                // If already in editor mode, exit it first
+                                toggleEditorMode();
+                            }
+                            // Now toggle to editor mode
+                            toggleEditorMode();
                             // Restore saved editor products (Keep The Look)
                             if(savedEditorProducts.length > 0) {
                                 editorProducts = [...savedEditorProducts];
                                 updateEditorProductsList();
+                                updateEditorImage();
                             }
                         }, 500);
                     }
