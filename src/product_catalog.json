@@ -1,19 +1,5 @@
 [
   {
-    "id": "prod_ca490861",
-    "category": "lipstick",
-    "brand": "gucci",
-    "product_name": "homo",
-    "hex_color": "#cc0000",
-    "price": "25.00",
-    "description": "Long-wearing, full coverage finish.",
-    "url": "/product/prod_ca490861",
-    "image_url": "/static/uploads/de7766_IMG_4649.HEIC",
-    "pigment": 55,
-    "shine": 10,
-    "effect": "none"
-  },
-  {
     "id": "prod_demo2",
     "category": "mascara",
     "brand": "Maybelline",

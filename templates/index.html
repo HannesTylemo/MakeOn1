@@ -9,7 +9,7 @@
 
         :root {
             --sidebar-width: 90px;
-            --editor-panel-width: 317px; /* Widened by 10%: 288px * 1.10 = 316.8, rounded to 317px */
+            --editor-panel-width: 314px; /* Narrowed by 10% from 349px: 349 * 0.90 = 314.1, rounded to 314px */
             --popup-width: 90%;
             --popup-max-width: 1200px;
             --popup-height: 90%;
@@ -125,7 +125,7 @@
         }
 
         /* SHOPPING CART MODALS */
-        #cartAddedModal, #cartViewModal, #checkoutConfirmModal, #deleteItemModal, #exploreLooksModal {
+        #cartAddedModal, #cartViewModal, #checkoutConfirmModal, #deleteItemModal, #exploreLooksModal, #editorModeModal, #emptyCartModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 500;
             display: none; justify-content: center; align-items: center;
@@ -417,11 +417,13 @@
             background: white;
             z-index: 20;
             overflow-y: auto;
+            overflow-x: hidden; /* Prevent horizontal scroll */
             padding: 20px;
             display: flex;
             flex-direction: column;
             border-left: 3px solid #000;
             transition: none; /* Remove animation */
+            touch-action: pan-y; /* Only allow vertical scrolling, prevent horizontal swipe */
         }
 
         .editor-mode-active .editor-products-panel {
@@ -456,6 +458,13 @@
         .editor-products-list {
             flex: 1;
             overflow-y: auto;
+            /* Hide scrollbar */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .editor-products-list::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
 
         .editor-purchase-btn {
@@ -508,12 +517,14 @@
 
         .editor-product-img {
             width: 100%;
-            height: 120px;
-            object-fit: cover;
+            max-width: 150px;
+            height: 150px; /* Fixed height for consistent sizing */
+            object-fit: cover; /* Crop landscape images to fill square */
             border-radius: 8px;
-            background: #f0f0f0;
+            background: transparent;
             cursor: pointer;
             margin-bottom: 10px;
+            display: block;
         }
 
         .editor-product-img:hover {
@@ -530,7 +541,7 @@
 
         .editor-product-info .editor-trash-btn {
             position: absolute;
-            right: -5px; /* Position right outside, near the scroll-bar */
+            left: 20px; /* Position under the left side of product image */
         }
 
         .editor-product-details {
@@ -875,6 +886,27 @@
             </div>
         </div>
 
+        <!-- Editor Mode Transition Modal -->
+        <div id="editorModeModal">
+            <div class="modal-box">
+                <h3>Do you want to edit the current look or create a new one?</h3>
+                <div class="modal-actions">
+                    <button class="modal-btn yes" onclick="confirmEditorMode('edit')">Edit This Look</button>
+                    <button class="modal-btn no" onclick="confirmEditorMode('new')">New Look</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty Cart Warning Modal -->
+        <div id="emptyCartModal">
+            <div class="modal-box">
+                <h3>There are no items to add</h3>
+                <div class="modal-actions">
+                    <button class="modal-btn yes" onclick="closeEmptyCartModal()">Okay</button>
+                </div>
+            </div>
+        </div>
+
         <div class="startup-overlay" id="startupOverlay">
             <div class="startup-content">
                 <h1>Welcome</h1>
@@ -947,6 +979,7 @@
                      </svg>
                 </button>
                 <button class="toolbar-button" id="editorBtn">
+                    <!-- Editor/Gallery icon for navigating to editor mode -->
                     <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                         <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -959,8 +992,9 @@
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
                 </button>
                 <button class="toolbar-button" id="scrollBackBtnToolbar" style="display:none;" onclick="showScrollBackConfirm()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
-                        <path d="M12 5v14M5 12l7-7 7 7"/>
+                    <!-- Swipe icon for navigating back to scroll mode -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M5 12l4-4M5 12l4 4"/>
                     </svg>
                 </button>
             </div>
@@ -1064,10 +1098,31 @@
 
         function getProductUrl(index) {
             const p = products[index];
+            // Each URL shows the user's uploaded image with this product's makeup applied
+            // The /frame endpoint applies the product based on the id parameter
             return `/frame?id=${p.id}&t=${Date.now()}`;
         }
 
+        function getEditorProductUrl() {
+            // Build URL with all editor products using pipe delimiter (safer than comma)
+            if (editorProducts.length === 0) {
+                // Return the base image if no products
+                return `/frame?t=${Date.now()}`;
+            }
+            return `/frame?id=${editorProducts.join('|')}&t=${Date.now()}`;
+        }
+
+        function updateEditorImage() {
+            // Update the current slide image with the editor products
+            if (editorMode) {
+                const currentSlide = slideElements[1]; // Middle slide is current
+                updateSlideImage(currentSlide, getEditorProductUrl());
+            }
+        }
+
         function initSlides() {
+            // In scroll mode, show the product applied to the uploaded image
+            // All slides use the SAME uploaded image with different products applied
             updateSlideImage(slideElements[0], getProductUrl(getIndex(currentIndex - 1)));
             updateSlideImage(slideElements[1], getProductUrl(getIndex(currentIndex)));
             updateSlideImage(slideElements[2], getProductUrl(getIndex(currentIndex + 1)));
@@ -1098,6 +1153,9 @@
         function updateInfo(idx) {
             const p = products[idx];
             if(!p) return;
+
+            // In scroll mode, "The Recipe" shows the products applied to the current photo
+            // Since each slide shows one product applied, show that single product
             productInfo.innerHTML = `
                 <div style="background:#fff; border:1px solid #eee; padding:15px; border-radius:10px;">
                     <p style="font-weight:bold; font-size:16px; margin-bottom:10px;">${p.product_name}</p>
@@ -1344,10 +1402,28 @@
         }
 
         function purchaseWholeLook() {
-            const allProducts = [];
-
             // Determine which products to add based on current mode
-            const productsToAdd = editorMode ? editorProducts : products.map(p => p.id);
+            // In editor mode: add all products in editorProducts array
+            // In scroll mode: add only the currently displayed product (the one in "The Recipe")
+            let productsToAdd;
+            if (editorMode) {
+                productsToAdd = editorProducts;
+            } else {
+                // Ensure current product exists before adding
+                if (products[currentIndex]) {
+                    productsToAdd = [products[currentIndex].id];
+                } else {
+                    productsToAdd = [];
+                }
+            }
+
+            if (productsToAdd.length === 0) {
+                // Show empty cart modal
+                document.getElementById('emptyCartModal').style.display = 'flex';
+                return;
+            }
+
+            const allProducts = [];
 
             productsToAdd.forEach(pid => {
                 const product = products.find(p => p.id === pid);
@@ -1364,6 +1440,10 @@
             });
 
             showCartAdded(allProducts);
+        }
+
+        function closeEmptyCartModal() {
+            document.getElementById('emptyCartModal').style.display = 'none';
         }
 
         function showCartAdded(addedProducts) {
@@ -1496,8 +1576,22 @@
         // Editor Mode Functions
         document.getElementById('editorBtn').onclick = (e) => {
             e.stopPropagation();
-            toggleEditorMode();
+            // Show modal to ask user's intention
+            document.getElementById('editorModeModal').style.display = 'flex';
         };
+
+        function confirmEditorMode(mode) {
+            document.getElementById('editorModeModal').style.display = 'none';
+
+            if (mode === 'new') {
+                // Clear all editor products for new look
+                editorProducts = [];
+                updateEditorProductsList();
+            }
+            // If mode === 'edit', keep current products
+
+            toggleEditorMode();
+        }
 
         // Lipstick button in editor mode - removed as per requirements
         // document.getElementById('lipstickBtnEditor').onclick = (e) => {
@@ -1638,6 +1732,7 @@
             editorProducts.push(productId);
 
             updateEditorProductsList();
+            updateEditorImage(); // Update the preview image
 
             // Update button in product list
             const btn = document.getElementById(`addBtn_${productId}`);
@@ -1656,6 +1751,7 @@
         function removeProductFromEditor(productId) {
             editorProducts = editorProducts.filter(id => id !== productId);
             updateEditorProductsList();
+            updateEditorImage(); // Update the preview image
 
             // Update button in product list if modal is open
             const btn = document.getElementById(`addBtn_${productId}`);
@@ -1732,9 +1828,16 @@
 
         document.getElementById('newPhotoBtn').onclick = (e) => {
             e.stopPropagation();
-            // Save current mode and clear saved products for scroll mode
+            // Save current mode and preserve products
             previousMode = editorMode ? 'editor' : 'scroll';
-            savedEditorProducts = []; // Clear saved products when taking photo from scroll mode
+            // In scroll mode, save the current product being viewed
+            if (!editorMode && currentIndex >= 0 && currentIndex < products.length && products[currentIndex]) {
+                savedEditorProducts = [products[currentIndex].id];
+            } else if (editorMode) {
+                savedEditorProducts = [...editorProducts]; // Save editor products
+            } else {
+                savedEditorProducts = [];
+            }
             overlay.classList.remove('hidden');
         };
 
