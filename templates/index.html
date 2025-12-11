@@ -423,6 +423,7 @@
             flex-direction: column;
             border-left: 3px solid #000;
             transition: none; /* Remove animation */
+            touch-action: pan-y; /* Only allow vertical scrolling, prevent horizontal swipe */
         }
 
         .editor-mode-active .editor-products-panel {
@@ -517,10 +518,10 @@
         .editor-product-img {
             width: 100%;
             max-width: 150px;
-            height: auto;
-            object-fit: contain; /* Show full image without cropping */
+            height: 150px; /* Fixed height for consistent sizing */
+            object-fit: cover; /* Crop landscape images to fill square */
             border-radius: 8px;
-            background: transparent; /* Remove grey background */
+            background: transparent;
             cursor: pointer;
             margin-bottom: 10px;
             display: block;
@@ -540,7 +541,7 @@
 
         .editor-product-info .editor-trash-btn {
             position: absolute;
-            right: 5px; /* Move inside the container to prevent horizontal scroll */
+            right: calc(80%); /* Move 20% to the left, positioning under picture in left corner */
         }
 
         .editor-product-details {
@@ -1827,9 +1828,14 @@
 
         document.getElementById('newPhotoBtn').onclick = (e) => {
             e.stopPropagation();
-            // Save current mode and clear saved products for scroll mode
+            // Save current mode and preserve products
             previousMode = editorMode ? 'editor' : 'scroll';
-            savedEditorProducts = []; // Clear saved products when taking photo from scroll mode
+            // In scroll mode, save the current product being viewed
+            if (!editorMode && products[currentIndex]) {
+                savedEditorProducts = [products[currentIndex].id];
+            } else {
+                savedEditorProducts = [...editorProducts]; // Save editor products
+            }
             overlay.classList.remove('hidden');
         };
 
