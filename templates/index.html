@@ -9,7 +9,7 @@
 
         :root {
             --sidebar-width: 90px;
-            --editor-panel-width: 317px; /* Widened by 10%: 288px * 1.10 = 316.8, rounded to 317px */
+            --editor-panel-width: 349px; /* Increased by 10% from 317px: 317 * 1.10 = 348.7, rounded to 349px */
             --popup-width: 90%;
             --popup-max-width: 1200px;
             --popup-height: 90%;
@@ -456,6 +456,13 @@
         .editor-products-list {
             flex: 1;
             overflow-y: auto;
+            /* Hide scrollbar */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .editor-products-list::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
 
         .editor-purchase-btn {
@@ -508,12 +515,15 @@
 
         .editor-product-img {
             width: 100%;
-            height: 120px;
-            object-fit: cover;
+            max-width: 150px;
+            height: auto;
+            aspect-ratio: 1 / 1; /* Make images square */
+            object-fit: contain; /* Changed from cover to contain for full visibility */
             border-radius: 8px;
             background: #f0f0f0;
             cursor: pointer;
             margin-bottom: 10px;
+            display: block;
         }
 
         .editor-product-img:hover {
@@ -947,6 +957,7 @@
                      </svg>
                 </button>
                 <button class="toolbar-button" id="editorBtn">
+                    <!-- Editor/Gallery icon for navigating to editor mode -->
                     <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                         <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -959,8 +970,9 @@
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
                 </button>
                 <button class="toolbar-button" id="scrollBackBtnToolbar" style="display:none;" onclick="showScrollBackConfirm()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
-                        <path d="M12 5v14M5 12l7-7 7 7"/>
+                    <!-- Swipe icon for navigating back to scroll mode -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M5 12l4-4M5 12l4 4"/>
                     </svg>
                 </button>
             </div>

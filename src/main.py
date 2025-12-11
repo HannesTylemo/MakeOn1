@@ -195,7 +195,9 @@ ERROR_PROCESSING_FAILED = 'processing_failed'
 
 # --- VTO LOGIC ---
 mp_face_mesh = mp.solutions.face_mesh
+mp_hands = mp.solutions.hands
 face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True, max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5)
+hands = mp_hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5)
 LIPS_OUTER = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146]
 LIPS_INNER = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95]
 LEFT_EYE_UPPER = [362, 382, 381, 380, 374, 373, 390, 249, 263]
@@ -216,7 +218,60 @@ def create_mask(shape, outer, inner=None):
     if inner is not None: cv2.fillPoly(mask, inner, 0)
     return cv2.GaussianBlur(mask, (7, 7), 0)
 
-def apply_lipstick_physics(img, mask, hex_color, pigment, shine, effect):
+def detect_hand_occlusion(img, lip_outer_pts, hand_results):
+    """
+    Detect if hands are occluding (covering) the lips area.
+    Returns a mask where occluded areas are set to 0 (black).
+    """
+    h, w = img.shape[:2]
+    occlusion_mask = np.ones((h, w), dtype=np.uint8) * 255  # Start with no occlusion
+    
+    if not hand_results.multi_hand_landmarks:
+        return occlusion_mask  # No hands detected, no occlusion
+    
+    # Get lip bounding box for quick check
+    lip_pts_flat = lip_outer_pts.reshape(-1, 2)
+    lip_min_x, lip_min_y = lip_pts_flat.min(axis=0)
+    lip_max_x, lip_max_y = lip_pts_flat.max(axis=0)
+    
+    # Check each detected hand
+    for hand_landmarks in hand_results.multi_hand_landmarks:
+        # Get hand palm points (indices for palm: wrist=0, and base of fingers: 1, 5, 9, 13, 17)
+        hand_points = []
+        for idx in range(21):  # All 21 hand landmarks
+            landmark = hand_landmarks.landmark[idx]
+            x, y = int(landmark.x * w), int(landmark.y * h)
+            hand_points.append((x, y))
+        
+        hand_points = np.array(hand_points)
+        
+        # Create a convex hull around the hand
+        if len(hand_points) > 0:
+            hull = cv2.convexHull(hand_points)
+            
+            # Check if hand overlaps with lip area
+            hand_min_x, hand_min_y = hand_points.min(axis=0)
+            hand_max_x, hand_max_y = hand_points.max(axis=0)
+            
+            # If bounding boxes overlap, hand might be occluding lips
+            if (hand_min_x < lip_max_x and hand_max_x > lip_min_x and
+                hand_min_y < lip_max_y and hand_max_y > lip_min_y):
+                # Fill the hand area in the occlusion mask with 0 (occluded)
+                cv2.fillConvexPoly(occlusion_mask, hull, 0)
+    
+    return occlusion_mask
+
+def apply_lipstick_physics(img, mask, hex_color, pigment, shine, effect, occlusion_mask=None):
+    """
+    Apply lipstick with physics-based rendering.
+    If occlusion_mask is provided, lipstick will not be applied to occluded areas.
+    """
+    # Apply occlusion mask if provided
+    if occlusion_mask is not None:
+        # Combine lipstick mask with occlusion mask
+        # Only apply lipstick where both masks allow (bitwise AND)
+        mask = cv2.bitwise_and(mask, occlusion_mask)
+    
     opacity = pigment / 100.0
     shine_factor = shine / 100.0
     img_lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
@@ -267,7 +322,15 @@ def get_frame():
             outer = get_points(LIPS_OUTER, lm, w, h)
             inner = get_points(LIPS_INNER, lm, w, h)
             mask = create_mask(img.shape, outer, inner)
-            img = apply_lipstick_physics(img, mask, prod.get('hex_color', '#cc0000'), prod.get('pigment', 70), prod.get('shine', 30), prod.get('effect', 'none'))
+            
+            # Detect hand occlusion
+            hand_results = hands.process(rgb)
+            occlusion_mask = detect_hand_occlusion(img, outer, hand_results)
+            
+            # Apply lipstick with occlusion handling
+            img = apply_lipstick_physics(img, mask, prod.get('hex_color', '#cc0000'), 
+                                        prod.get('pigment', 70), prod.get('shine', 30), 
+                                        prod.get('effect', 'none'), occlusion_mask)
         elif cat == 'mascara':
             l_eye = get_points(LEFT_EYE_UPPER, lm, w, h)[0]
             r_eye = get_points(RIGHT_EYE_UPPER, lm, w, h)[0]
