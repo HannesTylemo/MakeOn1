@@ -1173,15 +1173,19 @@
                 const temp = new Image();
                 temp.src = url;
                 imageCache[url] = temp;
+                let retryCount = 0;
                 temp.onload = () => { 
                     img.src = url; 
                 }
                 temp.onerror = () => { 
                     console.error('Failed to load image:', url);
-                    // Retry once after a brief delay
-                    setTimeout(() => {
-                        temp.src = url;
-                    }, 1000);
+                    // Retry once only to prevent infinite loops
+                    if (retryCount === 0) {
+                        retryCount++;
+                        setTimeout(() => {
+                            temp.src = url;
+                        }, 1000);
+                    }
                 }
             }
         }
@@ -1361,12 +1365,18 @@
                     } else if(previousMode === 'editor') {
                         // Restore editor mode if user was previously in it
                         setTimeout(() => {
-                            // Ensure we're in scroll mode first, then toggle to editor
+                            // Ensure we start from scroll mode, then activate editor mode
                             if(editorMode) {
-                                // If already in editor mode, exit it first
-                                toggleEditorMode();
+                                phoneContainer.classList.remove('editor-mode-active');
+                                editorMode = false;
+                                // Reset UI to scroll mode
+                                document.getElementById('lipstickBtn').style.display = 'flex';
+                                document.getElementById('editorBtn').style.display = 'flex';
+                                document.getElementById('scrollBackBtnToolbar').style.display = 'none';
+                                addProductBtn.style.display = 'none';
+                                document.getElementById('newPhotoEditorBtn').style.display = 'none';
                             }
-                            // Now toggle to editor mode
+                            // Now activate editor mode
                             toggleEditorMode();
                             // Restore saved editor products (Keep The Look)
                             if(savedEditorProducts.length > 0) {
@@ -1661,14 +1671,12 @@
                 // Clear all editor products for new look
                 editorProducts = [];
                 updateEditorProductsList();
-            }
-            // If mode === 'edit', keep current products
-
-            toggleEditorMode();
-            
-            // Update image after toggling editor mode to ensure makeup is cleared for "New Look"
-            if (mode === 'new') {
+                // Enter editor mode, then clear the image
+                toggleEditorMode();
                 updateEditorImage();
+            } else {
+                // mode === 'edit', keep current products and enter editor mode
+                toggleEditorMode();
             }
         }
 
