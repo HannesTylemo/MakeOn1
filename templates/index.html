@@ -1097,7 +1097,8 @@
 
         function getProductUrl(index) {
             const p = products[index];
-            // Always use the same uploaded image, just apply different product makeup
+            // Each URL shows the user's uploaded image with this product's makeup applied
+            // The /frame endpoint applies the product based on the id parameter
             return `/frame?id=${p.id}&t=${Date.now()}`;
         }
 
@@ -1403,7 +1404,17 @@
             // Determine which products to add based on current mode
             // In editor mode: add all products in editorProducts array
             // In scroll mode: add only the currently displayed product (the one in "The Recipe")
-            const productsToAdd = editorMode ? editorProducts : [products[currentIndex].id];
+            let productsToAdd;
+            if (editorMode) {
+                productsToAdd = editorProducts;
+            } else {
+                // Ensure current product exists before adding
+                if (products[currentIndex]) {
+                    productsToAdd = [products[currentIndex].id];
+                } else {
+                    productsToAdd = [];
+                }
+            }
             
             if (productsToAdd.length === 0) {
                 // Show empty cart modal
