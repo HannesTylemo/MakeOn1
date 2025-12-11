@@ -195,7 +195,10 @@ ERROR_PROCESSING_FAILED = 'processing_failed'
 
 # --- VTO LOGIC ---
 mp_face_mesh = mp.solutions.face_mesh
-face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True, max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5)
+mp_hands = mp.solutions.hands
+# Lower confidence threshold to 0.3 for better image acceptance
+face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True, max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.3)
+hands = mp_hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5)
 LIPS_OUTER = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146]
 LIPS_INNER = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95]
 LEFT_EYE_UPPER = [362, 382, 381, 380, 374, 373, 390, 249, 263]
@@ -210,13 +213,73 @@ def hex_to_lab(hex_color):
 def get_points(indices, landmarks, w, h):
     return np.array([[(int(landmarks.landmark[i].x * w), int(landmarks.landmark[i].y * h)) for i in indices]], dtype=np.int32)
 
-def create_mask(shape, outer, inner=None):
+def create_mask(shape, outer, inner=None, occlusion_mask=None):
+    """
+    Create a mask for makeup application.
+    If occlusion_mask is provided, it's applied BEFORE blurring for complete occlusion.
+    """
     mask = np.zeros(shape[:2], dtype=np.uint8)
     cv2.fillPoly(mask, outer, 255)
     if inner is not None: cv2.fillPoly(mask, inner, 0)
+    
+    # Apply occlusion BEFORE blurring to ensure complete masking
+    if occlusion_mask is not None:
+        mask = cv2.bitwise_and(mask, occlusion_mask)
+    
     return cv2.GaussianBlur(mask, (7, 7), 0)
 
+def detect_hand_occlusion(img, lip_outer_pts, hand_results):
+    """
+    Detect if hands are occluding (covering) the lips area.
+    Returns a mask where occluded areas are set to 0 (black).
+    """
+    h, w = img.shape[:2]
+    occlusion_mask = np.ones((h, w), dtype=np.uint8) * 255  # Start with no occlusion
+    
+    if not hand_results.multi_hand_landmarks:
+        return occlusion_mask  # No hands detected, no occlusion
+    
+    # Extract lip points - handle different array shapes robustly
+    if isinstance(lip_outer_pts, np.ndarray):
+        # Flatten to 2D array of points regardless of input shape
+        lip_pts_flat = lip_outer_pts.reshape(-1, 2)
+    else:
+        lip_pts_flat = np.array(lip_outer_pts).reshape(-1, 2)
+    
+    lip_min_x, lip_min_y = lip_pts_flat.min(axis=0)
+    lip_max_x, lip_max_y = lip_pts_flat.max(axis=0)
+    
+    # Check each detected hand
+    for hand_landmarks in hand_results.multi_hand_landmarks:
+        # Get all 21 hand landmarks
+        hand_points = []
+        for idx in range(21):
+            landmark = hand_landmarks.landmark[idx]
+            x, y = int(landmark.x * w), int(landmark.y * h)
+            hand_points.append((x, y))
+        
+        hand_points = np.array(hand_points)
+        
+        # Create convex hull around the hand (MediaPipe always provides 21 points)
+        hull = cv2.convexHull(hand_points)
+        
+        # Check if hand overlaps with lip area
+        hand_min_x, hand_min_y = hand_points.min(axis=0)
+        hand_max_x, hand_max_y = hand_points.max(axis=0)
+        
+        # If bounding boxes overlap, hand might be occluding lips
+        if (hand_min_x < lip_max_x and hand_max_x > lip_min_x and
+            hand_min_y < lip_max_y and hand_max_y > lip_min_y):
+            # Fill the hand area in the occlusion mask with 0 (occluded)
+            cv2.fillConvexPoly(occlusion_mask, hull, 0)
+    
+    return occlusion_mask
+
 def apply_lipstick_physics(img, mask, hex_color, pigment, shine, effect):
+    """
+    Apply lipstick with physics-based rendering.
+    Note: Occlusion should be applied in create_mask before blurring.
+    """
     opacity = pigment / 100.0
     shine_factor = shine / 100.0
     img_lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
@@ -251,6 +314,12 @@ active_image_data = None
 
 @app.route('/frame')
 def get_frame():
+    """
+    Generate a makeup preview frame with optional hand occlusion detection.
+    Supports multiple product IDs separated by commas.
+    Note: Hand detection is performed on each request for accuracy.
+    This is appropriate since frames are generated on-demand, not in real-time video.
+    """
     global active_image_data
     if active_image_data is None: return "No Image", 404
     img = active_image_data.copy()
@@ -259,19 +328,40 @@ def get_frame():
     results = face_mesh.process(rgb)
     if not results.multi_face_landmarks: return cv2.imencode('.jpg', img)[1].tobytes()
     lm = results.multi_face_landmarks[0]
-    pid = request.args.get('id')
-    prod = next((p for p in products_db if p['id'] == pid), None)
-    if prod:
+    
+    # Support multiple product IDs separated by pipe character (safer than comma)
+    pid_param = request.args.get('id', '')
+    product_ids = [pid.strip() for pid in pid_param.split('|') if pid.strip()]
+    
+    # Detect hand occlusion once for all products
+    hand_results = hands.process(rgb)
+    
+    # Apply each product
+    for pid in product_ids:
+        prod = next((p for p in products_db if p['id'] == pid), None)
+        if not prod:
+            continue
+            
         cat = prod.get('category', 'lipstick')
         if cat == 'lipstick':
             outer = get_points(LIPS_OUTER, lm, w, h)
             inner = get_points(LIPS_INNER, lm, w, h)
-            mask = create_mask(img.shape, outer, inner)
-            img = apply_lipstick_physics(img, mask, prod.get('hex_color', '#cc0000'), prod.get('pigment', 70), prod.get('shine', 30), prod.get('effect', 'none'))
+            
+            # Get occlusion mask for this product
+            occlusion_mask = detect_hand_occlusion(img, outer, hand_results)
+            
+            # Create mask with occlusion applied BEFORE blurring
+            mask = create_mask(img.shape, outer, inner, occlusion_mask)
+            
+            # Apply lipstick with properly occluded mask
+            img = apply_lipstick_physics(img, mask, prod.get('hex_color', '#cc0000'), 
+                                        prod.get('pigment', 70), prod.get('shine', 30), 
+                                        prod.get('effect', 'none'))
         elif cat == 'mascara':
             l_eye = get_points(LEFT_EYE_UPPER, lm, w, h)[0]
             r_eye = get_points(RIGHT_EYE_UPPER, lm, w, h)[0]
             img = apply_mascara(img, l_eye, r_eye, prod.get('hex_color', '#000000'))
+    
     ret, buf = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 95])
     return Response(buf.tobytes(), mimetype='image/jpeg')
 
@@ -282,21 +372,27 @@ def upload_selfie():
         d = request.json.get('image').split(',')[1]
         n = np.frombuffer(base64.b64decode(d), np.uint8)
         img = cv2.imdecode(n, cv2.IMREAD_COLOR)
+        
+        if img is None:
+            print("Error: Failed to decode image")
+            return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
+        
         h, w = img.shape[:2]
         s = min(720/w, 960/h)
         img = cv2.resize(img, (int(w*s), int(h*s)))
 
-        # Check for face detection
+        # Check for face detection with lower confidence threshold for better acceptance
         rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         results = face_mesh.process(rgb)
 
         if not results.multi_face_landmarks:
+            print("Warning: No face detected in image")
             return jsonify({'success': False, 'error': ERROR_NO_FACE})
 
         active_image_data = img
         return jsonify({'success': True})
     except Exception as e:
-        print(f"Error in upload_selfie: {e}")  # Log server-side
+        print(f"Error in upload_selfie: {type(e).__name__}: {str(e)}")  # Log error type and message only
         return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
 
 @app.route('/api/products')
