@@ -1166,13 +1166,23 @@
 
         function updateSlideImage(el, url) {
             const img = el.querySelector('img');
+            
             if(imageCache[url] && imageCache[url].complete) {
                 img.src = url;
             } else {
                 const temp = new Image();
                 temp.src = url;
                 imageCache[url] = temp;
-                temp.onload = () => { img.src = url; }
+                temp.onload = () => { 
+                    img.src = url; 
+                }
+                temp.onerror = () => { 
+                    console.error('Failed to load image:', url);
+                    // Retry once after a brief delay
+                    setTimeout(() => {
+                        temp.src = url;
+                    }, 1000);
+                }
             }
         }
 
