@@ -196,7 +196,8 @@ ERROR_PROCESSING_FAILED = 'processing_failed'
 # --- VTO LOGIC ---
 mp_face_mesh = mp.solutions.face_mesh
 mp_hands = mp.solutions.hands
-face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True, max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5)
+# Lower confidence threshold to 0.3 for better image acceptance
+face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True, max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.3)
 hands = mp_hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5)
 LIPS_OUTER = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146]
 LIPS_INNER = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95]
@@ -371,21 +372,29 @@ def upload_selfie():
         d = request.json.get('image').split(',')[1]
         n = np.frombuffer(base64.b64decode(d), np.uint8)
         img = cv2.imdecode(n, cv2.IMREAD_COLOR)
+        
+        if img is None:
+            print("Error: Failed to decode image")
+            return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
+        
         h, w = img.shape[:2]
         s = min(720/w, 960/h)
         img = cv2.resize(img, (int(w*s), int(h*s)))
 
-        # Check for face detection
+        # Check for face detection with lower confidence threshold for better acceptance
         rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         results = face_mesh.process(rgb)
 
         if not results.multi_face_landmarks:
+            print("Warning: No face detected in image")
             return jsonify({'success': False, 'error': ERROR_NO_FACE})
 
         active_image_data = img
         return jsonify({'success': True})
     except Exception as e:
         print(f"Error in upload_selfie: {e}")  # Log server-side
+        import traceback
+        traceback.print_exc()  # Print full traceback for debugging
         return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
 
 @app.route('/api/products')
