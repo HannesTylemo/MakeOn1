@@ -1644,12 +1644,15 @@
                 // Clear all editor products for new look
                 editorProducts = [];
                 updateEditorProductsList();
-                // Clear the rendered makeup from the image by refreshing with no products
-                updateEditorImage();
             }
             // If mode === 'edit', keep current products
 
             toggleEditorMode();
+            
+            // Update image after toggling editor mode to ensure makeup is cleared for "New Look"
+            if (mode === 'new') {
+                updateEditorImage();
+            }
         }
 
         // Lipstick button in editor mode - removed as per requirements
@@ -1704,6 +1707,10 @@
                 editorProducts = [];
                 updateEditorProductsList();
                 // The Look panel is now automatically hidden via CSS when editor mode is off
+                
+                // Reinitialize scroll mode slides to fix blank screen issue
+                initSlides();
+                preloadAround(currentIndex);
             }
         }
 
