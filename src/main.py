@@ -357,8 +357,12 @@ def upload_selfie():
             print("Error: No image data in request")
             return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
         
-        # Split and decode base64 image
-        d = image_data.split(',')[1] if ',' in image_data else image_data
+        # Split and decode base64 image - expect data:image/...;base64,<data> format
+        if ',' not in image_data:
+            print("Error: Invalid image data format - missing comma separator")
+            return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
+        
+        d = image_data.split(',')[1]
         n = np.frombuffer(base64.b64decode(d), np.uint8)
         img = cv2.imdecode(n, cv2.IMREAD_COLOR)
         

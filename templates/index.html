@@ -1431,11 +1431,11 @@
             const existing = shoppingCart.find(item => item.id === productId);
             if (existing) {
                 existing.quantity++;
+                showCartAdded([Object.assign({}, product, {quantity: existing.quantity})]);
             } else {
                 shoppingCart.push(Object.assign({}, product, {quantity: 1}));
+                showCartAdded([Object.assign({}, product, {quantity: 1})]);
             }
-
-            showCartAdded([Object.assign({}, product, {quantity: existing ? existing.quantity : 1})]);
         }
 
         function purchaseWholeLook() {
