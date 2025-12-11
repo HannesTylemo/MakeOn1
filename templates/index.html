@@ -9,7 +9,7 @@
 
         :root {
             --sidebar-width: 90px;
-            --editor-panel-width: 349px; /* Current width after 10% increase from previous 317px */
+            --editor-panel-width: 314px; /* Narrowed by 10% from 349px: 349 * 0.90 = 314.1, rounded to 314px */
             --popup-width: 90%;
             --popup-max-width: 1200px;
             --popup-height: 90%;
@@ -125,7 +125,7 @@
         }
 
         /* SHOPPING CART MODALS */
-        #cartAddedModal, #cartViewModal, #checkoutConfirmModal, #deleteItemModal, #exploreLooksModal {
+        #cartAddedModal, #cartViewModal, #checkoutConfirmModal, #deleteItemModal, #exploreLooksModal, #editorModeModal, #emptyCartModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 500;
             display: none; justify-content: center; align-items: center;
@@ -540,7 +540,7 @@
 
         .editor-product-info .editor-trash-btn {
             position: absolute;
-            right: -5px; /* Position right outside, near the scroll-bar */
+            right: calc(-5px - 10%); /* Move left by 10% of container width (originally -5px) */
         }
 
         .editor-product-details {
@@ -885,6 +885,27 @@
             </div>
         </div>
 
+        <!-- Editor Mode Transition Modal -->
+        <div id="editorModeModal">
+            <div class="modal-box">
+                <h3>Do you want to edit the current look or create a new one?</h3>
+                <div class="modal-actions">
+                    <button class="modal-btn yes" onclick="confirmEditorMode('edit')">Edit This Look</button>
+                    <button class="modal-btn no" onclick="confirmEditorMode('new')">New Look</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty Cart Warning Modal -->
+        <div id="emptyCartModal">
+            <div class="modal-box">
+                <h3>There are no items to add</h3>
+                <div class="modal-actions">
+                    <button class="modal-btn yes" onclick="closeEmptyCartModal()">Okay</button>
+                </div>
+            </div>
+        </div>
+
         <div class="startup-overlay" id="startupOverlay">
             <div class="startup-content">
                 <h1>Welcome</h1>
@@ -1077,6 +1098,23 @@
         function getProductUrl(index) {
             const p = products[index];
             return `/frame?id=${p.id}&t=${Date.now()}`;
+        }
+
+        function getEditorProductUrl() {
+            // Build URL with all editor products as comma-separated ids
+            if (editorProducts.length === 0) {
+                // Return the base image if no products
+                return `/frame?t=${Date.now()}`;
+            }
+            return `/frame?id=${editorProducts.join(',')}&t=${Date.now()}`;
+        }
+
+        function updateEditorImage() {
+            // Update the current slide image with the editor products
+            if (editorMode) {
+                const currentSlide = slideElements[1]; // Middle slide is current
+                updateSlideImage(currentSlide, getEditorProductUrl());
+            }
         }
 
         function initSlides() {
@@ -1356,10 +1394,16 @@
         }
 
         function purchaseWholeLook() {
-            const allProducts = [];
-
-            // Determine which products to add based on current mode
+            // Check if there are products to add
             const productsToAdd = editorMode ? editorProducts : products.map(p => p.id);
+            
+            if (productsToAdd.length === 0) {
+                // Show empty cart modal
+                document.getElementById('emptyCartModal').style.display = 'flex';
+                return;
+            }
+            
+            const allProducts = [];
 
             productsToAdd.forEach(pid => {
                 const product = products.find(p => p.id === pid);
@@ -1376,6 +1420,10 @@
             });
 
             showCartAdded(allProducts);
+        }
+
+        function closeEmptyCartModal() {
+            document.getElementById('emptyCartModal').style.display = 'none';
         }
 
         function showCartAdded(addedProducts) {
@@ -1508,8 +1556,22 @@
         // Editor Mode Functions
         document.getElementById('editorBtn').onclick = (e) => {
             e.stopPropagation();
-            toggleEditorMode();
+            // Show modal to ask user's intention
+            document.getElementById('editorModeModal').style.display = 'flex';
         };
+
+        function confirmEditorMode(mode) {
+            document.getElementById('editorModeModal').style.display = 'none';
+            
+            if (mode === 'new') {
+                // Clear all editor products for new look
+                editorProducts = [];
+                updateEditorProductsList();
+            }
+            // If mode === 'edit', keep current products
+            
+            toggleEditorMode();
+        }
 
         // Lipstick button in editor mode - removed as per requirements
         // document.getElementById('lipstickBtnEditor').onclick = (e) => {
@@ -1650,6 +1712,7 @@
             editorProducts.push(productId);
 
             updateEditorProductsList();
+            updateEditorImage(); // Update the preview image
 
             // Update button in product list
             const btn = document.getElementById(`addBtn_${productId}`);
@@ -1668,6 +1731,7 @@
         function removeProductFromEditor(productId) {
             editorProducts = editorProducts.filter(id => id !== productId);
             updateEditorProductsList();
+            updateEditorImage(); // Update the preview image
 
             // Update button in product list if modal is open
             const btn = document.getElementById(`addBtn_${productId}`);

@@ -212,10 +212,19 @@ def hex_to_lab(hex_color):
 def get_points(indices, landmarks, w, h):
     return np.array([[(int(landmarks.landmark[i].x * w), int(landmarks.landmark[i].y * h)) for i in indices]], dtype=np.int32)
 
-def create_mask(shape, outer, inner=None):
+def create_mask(shape, outer, inner=None, occlusion_mask=None):
+    """
+    Create a mask for makeup application.
+    If occlusion_mask is provided, it's applied BEFORE blurring for complete occlusion.
+    """
     mask = np.zeros(shape[:2], dtype=np.uint8)
     cv2.fillPoly(mask, outer, 255)
     if inner is not None: cv2.fillPoly(mask, inner, 0)
+    
+    # Apply occlusion BEFORE blurring to ensure complete masking
+    if occlusion_mask is not None:
+        mask = cv2.bitwise_and(mask, occlusion_mask)
+    
     return cv2.GaussianBlur(mask, (7, 7), 0)
 
 def detect_hand_occlusion(img, lip_outer_pts, hand_results):
@@ -265,17 +274,11 @@ def detect_hand_occlusion(img, lip_outer_pts, hand_results):
     
     return occlusion_mask
 
-def apply_lipstick_physics(img, mask, hex_color, pigment, shine, effect, occlusion_mask=None):
+def apply_lipstick_physics(img, mask, hex_color, pigment, shine, effect):
     """
     Apply lipstick with physics-based rendering.
-    If occlusion_mask is provided, lipstick will not be applied to occluded areas.
+    Note: Occlusion should be applied in create_mask before blurring.
     """
-    # Apply occlusion mask if provided
-    if occlusion_mask is not None:
-        # Combine lipstick mask with occlusion mask
-        # Only apply lipstick where both masks allow (bitwise AND)
-        mask = cv2.bitwise_and(mask, occlusion_mask)
-    
     opacity = pigment / 100.0
     shine_factor = shine / 100.0
     img_lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
@@ -312,6 +315,7 @@ active_image_data = None
 def get_frame():
     """
     Generate a makeup preview frame with optional hand occlusion detection.
+    Supports multiple product IDs separated by commas.
     Note: Hand detection is performed on each request for accuracy.
     This is appropriate since frames are generated on-demand, not in real-time video.
     """
@@ -323,27 +327,40 @@ def get_frame():
     results = face_mesh.process(rgb)
     if not results.multi_face_landmarks: return cv2.imencode('.jpg', img)[1].tobytes()
     lm = results.multi_face_landmarks[0]
-    pid = request.args.get('id')
-    prod = next((p for p in products_db if p['id'] == pid), None)
-    if prod:
+    
+    # Support multiple product IDs separated by commas
+    pid_param = request.args.get('id', '')
+    product_ids = [pid.strip() for pid in pid_param.split(',') if pid.strip()]
+    
+    # Detect hand occlusion once for all products
+    hand_results = hands.process(rgb)
+    
+    # Apply each product
+    for pid in product_ids:
+        prod = next((p for p in products_db if p['id'] == pid), None)
+        if not prod:
+            continue
+            
         cat = prod.get('category', 'lipstick')
         if cat == 'lipstick':
             outer = get_points(LIPS_OUTER, lm, w, h)
             inner = get_points(LIPS_INNER, lm, w, h)
-            mask = create_mask(img.shape, outer, inner)
             
-            # Detect hand occlusion for realistic rendering
-            hand_results = hands.process(rgb)
+            # Get occlusion mask for this product
             occlusion_mask = detect_hand_occlusion(img, outer, hand_results)
             
-            # Apply lipstick with occlusion handling
+            # Create mask with occlusion applied BEFORE blurring
+            mask = create_mask(img.shape, outer, inner, occlusion_mask)
+            
+            # Apply lipstick with properly occluded mask
             img = apply_lipstick_physics(img, mask, prod.get('hex_color', '#cc0000'), 
                                         prod.get('pigment', 70), prod.get('shine', 30), 
-                                        prod.get('effect', 'none'), occlusion_mask)
+                                        prod.get('effect', 'none'))
         elif cat == 'mascara':
             l_eye = get_points(LEFT_EYE_UPPER, lm, w, h)[0]
             r_eye = get_points(RIGHT_EYE_UPPER, lm, w, h)[0]
             img = apply_mascara(img, l_eye, r_eye, prod.get('hex_color', '#000000'))
+    
     ret, buf = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 95])
     return Response(buf.tobytes(), mimetype='image/jpeg')
 
