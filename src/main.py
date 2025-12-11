@@ -392,9 +392,7 @@ def upload_selfie():
         active_image_data = img
         return jsonify({'success': True})
     except Exception as e:
-        print(f"Error in upload_selfie: {e}")  # Log server-side
-        import traceback
-        traceback.print_exc()  # Print full traceback for debugging
+        print(f"Error in upload_selfie: {type(e).__name__}: {str(e)}")  # Log error type and message only
         return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
 
 @app.route('/api/products')

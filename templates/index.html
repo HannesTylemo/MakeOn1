@@ -1818,6 +1818,7 @@
                 const categoryProducts = productsByCategory[category];
 
                 categoryProducts.forEach(product => {
+                    // Note: product.id is generated server-side as UUID (safe for direct use)
                     html += `
                         <div class="editor-product-item">
                             <div class="editor-product-category-header">${category}:</div>
