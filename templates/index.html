@@ -540,7 +540,7 @@
 
         .editor-product-info .editor-trash-btn {
             position: absolute;
-            right: calc(-5px - 10%); /* Move left by 10% of container width (originally -5px) */
+            right: -36px; /* Move left by ~10% of 314px container = 31.4px, added to original -5px = -36px */
         }
 
         .editor-product-details {
@@ -1101,12 +1101,12 @@
         }
 
         function getEditorProductUrl() {
-            // Build URL with all editor products as comma-separated ids
+            // Build URL with all editor products using pipe delimiter (safer than comma)
             if (editorProducts.length === 0) {
                 // Return the base image if no products
                 return `/frame?t=${Date.now()}`;
             }
-            return `/frame?id=${editorProducts.join(',')}&t=${Date.now()}`;
+            return `/frame?id=${editorProducts.join('|')}&t=${Date.now()}`;
         }
 
         function updateEditorImage() {

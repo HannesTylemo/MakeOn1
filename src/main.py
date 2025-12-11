@@ -328,9 +328,9 @@ def get_frame():
     if not results.multi_face_landmarks: return cv2.imencode('.jpg', img)[1].tobytes()
     lm = results.multi_face_landmarks[0]
     
-    # Support multiple product IDs separated by commas
+    # Support multiple product IDs separated by pipe character (safer than comma)
     pid_param = request.args.get('id', '')
-    product_ids = [pid.strip() for pid in pid_param.split(',') if pid.strip()]
+    product_ids = [pid.strip() for pid in pid_param.split('|') if pid.strip()]
     
     # Detect hand occlusion once for all products
     hand_results = hands.process(rgb)
