@@ -229,36 +229,39 @@ def detect_hand_occlusion(img, lip_outer_pts, hand_results):
     if not hand_results.multi_hand_landmarks:
         return occlusion_mask  # No hands detected, no occlusion
     
-    # Get lip bounding box for quick check
-    # lip_outer_pts has shape [1, n, 2], so we access the first element
-    lip_pts_flat = lip_outer_pts[0] if len(lip_outer_pts.shape) == 3 else lip_outer_pts.reshape(-1, 2)
+    # Extract lip points - handle different array shapes robustly
+    if isinstance(lip_outer_pts, np.ndarray):
+        # Flatten to 2D array of points regardless of input shape
+        lip_pts_flat = lip_outer_pts.reshape(-1, 2)
+    else:
+        lip_pts_flat = np.array(lip_outer_pts).reshape(-1, 2)
+    
     lip_min_x, lip_min_y = lip_pts_flat.min(axis=0)
     lip_max_x, lip_max_y = lip_pts_flat.max(axis=0)
     
     # Check each detected hand
     for hand_landmarks in hand_results.multi_hand_landmarks:
-        # Get hand palm points (indices for palm: wrist=0, and base of fingers: 1, 5, 9, 13, 17)
+        # Get all 21 hand landmarks
         hand_points = []
-        for idx in range(21):  # All 21 hand landmarks
+        for idx in range(21):
             landmark = hand_landmarks.landmark[idx]
             x, y = int(landmark.x * w), int(landmark.y * h)
             hand_points.append((x, y))
         
         hand_points = np.array(hand_points)
         
-        # Create a convex hull around the hand (requires at least 3 points)
-        if len(hand_points) >= 3:
-            hull = cv2.convexHull(hand_points)
-            
-            # Check if hand overlaps with lip area
-            hand_min_x, hand_min_y = hand_points.min(axis=0)
-            hand_max_x, hand_max_y = hand_points.max(axis=0)
-            
-            # If bounding boxes overlap, hand might be occluding lips
-            if (hand_min_x < lip_max_x and hand_max_x > lip_min_x and
-                hand_min_y < lip_max_y and hand_max_y > lip_min_y):
-                # Fill the hand area in the occlusion mask with 0 (occluded)
-                cv2.fillConvexPoly(occlusion_mask, hull, 0)
+        # Create convex hull around the hand (MediaPipe always provides 21 points)
+        hull = cv2.convexHull(hand_points)
+        
+        # Check if hand overlaps with lip area
+        hand_min_x, hand_min_y = hand_points.min(axis=0)
+        hand_max_x, hand_max_y = hand_points.max(axis=0)
+        
+        # If bounding boxes overlap, hand might be occluding lips
+        if (hand_min_x < lip_max_x and hand_max_x > lip_min_x and
+            hand_min_y < lip_max_y and hand_max_y > lip_min_y):
+            # Fill the hand area in the occlusion mask with 0 (occluded)
+            cv2.fillConvexPoly(occlusion_mask, hull, 0)
     
     return occlusion_mask
 
