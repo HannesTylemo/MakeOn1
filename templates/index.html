@@ -232,7 +232,7 @@
         }
 
         .modal-box {
-            background: white; padding: 30px; border-radius: 20px; width: 300px; text-align: center;
+            background: white; padding: 30px; border-radius: 20px; width: 450px; text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .modal-box h3 {
@@ -281,7 +281,7 @@
         }
         .toolbar-button { background: transparent; border: none; cursor: pointer; width: 44px; height: 100%; display:flex; justify-content:center; align-items:center;}
         .toolbar-button svg { width: 24px; height: 24px; stroke: #000; stroke-width: 2; fill: none; }
-        .toolbar-button img { width: 24px; height: 24px; object-fit: contain; }
+        .toolbar-button img { width: 48px; height: 48px; object-fit: contain; }
 
         .desktop-arrows-container { display: none; flex-direction: column; gap: 15px; align-items: center; }
         .nav-buttons-container { display: flex; justify-content: space-around; width: 100%; height: 100%; }
@@ -358,7 +358,7 @@
             .nav-buttons-container { flex-direction: column; height: auto; gap: 20px; justify-content: flex-end; }
             .toolbar-button { height: 60px; width: 100%; }
             .toolbar-button svg { width: 32px; height: 32px; }
-            .toolbar-button img { width: 32px; height: 32px; }
+            .toolbar-button img { width: 64px; height: 64px; }
             .side-panel {
                 width: 300px; right: -300px; top: 0; height: 100%; z-index: 45;
                 border-left: 1px solid #eee; padding-top: 30px;
@@ -508,6 +508,19 @@
             text-transform: uppercase;
             margin-bottom: 10px;
             letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .editor-product-category-header-text {
+            flex: 1;
+        }
+        
+        .editor-product-category-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         .editor-product-image-container {
@@ -930,7 +943,7 @@
             <div class="modal-box">
                 <h3>No items to add!</h3>
                 <div class="modal-actions">
-                    <button class="modal-btn yes" onclick="closeEmptyCartModal()">Okay!</button>
+                    <button class="modal-btn yes" onclick="closeEmptyCartModal()">Okay</button>
                 </div>
             </div>
         </div>
@@ -1310,6 +1323,13 @@
 
         function handleImageSelection(b64, save) {
             imageCache = {};
+            
+            // Clear existing slide images to prevent old images from showing
+            slideElements.forEach(slide => {
+                const img = slide.querySelector('img');
+                if (img) img.src = '';
+            });
+            
             fetch('/upload_selfie', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({image:b64}) })
             .then(r=>r.json()).then(d => {
                 if(d.success) {
@@ -1624,6 +1644,8 @@
                 // Clear all editor products for new look
                 editorProducts = [];
                 updateEditorProductsList();
+                // Clear the rendered makeup from the image by refreshing with no products
+                updateEditorImage();
             }
             // If mode === 'edit', keep current products
 
@@ -1827,13 +1849,9 @@
                 categoryProducts.forEach(product => {
                     html += `
                         <div class="editor-product-item">
-                            <div class="editor-product-category-header">${category}:</div>
-                            <div class="editor-product-image-container">
-                                <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
-                                <div class="editor-product-details">
-                                    <div class="editor-product-name">${product.product_name}</div>
-                                </div>
-                                <div class="editor-product-info">
+                            <div class="editor-product-category-header">
+                                <div class="editor-product-category-header-text">${category}:</div>
+                                <div class="editor-product-category-actions">
                                     <button class="editor-cart-btn" onclick="addSingleProductToCart('${product.id}')" title="Add to Cart">
                                         <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
                                             <circle cx="9" cy="21" r="1"></circle>
@@ -1848,6 +1866,12 @@
                                             <line x1="14" y1="11" x2="14" y2="17"/>
                                         </svg>
                                     </button>
+                                </div>
+                            </div>
+                            <div class="editor-product-image-container">
+                                <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
+                                <div class="editor-product-details">
+                                    <div class="editor-product-name">${product.product_name}</div>
                                 </div>
                             </div>
                         </div>

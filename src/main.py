@@ -314,6 +314,7 @@ def get_frame():
     Generate a makeup preview frame with optional hand occlusion detection.
     Note: Hand detection is performed on each request for accuracy.
     This is appropriate since frames are generated on-demand, not in real-time video.
+    Supports multiple product IDs separated by pipe (|) character.
     """
     global active_image_data
     if active_image_data is None: return "No Image", 404
@@ -323,27 +324,39 @@ def get_frame():
     results = face_mesh.process(rgb)
     if not results.multi_face_landmarks: return cv2.imencode('.jpg', img)[1].tobytes()
     lm = results.multi_face_landmarks[0]
-    pid = request.args.get('id')
-    prod = next((p for p in products_db if p['id'] == pid), None)
-    if prod:
-        cat = prod.get('category', 'lipstick')
-        if cat == 'lipstick':
-            outer = get_points(LIPS_OUTER, lm, w, h)
-            inner = get_points(LIPS_INNER, lm, w, h)
-            mask = create_mask(img.shape, outer, inner)
+    
+    # Handle multiple product IDs separated by pipe character
+    pid_param = request.args.get('id', '')
+    if pid_param:
+        product_ids = pid_param.split('|')
+        
+        # Apply each product in order
+        for pid in product_ids:
+            pid = pid.strip()
+            if not pid:
+                continue
+                
+            prod = next((p for p in products_db if p['id'] == pid), None)
+            if prod:
+                cat = prod.get('category', 'lipstick')
+                if cat == 'lipstick':
+                    outer = get_points(LIPS_OUTER, lm, w, h)
+                    inner = get_points(LIPS_INNER, lm, w, h)
+                    mask = create_mask(img.shape, outer, inner)
 
-            # Detect hand occlusion for realistic rendering
-            hand_results = hands.process(rgb)
-            occlusion_mask = detect_hand_occlusion(img, outer, hand_results)
+                    # Detect hand occlusion for realistic rendering
+                    hand_results = hands.process(rgb)
+                    occlusion_mask = detect_hand_occlusion(img, outer, hand_results)
 
-            # Apply lipstick with occlusion handling
-            img = apply_lipstick_physics(img, mask, prod.get('hex_color', '#cc0000'),
-                                        prod.get('pigment', 70), prod.get('shine', 30),
-                                        prod.get('effect', 'none'), occlusion_mask)
-        elif cat == 'mascara':
-            l_eye = get_points(LEFT_EYE_UPPER, lm, w, h)[0]
-            r_eye = get_points(RIGHT_EYE_UPPER, lm, w, h)[0]
-            img = apply_mascara(img, l_eye, r_eye, prod.get('hex_color', '#000000'))
+                    # Apply lipstick with occlusion handling
+                    img = apply_lipstick_physics(img, mask, prod.get('hex_color', '#cc0000'),
+                                                prod.get('pigment', 70), prod.get('shine', 30),
+                                                prod.get('effect', 'none'), occlusion_mask)
+                elif cat == 'mascara':
+                    l_eye = get_points(LEFT_EYE_UPPER, lm, w, h)[0]
+                    r_eye = get_points(RIGHT_EYE_UPPER, lm, w, h)[0]
+                    img = apply_mascara(img, l_eye, r_eye, prod.get('hex_color', '#000000'))
+    
     ret, buf = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 95])
     return Response(buf.tobytes(), mimetype='image/jpeg')
 
