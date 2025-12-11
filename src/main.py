@@ -351,9 +351,22 @@ def get_frame():
 def upload_selfie():
     global active_image_data
     try:
-        d = request.json.get('image').split(',')[1]
+        # Get image data from request
+        image_data = request.json.get('image')
+        if not image_data:
+            print("Error: No image data in request")
+            return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
+        
+        # Split and decode base64 image
+        d = image_data.split(',')[1] if ',' in image_data else image_data
         n = np.frombuffer(base64.b64decode(d), np.uint8)
         img = cv2.imdecode(n, cv2.IMREAD_COLOR)
+        
+        # Check if image was decoded successfully
+        if img is None:
+            print("Error: Failed to decode image")
+            return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
+        
         h, w = img.shape[:2]
         s = min(720/w, 960/h)
         img = cv2.resize(img, (int(w*s), int(h*s)))
@@ -369,6 +382,8 @@ def upload_selfie():
         return jsonify({'success': True})
     except Exception as e:
         print(f"Error in upload_selfie: {e}")  # Log server-side
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'error': ERROR_PROCESSING_FAILED})
 
 @app.route('/api/products')
