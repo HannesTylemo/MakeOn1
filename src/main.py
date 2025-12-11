@@ -230,7 +230,8 @@ def detect_hand_occlusion(img, lip_outer_pts, hand_results):
         return occlusion_mask  # No hands detected, no occlusion
     
     # Get lip bounding box for quick check
-    lip_pts_flat = lip_outer_pts.reshape(-1, 2)
+    # lip_outer_pts has shape [1, n, 2], so we access the first element
+    lip_pts_flat = lip_outer_pts[0] if len(lip_outer_pts.shape) == 3 else lip_outer_pts.reshape(-1, 2)
     lip_min_x, lip_min_y = lip_pts_flat.min(axis=0)
     lip_max_x, lip_max_y = lip_pts_flat.max(axis=0)
     
@@ -245,8 +246,8 @@ def detect_hand_occlusion(img, lip_outer_pts, hand_results):
         
         hand_points = np.array(hand_points)
         
-        # Create a convex hull around the hand
-        if len(hand_points) > 0:
+        # Create a convex hull around the hand (requires at least 3 points)
+        if len(hand_points) >= 3:
             hull = cv2.convexHull(hand_points)
             
             # Check if hand overlaps with lip area
@@ -306,6 +307,11 @@ active_image_data = None
 
 @app.route('/frame')
 def get_frame():
+    """
+    Generate a makeup preview frame with optional hand occlusion detection.
+    Note: Hand detection is performed on each request for accuracy.
+    This is appropriate since frames are generated on-demand, not in real-time video.
+    """
     global active_image_data
     if active_image_data is None: return "No Image", 404
     img = active_image_data.copy()
@@ -323,7 +329,7 @@ def get_frame():
             inner = get_points(LIPS_INNER, lm, w, h)
             mask = create_mask(img.shape, outer, inner)
             
-            # Detect hand occlusion
+            # Detect hand occlusion for realistic rendering
             hand_results = hands.process(rgb)
             occlusion_mask = detect_hand_occlusion(img, outer, hand_results)
             
