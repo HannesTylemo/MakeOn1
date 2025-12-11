@@ -541,7 +541,7 @@
 
         .editor-product-info .editor-trash-btn {
             position: absolute;
-            right: calc(80%); /* Move 20% to the left, positioning under picture in left corner */
+            left: 20px; /* Position under the left side of product image */
         }
 
         .editor-product-details {
@@ -1831,10 +1831,12 @@
             // Save current mode and preserve products
             previousMode = editorMode ? 'editor' : 'scroll';
             // In scroll mode, save the current product being viewed
-            if (!editorMode && products[currentIndex]) {
+            if (!editorMode && currentIndex >= 0 && currentIndex < products.length && products[currentIndex]) {
                 savedEditorProducts = [products[currentIndex].id];
-            } else {
+            } else if (editorMode) {
                 savedEditorProducts = [...editorProducts]; // Save editor products
+            } else {
+                savedEditorProducts = [];
             }
             overlay.classList.remove('hidden');
         };
