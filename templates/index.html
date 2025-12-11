@@ -1166,13 +1166,27 @@
 
         function updateSlideImage(el, url) {
             const img = el.querySelector('img');
+            
             if(imageCache[url] && imageCache[url].complete) {
                 img.src = url;
             } else {
                 const temp = new Image();
                 temp.src = url;
                 imageCache[url] = temp;
-                temp.onload = () => { img.src = url; }
+                let retryCount = 0;
+                temp.onload = () => { 
+                    img.src = url; 
+                }
+                temp.onerror = () => { 
+                    console.error('Failed to load image:', url);
+                    // Retry once only to prevent infinite loops
+                    if (retryCount === 0) {
+                        retryCount++;
+                        setTimeout(() => {
+                            temp.src = url;
+                        }, 1000);
+                    }
+                }
             }
         }
 
@@ -1351,11 +1365,24 @@
                     } else if(previousMode === 'editor') {
                         // Restore editor mode if user was previously in it
                         setTimeout(() => {
-                            if(!editorMode) toggleEditorMode();
+                            // Ensure we start from scroll mode, then activate editor mode
+                            if(editorMode) {
+                                phoneContainer.classList.remove('editor-mode-active');
+                                editorMode = false;
+                                // Reset UI to scroll mode
+                                document.getElementById('lipstickBtn').style.display = 'flex';
+                                document.getElementById('editorBtn').style.display = 'flex';
+                                document.getElementById('scrollBackBtnToolbar').style.display = 'none';
+                                addProductBtn.style.display = 'none';
+                                document.getElementById('newPhotoEditorBtn').style.display = 'none';
+                            }
+                            // Now activate editor mode
+                            toggleEditorMode();
                             // Restore saved editor products (Keep The Look)
                             if(savedEditorProducts.length > 0) {
                                 editorProducts = [...savedEditorProducts];
                                 updateEditorProductsList();
+                                updateEditorImage();
                             }
                         }, 500);
                     }
@@ -1644,12 +1671,13 @@
                 // Clear all editor products for new look
                 editorProducts = [];
                 updateEditorProductsList();
-                // Clear the rendered makeup from the image by refreshing with no products
+                // Enter editor mode, then clear the image
+                toggleEditorMode();
                 updateEditorImage();
+            } else {
+                // mode === 'edit', keep current products and enter editor mode
+                toggleEditorMode();
             }
-            // If mode === 'edit', keep current products
-
-            toggleEditorMode();
         }
 
         // Lipstick button in editor mode - removed as per requirements
@@ -1704,6 +1732,10 @@
                 editorProducts = [];
                 updateEditorProductsList();
                 // The Look panel is now automatically hidden via CSS when editor mode is off
+                
+                // Reinitialize scroll mode slides to fix blank screen issue
+                initSlides();
+                preloadAround(currentIndex);
             }
         }
 
