@@ -417,6 +417,7 @@
             background: white;
             z-index: 20;
             overflow-y: auto;
+            overflow-x: hidden; /* Prevent horizontal scroll */
             padding: 20px;
             display: flex;
             flex-direction: column;
@@ -517,10 +518,9 @@
             width: 100%;
             max-width: 150px;
             height: auto;
-            aspect-ratio: 1 / 1; /* Make images square */
-            object-fit: contain; /* Changed from cover to contain for full visibility */
+            object-fit: contain; /* Show full image without cropping */
             border-radius: 8px;
-            background: #f0f0f0;
+            background: transparent; /* Remove grey background */
             cursor: pointer;
             margin-bottom: 10px;
             display: block;
@@ -540,7 +540,7 @@
 
         .editor-product-info .editor-trash-btn {
             position: absolute;
-            right: -36px; /* Move left by ~10% of 314px container = 31.4px, added to original -5px = -36px */
+            right: 5px; /* Move inside the container to prevent horizontal scroll */
         }
 
         .editor-product-details {
@@ -1097,6 +1097,7 @@
 
         function getProductUrl(index) {
             const p = products[index];
+            // Always use the same uploaded image, just apply different product makeup
             return `/frame?id=${p.id}&t=${Date.now()}`;
         }
 
@@ -1118,6 +1119,8 @@
         }
 
         function initSlides() {
+            // In scroll mode, show the product applied to the uploaded image
+            // All slides use the SAME uploaded image with different products applied
             updateSlideImage(slideElements[0], getProductUrl(getIndex(currentIndex - 1)));
             updateSlideImage(slideElements[1], getProductUrl(getIndex(currentIndex)));
             updateSlideImage(slideElements[2], getProductUrl(getIndex(currentIndex + 1)));
@@ -1148,6 +1151,9 @@
         function updateInfo(idx) {
             const p = products[idx];
             if(!p) return;
+            
+            // In scroll mode, "The Recipe" shows the products applied to the current photo
+            // Since each slide shows one product applied, show that single product
             productInfo.innerHTML = `
                 <div style="background:#fff; border:1px solid #eee; padding:15px; border-radius:10px;">
                     <p style="font-weight:bold; font-size:16px; margin-bottom:10px;">${p.product_name}</p>
@@ -1394,8 +1400,10 @@
         }
 
         function purchaseWholeLook() {
-            // Check if there are products to add
-            const productsToAdd = editorMode ? editorProducts : products.map(p => p.id);
+            // Determine which products to add based on current mode
+            // In editor mode: add all products in editorProducts array
+            // In scroll mode: add only the currently displayed product (the one in "The Recipe")
+            const productsToAdd = editorMode ? editorProducts : [products[currentIndex].id];
             
             if (productsToAdd.length === 0) {
                 // Show empty cart modal
