@@ -283,6 +283,7 @@
         .toolbar-button svg { width: 24px; height: 24px; stroke: #000; stroke-width: 2; fill: none; }
         #addProductBtn svg { width: 36px; height: 36px; }
         .toolbar-button img { width: 48px; height: 48px; object-fit: contain; }
+        #editorBtn img { width: 24px; height: 24px; }
 
         .desktop-arrows-container { display: none; flex-direction: column; gap: 15px; align-items: center; }
         .nav-buttons-container { display: flex; justify-content: space-around; width: 100%; height: 100%; }
@@ -295,14 +296,14 @@
             color: black;
             font-family: 'Helvetica Neue', sans-serif;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 7px;
             padding: 0;
             cursor: pointer;
             margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            width: 60px;
-            height: 60px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -320,13 +321,13 @@
             color: black;
             font-family: 'Helvetica Neue', sans-serif;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 7px;
             padding: 0;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            width: 60px;
-            height: 60px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -336,7 +337,7 @@
             margin: 0 auto;
         }
         .new-photo-editor-btn:hover { background: #f0f0f0; }
-        @media (max-width: 767px) { .new-photo-editor-btn { width: 44px; height: 44px; font-size: 8px; } }
+        @media (max-width: 767px) { .new-photo-editor-btn { width: 31px; height: 31px; font-size: 6px; } }
 
         /* SIDE PANEL */
         .side-panel {
@@ -361,6 +362,7 @@
             .toolbar-button svg { width: 32px; height: 32px; }
             #addProductBtn svg { width: 48px; height: 48px; }
             .toolbar-button img { width: 64px; height: 64px; }
+            #editorBtn img { width: 32px; height: 32px; }
             .side-panel {
                 width: 300px; right: -300px; top: 0; height: 100%; z-index: 45;
                 border-left: 1px solid #eee; padding-top: 30px;
@@ -1038,7 +1040,7 @@
                 <!-- Editor mode: New Photo, Add new item, Back to scroll (bottom to top) - Product icon removed -->
                 <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
                 <button class="toolbar-button" id="addProductBtn" style="display:none;">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="1" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="1"/></svg>
                 </button>
                 <button class="toolbar-button" id="scrollBackBtnToolbar" style="display:none;" onclick="showScrollBackConfirm()">
                     <!-- Swipe icon for navigating back to scroll mode -->
