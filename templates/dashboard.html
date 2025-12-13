@@ -833,7 +833,19 @@
         document.getElementById('edit-category-select').addEventListener('change', toggleEditProperties);
 
         // EDIT MODAL
-        function openEditModal(id, category, brand, productName, hexColor, price, description, pigment, shine, effect, imageUrl) {
+        function openEditModal(id, category, brand, productName, hexColor, price, description, pigment, shine, effect, imageUrl, colors) {
+            // Clear existing color variations except the first one
+            const editContainer = document.getElementById('color-variations-edit');
+            editContainer.innerHTML = `
+                <div class="color-variation-row">
+                    <div class="color-input-wrapper">
+                        <input type="color" name="hex_color" id="edit-hex-color" class="form-control form-control-color color-input-shortened" required>
+                        <button type="button" class="add-color-btn" onclick="addColorVariation('edit')">+</button>
+                    </div>
+                </div>
+            `;
+            
+            // Set form values
             document.getElementById('edit-product-id').value = id;
             document.getElementById('edit-category-select').value = category;
             document.getElementById('edit-brand').value = brand;
@@ -851,6 +863,26 @@
                 document.getElementById('edit-effect').value = effect;
                 updateEditBubblePosition('edit-range-pigment', 'edit-bubble-pigment');
                 updateEditBubblePosition('edit-range-shine', 'edit-bubble-shine');
+            }
+            
+            // Add additional colors if they exist
+            if (colors && Array.isArray(colors) && colors.length > 1) {
+                for (let i = 1; i < colors.length; i++) {
+                    const newRow = document.createElement('div');
+                    newRow.className = 'color-variation-row';
+                    newRow.innerHTML = `
+                        <button type="button" class="remove-color-btn" onclick="removeColorVariation(this)">
+                            <svg class="trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                        <div class="color-input-wrapper">
+                            <input type="color" name="additional_colors[]" class="form-control form-control-color color-input-shortened" value="${colors[i]}">
+                            <button type="button" class="add-color-btn" onclick="addColorVariation('edit')">+</button>
+                        </div>
+                    `;
+                    editContainer.appendChild(newRow);
+                }
             }
 
             toggleEditProperties();
@@ -954,64 +986,6 @@
             const row = button.closest('.color-variation-row');
             row.remove();
         }
-        
-        // Update openEditModal to handle multiple colors
-        const originalOpenEditModal = openEditModal;
-        openEditModal = function(id, category, brand, productName, hexColor, price, description, pigment, shine, effect, imageUrl, colors) {
-            // Clear existing color variations except the first one
-            const editContainer = document.getElementById('color-variations-edit');
-            editContainer.innerHTML = `
-                <div class="color-variation-row">
-                    <div class="color-input-wrapper">
-                        <input type="color" name="hex_color" id="edit-hex-color" class="form-control form-control-color color-input-shortened" required>
-                        <button type="button" class="add-color-btn" onclick="addColorVariation('edit')">+</button>
-                    </div>
-                </div>
-            `;
-            
-            // Call original function
-            document.getElementById('edit-product-id').value = id;
-            document.getElementById('edit-category-select').value = category;
-            document.getElementById('edit-brand').value = brand;
-            document.getElementById('edit-product-name').value = productName;
-            document.getElementById('edit-hex-color').value = hexColor;
-            document.getElementById('edit-price').value = price;
-            document.getElementById('edit-description').value = description;
-
-            // Set lipstick properties
-            if (category === 'lipstick') {
-                document.getElementById('edit-range-pigment').value = pigment;
-                document.getElementById('edit-num-pigment').value = pigment;
-                document.getElementById('edit-range-shine').value = shine;
-                document.getElementById('edit-num-shine').value = shine;
-                document.getElementById('edit-effect').value = effect;
-                updateEditBubblePosition('edit-range-pigment', 'edit-bubble-pigment');
-                updateEditBubblePosition('edit-range-shine', 'edit-bubble-shine');
-            }
-            
-            // Add additional colors if they exist
-            if (colors && Array.isArray(colors) && colors.length > 1) {
-                for (let i = 1; i < colors.length; i++) {
-                    const newRow = document.createElement('div');
-                    newRow.className = 'color-variation-row';
-                    newRow.innerHTML = `
-                        <button type="button" class="remove-color-btn" onclick="removeColorVariation(this)">
-                            <svg class="trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                            </svg>
-                        </button>
-                        <div class="color-input-wrapper">
-                            <input type="color" name="additional_colors[]" class="form-control form-control-color color-input-shortened" value="${colors[i]}">
-                            <button type="button" class="add-color-btn" onclick="addColorVariation('edit')">+</button>
-                        </div>
-                    `;
-                    editContainer.appendChild(newRow);
-                }
-            }
-
-            toggleEditProperties();
-            showModal('editProductModal');
-        };
     </script>
 </body>
 </html>

@@ -121,7 +121,7 @@ def add_product():
         "brand": request.form.get('brand'),
         "product_name": request.form.get('product_name'),
         "hex_color": colors[0] if colors else "#cc0000",  # Keep backward compatibility
-        "colors": colors if len(colors) > 0 else [hex_color or "#cc0000"],  # Array of all colors
+        "colors": colors or [hex_color or "#cc0000"],  # Array of all colors
         "price": request.form.get('price', "25.00"),
         "description": request.form.get('description', ""),
         "url": "#",
@@ -173,7 +173,7 @@ def edit_product():
     colors.extend([c for c in additional_colors if c])
     
     product['hex_color'] = colors[0] if colors else product.get('hex_color', "#cc0000")
-    product['colors'] = colors if len(colors) > 0 else [product.get('hex_color', "#cc0000")]
+    product['colors'] = colors or [product.get('hex_color', "#cc0000")]
     
     product['price'] = request.form.get('price', "25.00")
     product['description'] = request.form.get('description', "")
