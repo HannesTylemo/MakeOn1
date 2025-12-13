@@ -967,7 +967,7 @@
         <div class="startup-overlay" id="startupOverlay">
             <div class="startup-content">
                 <h1>Welcome</h1>
-                <p>Upload or take a photo to find the look of your dreams.</p>
+                <p id="welcomeText">Upload or take a photo to find the look of your dreams.</p>
                 <button class="action-btn" onclick="handleCameraClick()">Open Camera</button>
                 <input type="file" id="mobileCameraInput" accept="image/*" capture="user" style="display: none" onchange="handleFileUpload(this)">
                 <button class="action-btn secondary" onclick="document.getElementById('uploadInput').click()">Upload Photo</button>
@@ -1095,10 +1095,11 @@
     </div>
 
     <script>
-        // Check URL parameters for editor mode
+        // Check URL parameters for editor mode and entry point
         const urlParams = new URLSearchParams(window.location.search);
         const shouldEnterEditorMode = urlParams.get('mode') === 'editor';
         const productParam = urlParams.get('product');
+        const entryMode = urlParams.get('entry'); // 'explore' or 'tryon'
 
         const overlay = document.getElementById('startupOverlay');
         const exitModal = document.getElementById('exitModal');
@@ -1110,6 +1111,14 @@
         const videoContainer = document.getElementById('videoContainer');
         const dragIndicator = document.getElementById('dragIndicator');
         const editorProductsPanel = document.getElementById('editorProductsPanel');
+
+        // Customize welcome text based on entry mode
+        const welcomeTextElement = document.getElementById('welcomeText');
+        if (entryMode === 'explore') {
+            welcomeTextElement.textContent = 'Upload or take a photo to get started. We will analyze your skintone and create personalised looks just for you. If you want to, you can also create your very own.';
+        } else if (entryMode === 'tryon') {
+            welcomeTextElement.textContent = 'Upload or take a photo to get started!';
+        }
 
         // DOM ROTATION SETUP
         let slideElements = [

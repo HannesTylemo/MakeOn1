@@ -71,7 +71,7 @@
                     {% if product.image_url %}
                         <img src="{{ product.image_url }}" class="product-image">
                         <!-- Try-On Button Inside Image (Bottom Right) -->
-                        <a href="/?mode=editor&product={{ product.id }}" class="btn-try-on-overlay" style="text-decoration: none; color: black;">
+                        <a href="/?mode=editor&product={{ product.id }}&entry=tryon" class="btn-try-on-overlay" style="text-decoration: none; color: black;">
                             Virtual Try On <img src="/static/uploads/VTO-button.png" alt="VTO">
                         </a>
                     {% else %}
