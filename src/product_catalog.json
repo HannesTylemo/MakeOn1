@@ -1,5 +1,24 @@
 [
   {
+    "id": "prod_7df3edae",
+    "category": "lipstick",
+    "brand": "Test Brand",
+    "product_name": "Multi Color Test",
+    "hex_color": "#ff0000",
+    "colors": [
+      "#ff0000",
+      "#00ff00",
+      "#0000ff"
+    ],
+    "price": "25.00",
+    "description": "Test product with 3 colors",
+    "url": "#",
+    "image_url": "/static/uploads/7ac35b_test.png",
+    "pigment": 70,
+    "shine": 30,
+    "effect": "none"
+  },
+  {
     "id": "prod_demo2",
     "category": "mascara",
     "brand": "Maybelline",
@@ -8,7 +27,10 @@
     "price": "12.00",
     "description": "Full fan effect volume.",
     "url": "/product/prod_demo2",
-    "image_url": "/static/uploads/mascara_demo.jpg"
+    "image_url": "/static/uploads/mascara_demo.jpg",
+    "colors": [
+      "#000000"
+    ]
   },
   {
     "id": "prod_new_1",
@@ -22,7 +44,10 @@
     "image_url": "/static/uploads/vice_lipstick.jpg",
     "pigment": 85,
     "shine": 20,
-    "effect": "matte"
+    "effect": "matte",
+    "colors": [
+      "#AC5851"
+    ]
   },
   {
     "id": "prod_new_2",
@@ -33,6 +58,9 @@
     "price": "28.00",
     "description": "An intensely black, volumizing mascara.",
     "url": "/product/prod_new_2",
-    "image_url": "/static/uploads/better_than_sex.jpg"
+    "image_url": "/static/uploads/better_than_sex.jpg",
+    "colors": [
+      "#000000"
+    ]
   }
 ]

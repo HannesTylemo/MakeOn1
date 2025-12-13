@@ -74,6 +74,59 @@
             vertical-align: middle;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        
+        /* Color variations styling */
+        .color-variations-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .color-variation-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+        }
+        .color-input-shortened {
+            flex: 0 0 80%;
+        }
+        .add-color-btn, .remove-color-btn {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--primary-green);
+            background: white;
+            color: var(--primary-green);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .add-color-btn:hover {
+            background: var(--primary-green);
+            color: white;
+        }
+        .remove-color-btn {
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+        .remove-color-btn:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+        .trash-icon {
+            width: 18px;
+            height: 18px;
+        }
 
         .slider-group { margin-bottom: 25px; }
         .slider-label {
@@ -430,7 +483,7 @@
                         <th>Product Name</th>
                         <th>Brand</th>
                         <th>Category</th>
-                        <th>Color</th>
+                        <th>Colors</th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
@@ -448,8 +501,7 @@
                         <td class="text-muted">{{ product.brand }}</td>
                         <td><span class="badge bg-light text-dark border">{{ product.category|capitalize }}</span></td>
                         <td>
-                            <span class="color-dot" style="background-color: {{ product.hex_color }}"></span>
-                            <span class="ms-2 small text-muted">{{ product.hex_color }}</span>
+                            <span class="fw-bold">{{ product.colors|length if product.colors else 1 }}</span>
                         </td>
                         <td class="text-end">
                             <button class="btn btn-sm btn-outline-primary me-2 edit-btn"
@@ -458,6 +510,7 @@
                                 data-brand="{{ product.brand | e }}"
                                 data-product-name="{{ product.product_name | e }}"
                                 data-hex-color="{{ product.hex_color }}"
+                                data-colors='{{ (product.colors if product.colors else [product.hex_color])|tojson }}'
                                 data-price="{{ product.price }}"
                                 data-description="{{ product.description | e }}"
                                 data-pigment="{{ product.pigment|default(70) }}"
@@ -516,11 +569,20 @@
                             </div>
                         </div>
                         <div class="row align-items-end">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Color (HEX)</label>
-                                <input type="color" name="hex_color" class="form-control form-control-color w-100" value="#cc0000" required>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Colors (HEX)</label>
+                                <div id="color-variations-add" class="color-variations-container">
+                                    <div class="color-variation-row">
+                                        <div class="color-input-wrapper">
+                                            <input type="color" name="hex_color" class="form-control form-control-color color-input-shortened" value="#cc0000" required>
+                                            <button type="button" class="add-color-btn" onclick="addColorVariation('add')">+</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-8 mb-3">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold">Product Image (Upload)</label>
                                 <input type="file" name="product_image" class="form-control" accept="image/*" required>
                             </div>
@@ -636,11 +698,20 @@
                             </div>
                         </div>
                         <div class="row align-items-end">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Color (HEX)</label>
-                                <input type="color" name="hex_color" id="edit-hex-color" class="form-control form-control-color w-100" required>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Colors (HEX)</label>
+                                <div id="color-variations-edit" class="color-variations-container">
+                                    <div class="color-variation-row">
+                                        <div class="color-input-wrapper">
+                                            <input type="color" name="hex_color" id="edit-hex-color" class="form-control form-control-color color-input-shortened" required>
+                                            <button type="button" class="add-color-btn" onclick="addColorVariation('edit')">+</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-8 mb-3">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold">Product Image (Upload new to replace)</label>
                                 <input type="file" name="product_image" class="form-control" accept="image/*">
                                 <small class="text-muted">Leave empty to keep current image</small>
@@ -762,7 +833,19 @@
         document.getElementById('edit-category-select').addEventListener('change', toggleEditProperties);
 
         // EDIT MODAL
-        function openEditModal(id, category, brand, productName, hexColor, price, description, pigment, shine, effect, imageUrl) {
+        function openEditModal(id, category, brand, productName, hexColor, price, description, pigment, shine, effect, imageUrl, colors) {
+            // Clear existing color variations except the first one
+            const editContainer = document.getElementById('color-variations-edit');
+            editContainer.innerHTML = `
+                <div class="color-variation-row">
+                    <div class="color-input-wrapper">
+                        <input type="color" name="hex_color" id="edit-hex-color" class="form-control form-control-color color-input-shortened" required>
+                        <button type="button" class="add-color-btn" onclick="addColorVariation('edit')">+</button>
+                    </div>
+                </div>
+            `;
+            
+            // Set form values
             document.getElementById('edit-product-id').value = id;
             document.getElementById('edit-category-select').value = category;
             document.getElementById('edit-brand').value = brand;
@@ -781,6 +864,44 @@
                 updateEditBubblePosition('edit-range-pigment', 'edit-bubble-pigment');
                 updateEditBubblePosition('edit-range-shine', 'edit-bubble-shine');
             }
+            
+            // Add additional colors if they exist
+            if (colors && Array.isArray(colors) && colors.length > 1) {
+                for (let i = 1; i < colors.length; i++) {
+                    // Validate color format
+                    const color = colors[i];
+                    const validColor = /^#[0-9A-Fa-f]{6}$/.test(color) ? color : '#ffffff';
+                    
+                    const newRow = document.createElement('div');
+                    newRow.className = 'color-variation-row';
+                    const colorInput = document.createElement('input');
+                    colorInput.type = 'color';
+                    colorInput.name = 'additional_colors[]';
+                    colorInput.className = 'form-control form-control-color color-input-shortened';
+                    colorInput.value = validColor;
+                    
+                    const addBtn = document.createElement('button');
+                    addBtn.type = 'button';
+                    addBtn.className = 'add-color-btn';
+                    addBtn.textContent = '+';
+                    addBtn.onclick = function() { addColorVariation('edit'); };
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'remove-color-btn';
+                    removeBtn.innerHTML = '<svg class="trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+                    removeBtn.onclick = function() { removeColorVariation(this); };
+                    
+                    const colorWrapper = document.createElement('div');
+                    colorWrapper.className = 'color-input-wrapper';
+                    colorWrapper.appendChild(colorInput);
+                    colorWrapper.appendChild(addBtn);
+                    
+                    newRow.appendChild(removeBtn);
+                    newRow.appendChild(colorWrapper);
+                    editContainer.appendChild(newRow);
+                }
+            }
 
             toggleEditProperties();
             showModal('editProductModal');
@@ -794,6 +915,8 @@
                 const brand = this.getAttribute('data-brand');
                 const productName = this.getAttribute('data-product-name');
                 const hexColor = this.getAttribute('data-hex-color');
+                const colorsJson = this.getAttribute('data-colors');
+                const colors = colorsJson ? JSON.parse(colorsJson) : [hexColor];
                 const price = this.getAttribute('data-price');
                 const description = this.getAttribute('data-description');
                 const pigment = parseInt(this.getAttribute('data-pigment'));
@@ -801,7 +924,7 @@
                 const effect = this.getAttribute('data-effect');
                 const imageUrl = this.getAttribute('data-image-url');
 
-                openEditModal(id, category, brand, productName, hexColor, price, description, pigment, shine, effect, imageUrl);
+                openEditModal(id, category, brand, productName, hexColor, price, description, pigment, shine, effect, imageUrl, colors);
             });
         });
 
@@ -857,6 +980,52 @@
         setupSyncedSlider('range-shine', 'num-shine', 'bubble-shine');
         setupSyncedSlider('edit-range-pigment', 'edit-num-pigment', 'edit-bubble-pigment');
         setupSyncedSlider('edit-range-shine', 'edit-num-shine', 'edit-bubble-shine');
+        
+        // Color variations handling
+        const DEFAULT_NEW_COLOR = '#ffffff';
+        
+        function addColorVariation(modalType) {
+            const container = document.getElementById('color-variations-' + modalType);
+            const newRow = document.createElement('div');
+            newRow.className = 'color-variation-row';
+            
+            // Create remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'remove-color-btn';
+            removeBtn.innerHTML = '<svg class="trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+            removeBtn.onclick = function() { removeColorVariation(this); };
+            
+            // Create color input wrapper
+            const colorWrapper = document.createElement('div');
+            colorWrapper.className = 'color-input-wrapper';
+            
+            // Create color input
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.name = 'additional_colors[]';
+            colorInput.className = 'form-control form-control-color color-input-shortened';
+            colorInput.value = DEFAULT_NEW_COLOR;
+            
+            // Create add button
+            const addBtn = document.createElement('button');
+            addBtn.type = 'button';
+            addBtn.className = 'add-color-btn';
+            addBtn.textContent = '+';
+            addBtn.onclick = function() { addColorVariation(modalType); };
+            
+            // Assemble elements
+            colorWrapper.appendChild(colorInput);
+            colorWrapper.appendChild(addBtn);
+            newRow.appendChild(removeBtn);
+            newRow.appendChild(colorWrapper);
+            container.appendChild(newRow);
+        }
+        
+        function removeColorVariation(button) {
+            const row = button.closest('.color-variation-row');
+            row.remove();
+        }
     </script>
 </body>
 </html>

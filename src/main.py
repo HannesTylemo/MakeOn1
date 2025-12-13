@@ -49,6 +49,10 @@ def load_products():
     try:
         with open(PRODUCTS_FILE, 'r', encoding='utf-8') as f:
             products_db = json.load(f)
+        # Migrate old products to support colors array
+        for product in products_db:
+            if 'colors' not in product:
+                product['colors'] = [product.get('hex_color', '#cc0000')]
     except: products_db = []
 
 def save_products():
@@ -100,12 +104,33 @@ def add_product():
         image_url = f"/static/uploads/{unique_name}"
 
     category = request.form.get('category')
+    
+    # Helper function to validate hex color
+    def is_valid_hex_color(color):
+        import re
+        return bool(re.match(r'^#[0-9A-Fa-f]{6}$', color))
+    
+    # Handle multiple colors - get all color inputs
+    colors = []
+    hex_color = request.form.get('hex_color', '#cc0000')
+    if hex_color and is_valid_hex_color(hex_color):
+        colors.append(hex_color)
+    
+    # Get additional colors if any
+    additional_colors = request.form.getlist('additional_colors[]')
+    colors.extend([c for c in additional_colors if c and is_valid_hex_color(c)])
+    
+    # Ensure colors is never empty
+    if not colors:
+        colors = ["#cc0000"]
+    
     new_product = {
         "id": f"prod_{uuid.uuid4().hex[:8]}",
         "category": category,
         "brand": request.form.get('brand'),
         "product_name": request.form.get('product_name'),
-        "hex_color": request.form.get('hex_color'),
+        "hex_color": colors[0],  # Keep backward compatibility
+        "colors": colors,  # Array of all colors
         "price": request.form.get('price', "25.00"),
         "description": request.form.get('description', ""),
         "url": "#",
@@ -145,7 +170,30 @@ def edit_product():
     product['category'] = category
     product['brand'] = request.form.get('brand')
     product['product_name'] = request.form.get('product_name')
-    product['hex_color'] = request.form.get('hex_color')
+    
+    # Helper function to validate hex color
+    def is_valid_hex_color(color):
+        import re
+        return bool(re.match(r'^#[0-9A-Fa-f]{6}$', color))
+    
+    # Handle multiple colors
+    colors = []
+    hex_color = request.form.get('hex_color')
+    if hex_color and is_valid_hex_color(hex_color):
+        colors.append(hex_color)
+    
+    # Get additional colors if any
+    additional_colors = request.form.getlist('additional_colors[]')
+    colors.extend([c for c in additional_colors if c and is_valid_hex_color(c)])
+    
+    # Ensure colors is never empty, fallback to existing or default
+    if not colors:
+        existing_color = product.get('hex_color', '#cc0000')
+        colors = [existing_color if is_valid_hex_color(existing_color) else '#cc0000']
+    
+    product['hex_color'] = colors[0]
+    product['colors'] = colors
+    
     product['price'] = request.form.get('price', "25.00")
     product['description'] = request.form.get('description', "")
 

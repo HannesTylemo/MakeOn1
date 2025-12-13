@@ -64,7 +64,7 @@
             justify-content: center; padding: 40px 30px; transition: opacity 0.4s ease;
         }
         .startup-overlay.hidden { opacity: 0; pointer-events: none; }
-        .startup-content { text-align: center; width: 100%; max-width: 400px; margin: 0 auto; }
+        .startup-content { text-align: center; width: 100%; max-width: 520px; margin: 0 auto; }
         .startup-content h1 { font-size: 36px; margin-bottom: 15px; color: #000; font-weight: 800; }
         .startup-content p { color: #666; margin-bottom: 50px; font-size: 18px; }
 
@@ -291,21 +291,27 @@
             background: white;
             color: black;
             border: 2px solid black;
-            padding: 7px 11px;
+            padding: 2.8px 4.9px;
             font-weight: 700;
-            font-size: 8px;
+            font-size: 3.5px;
             border-radius: 50px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.2px;
         }
         .explore-btn-text:hover {
             background: #f0f0f0;
         }
 
         .desktop-arrows-container { display: none; flex-direction: column; gap: 15px; align-items: center; }
-        .nav-buttons-container { display: flex; justify-content: space-around; width: 100%; height: 100%; }
+        .nav-buttons-container { display: flex; justify-content: space-around; width: 100%; height: 100%; align-items: center; }
+        
+        /* In editor mode, show New Photo button centered */
+        .editor-mode-active .nav-buttons-container {
+            justify-content: center;
+            gap: 15px;
+        }
 
         /* NEW PHOTO BUTTON (Circular) */
         .new-photo-btn {
@@ -489,6 +495,7 @@
         .editor-products-list {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden; /* Prevent horizontal scroll */
             /* Hide scrollbar */
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE and Edge */
@@ -523,7 +530,8 @@
             flex-direction: column;
             margin-bottom: 20px;
             padding-bottom: 20px;
-            border-bottom: 2px solid #000; /* Changed to black 2px line for emphasis */
+            border-bottom: 2px solid #000;
+            overflow: hidden; /* Prevent content from overflowing */
         }
 
         .editor-product-item:last-child {
@@ -544,23 +552,22 @@
         }
 
         .editor-product-image-container {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
             width: 100%;
+            position: relative;
         }
 
         .editor-product-img {
-            width: 100%;
-            max-width: 150px;
-            height: 150px; /* Fixed height for consistent sizing */
-            object-fit: cover; /* Crop landscape images to fill square */
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
             border-radius: 8px;
             background: transparent;
             cursor: pointer;
-            margin-bottom: 10px;
             display: block;
+            flex-shrink: 0;
         }
 
         .editor-product-img:hover {
@@ -582,15 +589,19 @@
 
         .editor-product-details {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
             width: 100%;
-            max-width: 150px;
+            margin-top: 10px;
         }
 
         .editor-product-name-row {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 10px;
             width: 100%;
+            margin-bottom: 6px;
         }
 
         .editor-product-name {
@@ -601,13 +612,41 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             min-width: 0;
+            max-width: 100%;
+        }
+        
+        /* Color circles in The Look */
+        .product-color-circles {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .product-color-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .product-color-circle:hover {
+            transform: scale(1.1);
+        }
+        .product-color-circle.active {
+            border-color: #000;
+            border-width: 3px;
         }
 
         .editor-product-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
             flex-shrink: 0;
+            position: absolute;
+            bottom: 10px;
+            right: 0;
         }
 
         /* Shopping cart button in editor panel */
@@ -876,7 +915,13 @@
 
         /* Hide arrows in editor mode */
         .editor-mode-active .desktop-arrows-container {
-            display: none !important;
+            display: flex !important;
+        }
+        
+        /* Hide arrow buttons in editor mode */
+        .editor-mode-active .desktop-arrows-container #arrowUpBtn,
+        .editor-mode-active .desktop-arrows-container #arrowDownBtn {
+            display: none;
         }
     </style>
 </head>
@@ -1043,7 +1088,7 @@
             <div class="desktop-arrows-container">
                 <!-- Scroll mode: New Photo button -->
                 <button class="new-photo-btn" id="newPhotoBtn">New<br>Photo</button>
-                <!-- Editor mode: New Photo button (same location) -->
+                <!-- Editor mode: New Photo button (same position as scroll mode) -->
                 <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
                 <button class="toolbar-button" id="arrowUpBtn">
                     <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1165,6 +1210,7 @@
         let editorProducts = []; // Track products added in editor
         let previousMode = 'scroll'; // Track previous mode: 'scroll' or 'editor'
         let savedEditorProducts = []; // Save editor products when taking new photo
+        let productActiveColors = {}; // Track active color for each product
 
         window.addEventListener('load', () => { loadHistory(); fetchProducts(); });
         window.addEventListener('message', (e) => { if (e.data === 'request-close-confirmation') toggleExitModal(true); });
@@ -1172,10 +1218,8 @@
         function fetchProducts() {
             fetch('/api/products').then(r => r.json()).then(d => {
                 products = d.products;
-                if(products.length > 0) {
-                    initSlides();
-                    preloadAround(currentIndex);
-                }
+                // Don't initialize slides until image is uploaded
+                // initSlides will be called from handleImageSelection after upload
             });
         }
 
@@ -1236,8 +1280,12 @@
                     if (retryCount === 0) {
                         retryCount++;
                         setTimeout(() => {
-                            temp.src = url;
+                            const retryUrl = url.includes('?') ? url + '&retry=1' : url + '?retry=1';
+                            temp.src = retryUrl;
                         }, 1000);
+                    } else {
+                        // After retry fails, show a placeholder or the base frame
+                        console.error('Image load failed after retry:', url);
                     }
                 }
             }
@@ -1925,6 +1973,22 @@
                 listContainer.innerHTML = '<p style="color:#666; text-align:center;">No products added yet</p>';
                 return;
             }
+            
+            // Helper function to validate and sanitize color values
+            function sanitizeColor(color) {
+                // Allow only valid hex colors
+                if (typeof color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(color)) {
+                    return color;
+                }
+                return '#cc0000'; // Default fallback
+            }
+            
+            // Helper function to escape HTML
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
 
             // Group products by category
             const productsByCategory = {};
@@ -1944,6 +2008,30 @@
                 const categoryProducts = productsByCategory[category];
 
                 categoryProducts.forEach(product => {
+                    // Initialize active color if not set
+                    if (!productActiveColors[product.id]) {
+                        productActiveColors[product.id] = sanitizeColor(product.hex_color);
+                    }
+                    
+                    // Get colors array (fallback to hex_color)
+                    const colors = product.colors || [product.hex_color];
+                    const activeColor = productActiveColors[product.id];
+                    
+                    // Build color circles HTML with sanitized colors
+                    let colorCirclesHtml = '';
+                    if (colors.length > 0) {
+                        colorCirclesHtml = '<div class="product-color-circles">';
+                        colors.forEach(color => {
+                            const sanitizedColor = sanitizeColor(color);
+                            const isActive = sanitizedColor === activeColor ? 'active' : '';
+                            colorCirclesHtml += `<div class="product-color-circle ${isActive}" 
+                                style="background-color: ${sanitizedColor}" 
+                                onclick="changeProductColor('${product.id}', '${sanitizedColor}')"
+                                title="${sanitizedColor}"></div>`;
+                        });
+                        colorCirclesHtml += '</div>';
+                    }
+                    
                     html += `
                         <div class="editor-product-item">
                             <div class="editor-product-category-header">
@@ -1952,25 +2040,24 @@
                             <div class="editor-product-image-container">
                                 <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
                                 <div class="editor-product-details">
-                                    <div class="editor-product-name-row">
-                                        <div class="editor-product-name">${product.product_name}</div>
-                                        <div class="editor-product-actions">
-                                            <button class="editor-cart-btn" onclick="addSingleProductToCart('${product.id}')" title="Add to Cart">
-                                                <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
-                                                    <circle cx="9" cy="21" r="1"></circle>
-                                                    <circle cx="20" cy="21" r="1"></circle>
-                                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                                                </svg>
-                                            </button>
-                                            <button class="editor-trash-btn" onclick="removeProductFromEditor('${product.id}')" title="Remove">
-                                                <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
-                                                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                                    <line x1="10" y1="11" x2="10" y2="17"/>
-                                                    <line x1="14" y1="11" x2="14" y2="17"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
+                                    <div class="editor-product-name">${product.product_name}</div>
+                                    ${colorCirclesHtml}
+                                </div>
+                                <div class="editor-product-actions">
+                                    <button class="editor-cart-btn" onclick="addSingleProductToCart('${product.id}')" title="Add to Cart">
+                                        <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
+                                            <circle cx="9" cy="21" r="1"></circle>
+                                            <circle cx="20" cy="21" r="1"></circle>
+                                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="editor-trash-btn" onclick="removeProductFromEditor('${product.id}')" title="Remove">
+                                        <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
+                                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                            <line x1="10" y1="11" x2="10" y2="17"/>
+                                            <line x1="14" y1="11" x2="14" y2="17"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1984,6 +2071,21 @@
         function expandImage(imageSrc) {
             document.getElementById('expandedImage').src = imageSrc;
             document.getElementById('imageExpandModal').classList.add('visible');
+        }
+        
+        function changeProductColor(productId, newColor) {
+            // Update the active color for this product
+            productActiveColors[productId] = newColor;
+            
+            // Find the product and update its hex_color temporarily
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                product.hex_color = newColor;
+            }
+            
+            // Update the display
+            updateEditorProductsList();
+            updateEditorImage();
         }
 
         function closeImageExpand() {
