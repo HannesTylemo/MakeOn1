@@ -1273,7 +1273,8 @@
                     if (retryCount === 0) {
                         retryCount++;
                         setTimeout(() => {
-                            temp.src = url + '&retry=1';
+                            const retryUrl = url.includes('?') ? url + '&retry=1' : url + '?retry=1';
+                            temp.src = retryUrl;
                         }, 1000);
                     } else {
                         // After retry fails, show a placeholder or the base frame
@@ -2053,9 +2054,6 @@
                                         </svg>
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                    `;
                             </div>
                         </div>
                     `;
