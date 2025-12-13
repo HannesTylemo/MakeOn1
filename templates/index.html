@@ -1110,12 +1110,14 @@
 
         // Update welcome text based on entry mode
         const welcomeText = document.querySelector('.startup-content p');
-        if (entryMode === 'tryon') {
-            welcomeText.textContent = 'Upload or take a photo to get started!';
-        } else if (entryMode === 'explore') {
-            welcomeText.textContent = 'Upload or take a photo to get started. We will analyze your skintone and create personalised looks just for you. If you want to, you can also create your very own.';
+        if (welcomeText) {
+            if (entryMode === 'tryon') {
+                welcomeText.textContent = 'Upload or take a photo to get started!';
+            } else if (entryMode === 'explore') {
+                welcomeText.textContent = 'Upload or take a photo to get started. We will analyze your skintone and create personalised looks just for you. If you want to, you can also create your very own.';
+            }
+            // If no entry mode is specified, keep default text
         }
-        // If no entry mode is specified, keep default text
 
         const overlay = document.getElementById('startupOverlay');
         const exitModal = document.getElementById('exitModal');
