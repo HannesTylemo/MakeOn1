@@ -286,6 +286,24 @@
         #editorBtn img { width: 29px; height: 29px; }
         #lipstickBtn svg { width: 29px; height: 29px; }
 
+        /* Explore button text styling (like Virtual Try On button) */
+        .explore-btn-text {
+            background: white;
+            color: black;
+            border: 2px solid black;
+            padding: 7px 11px;
+            font-weight: 700;
+            font-size: 8px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .explore-btn-text:hover {
+            background: #f0f0f0;
+        }
+
         .desktop-arrows-container { display: none; flex-direction: column; gap: 15px; align-items: center; }
         .nav-buttons-container { display: flex; justify-content: space-around; width: 100%; height: 100%; }
 
@@ -353,6 +371,10 @@
         @media (min-width: 768px) {
             .video-slide img { object-fit: contain; background: white; }
             .close-app-btn { right: 25px; }
+            .explore-btn-text {
+                font-size: 11px;
+                padding: 10px 15px;
+            }
             .bottom-toolbar {
                 position: absolute; top: 0; right: 0; bottom: 0; left: auto;
                 width: var(--sidebar-width); height: 100%;
@@ -1050,8 +1072,8 @@
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
                 </button>
                 <button class="toolbar-button" id="scrollBackBtnToolbar" style="display:none;" onclick="showScrollBackConfirm()">
-                    <!-- Swipe icon for navigating back to scroll mode -->
-                    <img src="/static/uploads/Swipe-icon (1).png" alt="Back to Scroll">
+                    <!-- Explore button styled like Virtual Try On button -->
+                    <span class="explore-btn-text">Explore</span>
                 </button>
             </div>
         </div>
