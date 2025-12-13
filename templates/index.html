@@ -281,10 +281,28 @@
         }
         .toolbar-button { background: transparent; border: none; cursor: pointer; width: 44px; height: 100%; display:flex; justify-content:center; align-items:center;}
         .toolbar-button svg { width: 24px; height: 24px; stroke: #000; stroke-width: 2; fill: none; }
-        #addProductBtn svg { width: 36px; height: 36px; }
+        #addProductBtn svg { width: 29px; height: 29px; }
         .toolbar-button img { width: 48px; height: 48px; object-fit: contain; }
         #editorBtn img { width: 29px; height: 29px; }
         #lipstickBtn svg { width: 29px; height: 29px; }
+
+        /* Explore button text styling (like Virtual Try On button) */
+        .explore-btn-text {
+            background: white;
+            color: black;
+            border: 2px solid black;
+            padding: 7px 11px;
+            font-weight: 700;
+            font-size: 8px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .explore-btn-text:hover {
+            background: #f0f0f0;
+        }
 
         .desktop-arrows-container { display: none; flex-direction: column; gap: 15px; align-items: center; }
         .nav-buttons-container { display: flex; justify-content: space-around; width: 100%; height: 100%; }
@@ -352,6 +370,11 @@
 
         @media (min-width: 768px) {
             .video-slide img { object-fit: contain; background: white; }
+            .close-app-btn { right: 25px; }
+            .explore-btn-text {
+                font-size: 11px;
+                padding: 10px 15px;
+            }
             .bottom-toolbar {
                 position: absolute; top: 0; right: 0; bottom: 0; left: auto;
                 width: var(--sidebar-width); height: 100%;
@@ -361,7 +384,7 @@
             .nav-buttons-container { flex-direction: column; height: auto; gap: 20px; justify-content: flex-end; }
             .toolbar-button { height: 60px; width: 100%; }
             .toolbar-button svg { width: 32px; height: 32px; }
-            #addProductBtn svg { width: 48px; height: 48px; }
+            #addProductBtn svg { width: 38px; height: 38px; }
             .toolbar-button img { width: 64px; height: 64px; }
             #editorBtn img { width: 38px; height: 38px; }
             #lipstickBtn svg { width: 38px; height: 38px; }
@@ -525,6 +548,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
         }
 
         .editor-product-img {
@@ -558,6 +582,8 @@
 
         .editor-product-details {
             flex: 1;
+            width: 100%;
+            max-width: 150px;
         }
 
         .editor-product-name-row {
@@ -967,7 +993,7 @@
         <div class="startup-overlay" id="startupOverlay">
             <div class="startup-content">
                 <h1>Welcome</h1>
-                <p>Upload or take a photo to find the look of your dreams.</p>
+                <p id="welcomeText">Upload or take a photo to find the look of your dreams.</p>
                 <button class="action-btn" onclick="handleCameraClick()">Open Camera</button>
                 <input type="file" id="mobileCameraInput" accept="image/*" capture="user" style="display: none" onchange="handleFileUpload(this)">
                 <button class="action-btn secondary" onclick="document.getElementById('uploadInput').click()">Upload Photo</button>
@@ -1015,7 +1041,10 @@
         <div class="bottom-toolbar" id="bottomToolbar">
             <div style="height:20px;" class="desktop-only"></div>
             <div class="desktop-arrows-container">
+                <!-- Scroll mode: New Photo button -->
                 <button class="new-photo-btn" id="newPhotoBtn">New<br>Photo</button>
+                <!-- Editor mode: New Photo button (same location) -->
+                <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
                 <button class="toolbar-button" id="arrowUpBtn">
                     <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
@@ -1039,14 +1068,13 @@
                     <!-- Editor/Gallery icon for navigating to editor mode -->
                     <img src="/static/uploads/editor-icon.png" alt="Editor">
                 </button>
-                <!-- Editor mode: New Photo, Add new item, Back to scroll (bottom to top) - Product icon removed -->
-                <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
+                <!-- Editor mode: Add Product and Back to Scroll buttons -->
                 <button class="toolbar-button" id="addProductBtn" style="display:none;">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="1" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="1"/></svg>
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
                 </button>
                 <button class="toolbar-button" id="scrollBackBtnToolbar" style="display:none;" onclick="showScrollBackConfirm()">
-                    <!-- Swipe icon for navigating back to scroll mode -->
-                    <img src="/static/uploads/Swipe-icon (1).png" alt="Back to Scroll">
+                    <!-- Explore button styled like Virtual Try On button -->
+                    <span class="explore-btn-text">Explore</span>
                 </button>
             </div>
         </div>
@@ -1095,10 +1123,11 @@
     </div>
 
     <script>
-        // Check URL parameters for editor mode
+        // Check URL parameters for editor mode and entry point
         const urlParams = new URLSearchParams(window.location.search);
         const shouldEnterEditorMode = urlParams.get('mode') === 'editor';
         const productParam = urlParams.get('product');
+        const entryMode = urlParams.get('entry'); // 'explore' or 'tryon'
 
         const overlay = document.getElementById('startupOverlay');
         const exitModal = document.getElementById('exitModal');
@@ -1110,6 +1139,14 @@
         const videoContainer = document.getElementById('videoContainer');
         const dragIndicator = document.getElementById('dragIndicator');
         const editorProductsPanel = document.getElementById('editorProductsPanel');
+
+        // Customize welcome text based on entry mode
+        const welcomeTextElement = document.getElementById('welcomeText');
+        if (entryMode === 'explore') {
+            welcomeTextElement.textContent = 'Upload or take a photo to get started. We will analyze your skintone and create personalised looks just for you. If you want to, you can also create your very own.';
+        } else if (entryMode === 'tryon') {
+            welcomeTextElement.textContent = 'Upload or take a photo to get started!';
+        }
 
         // DOM ROTATION SETUP
         let slideElements = [
