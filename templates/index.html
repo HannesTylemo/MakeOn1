@@ -1211,10 +1211,8 @@
         function fetchProducts() {
             fetch('/api/products').then(r => r.json()).then(d => {
                 products = d.products;
-                if(products.length > 0) {
-                    initSlides();
-                    preloadAround(currentIndex);
-                }
+                // Don't initialize slides until image is uploaded
+                // initSlides will be called from handleImageSelection after upload
             });
         }
 
@@ -1275,8 +1273,11 @@
                     if (retryCount === 0) {
                         retryCount++;
                         setTimeout(() => {
-                            temp.src = url;
+                            temp.src = url + '&retry=1';
                         }, 1000);
+                    } else {
+                        // After retry fails, show a placeholder or the base frame
+                        console.error('Image load failed after retry:', url);
                     }
                 }
             }
