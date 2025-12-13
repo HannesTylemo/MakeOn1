@@ -281,7 +281,7 @@
         }
         .toolbar-button { background: transparent; border: none; cursor: pointer; width: 44px; height: 100%; display:flex; justify-content:center; align-items:center;}
         .toolbar-button svg { width: 24px; height: 24px; stroke: #000; stroke-width: 2; fill: none; }
-        #addProductBtn svg { width: 36px; height: 36px; }
+        #addProductBtn svg { width: 29px; height: 29px; }
         .toolbar-button img { width: 48px; height: 48px; object-fit: contain; }
         #editorBtn img { width: 29px; height: 29px; }
         #lipstickBtn svg { width: 29px; height: 29px; }
@@ -361,7 +361,7 @@
             .nav-buttons-container { flex-direction: column; height: auto; gap: 20px; justify-content: flex-end; }
             .toolbar-button { height: 60px; width: 100%; }
             .toolbar-button svg { width: 32px; height: 32px; }
-            #addProductBtn svg { width: 48px; height: 48px; }
+            #addProductBtn svg { width: 38px; height: 38px; }
             .toolbar-button img { width: 64px; height: 64px; }
             #editorBtn img { width: 38px; height: 38px; }
             #lipstickBtn svg { width: 38px; height: 38px; }
@@ -1016,6 +1016,8 @@
             <div style="height:20px;" class="desktop-only"></div>
             <div class="desktop-arrows-container">
                 <button class="new-photo-btn" id="newPhotoBtn">New<br>Photo</button>
+                <!-- Editor mode New Photo button (same location as scroll mode) -->
+                <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
                 <button class="toolbar-button" id="arrowUpBtn">
                     <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
@@ -1039,10 +1041,9 @@
                     <!-- Editor/Gallery icon for navigating to editor mode -->
                     <img src="/static/uploads/editor-icon.png" alt="Editor">
                 </button>
-                <!-- Editor mode: New Photo, Add new item, Back to scroll (bottom to top) - Product icon removed -->
-                <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
+                <!-- Editor mode: Add new item, Back to scroll (bottom to top) -->
                 <button class="toolbar-button" id="addProductBtn" style="display:none;">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="1" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="1"/></svg>
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
                 </button>
                 <button class="toolbar-button" id="scrollBackBtnToolbar" style="display:none;" onclick="showScrollBackConfirm()">
                     <!-- Swipe icon for navigating back to scroll mode -->
