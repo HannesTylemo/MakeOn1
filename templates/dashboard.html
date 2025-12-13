@@ -510,7 +510,7 @@
                                 data-brand="{{ product.brand | e }}"
                                 data-product-name="{{ product.product_name | e }}"
                                 data-hex-color="{{ product.hex_color }}"
-                                data-colors='{{ product.colors|default([product.hex_color])|tojson }}'
+                                data-colors='{{ (product.colors if product.colors else [product.hex_color])|tojson }}'
                                 data-price="{{ product.price }}"
                                 data-description="{{ product.description | e }}"
                                 data-pigment="{{ product.pigment|default(70) }}"

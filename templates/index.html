@@ -291,9 +291,9 @@
             background: white;
             color: black;
             border: 2px solid black;
-            padding: 4.2px 6.6px;
+            padding: 4px 7px;
             font-weight: 700;
-            font-size: 4.8px;
+            font-size: 5px;
             border-radius: 50px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
@@ -1950,6 +1950,22 @@
                 listContainer.innerHTML = '<p style="color:#666; text-align:center;">No products added yet</p>';
                 return;
             }
+            
+            // Helper function to validate and sanitize color values
+            function sanitizeColor(color) {
+                // Allow only valid hex colors
+                if (typeof color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(color)) {
+                    return color;
+                }
+                return '#cc0000'; // Default fallback
+            }
+            
+            // Helper function to escape HTML
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
 
             // Group products by category
             const productsByCategory = {};
@@ -1971,23 +1987,24 @@
                 categoryProducts.forEach(product => {
                     // Initialize active color if not set
                     if (!productActiveColors[product.id]) {
-                        productActiveColors[product.id] = product.hex_color;
+                        productActiveColors[product.id] = sanitizeColor(product.hex_color);
                     }
                     
                     // Get colors array (fallback to hex_color)
                     const colors = product.colors || [product.hex_color];
                     const activeColor = productActiveColors[product.id];
                     
-                    // Build color circles HTML
+                    // Build color circles HTML with sanitized colors
                     let colorCirclesHtml = '';
                     if (colors.length > 0) {
                         colorCirclesHtml = '<div class="product-color-circles">';
                         colors.forEach(color => {
-                            const isActive = color === activeColor ? 'active' : '';
+                            const sanitizedColor = sanitizeColor(color);
+                            const isActive = sanitizedColor === activeColor ? 'active' : '';
                             colorCirclesHtml += `<div class="product-color-circle ${isActive}" 
-                                style="background-color: ${color}" 
-                                onclick="changeProductColor('${product.id}', '${color}')"
-                                title="${color}"></div>`;
+                                style="background-color: ${sanitizedColor}" 
+                                onclick="changeProductColor('${escapeHtml(product.id)}', '${sanitizedColor}')"
+                                title="${sanitizedColor}"></div>`;
                         });
                         colorCirclesHtml += '</div>';
                     }

@@ -107,7 +107,7 @@ def add_product():
     
     # Handle multiple colors - get all color inputs
     colors = []
-    hex_color = request.form.get('hex_color')
+    hex_color = request.form.get('hex_color', '#cc0000')
     if hex_color:
         colors.append(hex_color)
     
@@ -115,13 +115,17 @@ def add_product():
     additional_colors = request.form.getlist('additional_colors[]')
     colors.extend([c for c in additional_colors if c])
     
+    # Ensure colors is never empty
+    if not colors:
+        colors = ["#cc0000"]
+    
     new_product = {
         "id": f"prod_{uuid.uuid4().hex[:8]}",
         "category": category,
         "brand": request.form.get('brand'),
         "product_name": request.form.get('product_name'),
-        "hex_color": colors[0] if colors else "#cc0000",  # Keep backward compatibility
-        "colors": colors or [hex_color or "#cc0000"],  # Array of all colors
+        "hex_color": colors[0],  # Keep backward compatibility
+        "colors": colors,  # Array of all colors
         "price": request.form.get('price', "25.00"),
         "description": request.form.get('description', ""),
         "url": "#",
@@ -172,8 +176,12 @@ def edit_product():
     additional_colors = request.form.getlist('additional_colors[]')
     colors.extend([c for c in additional_colors if c])
     
-    product['hex_color'] = colors[0] if colors else product.get('hex_color', "#cc0000")
-    product['colors'] = colors or [product.get('hex_color', "#cc0000")]
+    # Ensure colors is never empty, fallback to existing or default
+    if not colors:
+        colors = [product.get('hex_color', "#cc0000")]
+    
+    product['hex_color'] = colors[0]
+    product['colors'] = colors
     
     product['price'] = request.form.get('price', "25.00")
     product['description'] = request.form.get('description', "")
