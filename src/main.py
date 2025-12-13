@@ -49,6 +49,10 @@ def load_products():
     try:
         with open(PRODUCTS_FILE, 'r', encoding='utf-8') as f:
             products_db = json.load(f)
+        # Migrate old products to support colors array
+        for product in products_db:
+            if 'colors' not in product:
+                product['colors'] = [product.get('hex_color', '#cc0000')]
     except: products_db = []
 
 def save_products():
@@ -100,12 +104,24 @@ def add_product():
         image_url = f"/static/uploads/{unique_name}"
 
     category = request.form.get('category')
+    
+    # Handle multiple colors - get all color inputs
+    colors = []
+    hex_color = request.form.get('hex_color')
+    if hex_color:
+        colors.append(hex_color)
+    
+    # Get additional colors if any
+    additional_colors = request.form.getlist('additional_colors[]')
+    colors.extend([c for c in additional_colors if c])
+    
     new_product = {
         "id": f"prod_{uuid.uuid4().hex[:8]}",
         "category": category,
         "brand": request.form.get('brand'),
         "product_name": request.form.get('product_name'),
-        "hex_color": request.form.get('hex_color'),
+        "hex_color": colors[0] if colors else "#cc0000",  # Keep backward compatibility
+        "colors": colors if len(colors) > 0 else [hex_color or "#cc0000"],  # Array of all colors
         "price": request.form.get('price', "25.00"),
         "description": request.form.get('description', ""),
         "url": "#",
@@ -145,7 +161,20 @@ def edit_product():
     product['category'] = category
     product['brand'] = request.form.get('brand')
     product['product_name'] = request.form.get('product_name')
-    product['hex_color'] = request.form.get('hex_color')
+    
+    # Handle multiple colors
+    colors = []
+    hex_color = request.form.get('hex_color')
+    if hex_color:
+        colors.append(hex_color)
+    
+    # Get additional colors if any
+    additional_colors = request.form.getlist('additional_colors[]')
+    colors.extend([c for c in additional_colors if c])
+    
+    product['hex_color'] = colors[0] if colors else product.get('hex_color', "#cc0000")
+    product['colors'] = colors if len(colors) > 0 else [product.get('hex_color', "#cc0000")]
+    
     product['price'] = request.form.get('price', "25.00")
     product['description'] = request.form.get('description', "")
 

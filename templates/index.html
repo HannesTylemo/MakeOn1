@@ -64,7 +64,7 @@
             justify-content: center; padding: 40px 30px; transition: opacity 0.4s ease;
         }
         .startup-overlay.hidden { opacity: 0; pointer-events: none; }
-        .startup-content { text-align: center; width: 100%; max-width: 400px; margin: 0 auto; }
+        .startup-content { text-align: center; width: 100%; max-width: 520px; margin: 0 auto; }
         .startup-content h1 { font-size: 36px; margin-bottom: 15px; color: #000; font-weight: 800; }
         .startup-content p { color: #666; margin-bottom: 50px; font-size: 18px; }
 
@@ -291,14 +291,14 @@
             background: white;
             color: black;
             border: 2px solid black;
-            padding: 7px 11px;
+            padding: 4.2px 6.6px;
             font-weight: 700;
-            font-size: 8px;
+            font-size: 4.8px;
             border-radius: 50px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
         .explore-btn-text:hover {
             background: #f0f0f0;
@@ -601,6 +601,30 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             min-width: 0;
+        }
+        
+        /* Color circles in The Look */
+        .product-color-circles {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .product-color-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .product-color-circle:hover {
+            transform: scale(1.1);
+        }
+        .product-color-circle.active {
+            border-color: #000;
+            border-width: 3px;
         }
 
         .editor-product-actions {
@@ -1165,6 +1189,7 @@
         let editorProducts = []; // Track products added in editor
         let previousMode = 'scroll'; // Track previous mode: 'scroll' or 'editor'
         let savedEditorProducts = []; // Save editor products when taking new photo
+        let productActiveColors = {}; // Track active color for each product
 
         window.addEventListener('load', () => { loadHistory(); fetchProducts(); });
         window.addEventListener('message', (e) => { if (e.data === 'request-close-confirmation') toggleExitModal(true); });
@@ -1944,6 +1969,29 @@
                 const categoryProducts = productsByCategory[category];
 
                 categoryProducts.forEach(product => {
+                    // Initialize active color if not set
+                    if (!productActiveColors[product.id]) {
+                        productActiveColors[product.id] = product.hex_color;
+                    }
+                    
+                    // Get colors array (fallback to hex_color)
+                    const colors = product.colors || [product.hex_color];
+                    const activeColor = productActiveColors[product.id];
+                    
+                    // Build color circles HTML
+                    let colorCirclesHtml = '';
+                    if (colors.length > 0) {
+                        colorCirclesHtml = '<div class="product-color-circles">';
+                        colors.forEach(color => {
+                            const isActive = color === activeColor ? 'active' : '';
+                            colorCirclesHtml += `<div class="product-color-circle ${isActive}" 
+                                style="background-color: ${color}" 
+                                onclick="changeProductColor('${product.id}', '${color}')"
+                                title="${color}"></div>`;
+                        });
+                        colorCirclesHtml += '</div>';
+                    }
+                    
                     html += `
                         <div class="editor-product-item">
                             <div class="editor-product-category-header">
@@ -1953,7 +2001,10 @@
                                 <img src="${product.image_url}" class="editor-product-img" onclick="expandImage('${product.image_url}')" onerror="this.style.display='none'">
                                 <div class="editor-product-details">
                                     <div class="editor-product-name-row">
-                                        <div class="editor-product-name">${product.product_name}</div>
+                                        <div>
+                                            <div class="editor-product-name">${product.product_name}</div>
+                                            ${colorCirclesHtml}
+                                        </div>
                                         <div class="editor-product-actions">
                                             <button class="editor-cart-btn" onclick="addSingleProductToCart('${product.id}')" title="Add to Cart">
                                                 <svg viewBox="0 0 24 24" stroke="#000" stroke-width="2" fill="none">
@@ -1984,6 +2035,21 @@
         function expandImage(imageSrc) {
             document.getElementById('expandedImage').src = imageSrc;
             document.getElementById('imageExpandModal').classList.add('visible');
+        }
+        
+        function changeProductColor(productId, newColor) {
+            // Update the active color for this product
+            productActiveColors[productId] = newColor;
+            
+            // Find the product and update its hex_color temporarily
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                product.hex_color = newColor;
+            }
+            
+            // Update the display
+            updateEditorProductsList();
+            updateEditorImage();
         }
 
         function closeImageExpand() {
