@@ -291,14 +291,14 @@
             background: white;
             color: black;
             border: 2px solid black;
-            padding: 4px 7px;
+            padding: 2.8px 4.9px;
             font-weight: 700;
-            font-size: 5px;
+            font-size: 3.5px;
             border-radius: 50px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
         }
         .explore-btn-text:hover {
             background: #f0f0f0;
@@ -553,10 +553,9 @@
 
         .editor-product-image-container {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             align-items: flex-start;
             width: 100%;
-            gap: 10px;
             position: relative;
         }
 
@@ -593,6 +592,8 @@
             display: flex;
             flex-direction: column;
             min-width: 0;
+            width: 100%;
+            margin-top: 10px;
         }
 
         .editor-product-name-row {
@@ -644,7 +645,7 @@
             align-items: center;
             flex-shrink: 0;
             position: absolute;
-            bottom: 0;
+            bottom: 10px;
             right: 0;
         }
 
@@ -914,7 +915,13 @@
 
         /* Hide arrows in editor mode */
         .editor-mode-active .desktop-arrows-container {
-            display: none !important;
+            display: flex !important;
+        }
+        
+        /* Hide arrow buttons in editor mode */
+        .editor-mode-active .desktop-arrows-container #arrowUpBtn,
+        .editor-mode-active .desktop-arrows-container #arrowDownBtn {
+            display: none;
         }
     </style>
 </head>
@@ -1081,6 +1088,8 @@
             <div class="desktop-arrows-container">
                 <!-- Scroll mode: New Photo button -->
                 <button class="new-photo-btn" id="newPhotoBtn">New<br>Photo</button>
+                <!-- Editor mode: New Photo button (same position as scroll mode) -->
+                <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
                 <button class="toolbar-button" id="arrowUpBtn">
                     <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
@@ -1104,8 +1113,6 @@
                     <!-- Editor/Gallery icon for navigating to editor mode -->
                     <img src="/static/uploads/editor-icon.png" alt="Editor">
                 </button>
-                <!-- Editor mode: New Photo button (same position as scroll mode) -->
-                <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
                 <!-- Editor mode: Add Product and Back to Scroll buttons -->
                 <button class="toolbar-button" id="addProductBtn" style="display:none;">
                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
