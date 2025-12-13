@@ -2001,10 +2001,12 @@
                         colors.forEach(color => {
                             const sanitizedColor = sanitizeColor(color);
                             const isActive = sanitizedColor === activeColor ? 'active' : '';
+                            const escapedId = escapeHtml(product.id);
+                            const escapedColor = escapeHtml(sanitizedColor);
                             colorCirclesHtml += `<div class="product-color-circle ${isActive}" 
                                 style="background-color: ${sanitizedColor}" 
-                                onclick="changeProductColor('${escapeHtml(product.id)}', '${sanitizedColor}')"
-                                title="${sanitizedColor}"></div>`;
+                                onclick="changeProductColor('${escapedId}', '${escapedColor}')"
+                                title="${escapedColor}"></div>`;
                         });
                         colorCirclesHtml += '</div>';
                     }

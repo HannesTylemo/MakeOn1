@@ -105,15 +105,20 @@ def add_product():
 
     category = request.form.get('category')
     
+    # Helper function to validate hex color
+    def is_valid_hex_color(color):
+        import re
+        return bool(re.match(r'^#[0-9A-Fa-f]{6}$', color))
+    
     # Handle multiple colors - get all color inputs
     colors = []
     hex_color = request.form.get('hex_color', '#cc0000')
-    if hex_color:
+    if hex_color and is_valid_hex_color(hex_color):
         colors.append(hex_color)
     
     # Get additional colors if any
     additional_colors = request.form.getlist('additional_colors[]')
-    colors.extend([c for c in additional_colors if c])
+    colors.extend([c for c in additional_colors if c and is_valid_hex_color(c)])
     
     # Ensure colors is never empty
     if not colors:
@@ -166,19 +171,25 @@ def edit_product():
     product['brand'] = request.form.get('brand')
     product['product_name'] = request.form.get('product_name')
     
+    # Helper function to validate hex color
+    def is_valid_hex_color(color):
+        import re
+        return bool(re.match(r'^#[0-9A-Fa-f]{6}$', color))
+    
     # Handle multiple colors
     colors = []
     hex_color = request.form.get('hex_color')
-    if hex_color:
+    if hex_color and is_valid_hex_color(hex_color):
         colors.append(hex_color)
     
     # Get additional colors if any
     additional_colors = request.form.getlist('additional_colors[]')
-    colors.extend([c for c in additional_colors if c])
+    colors.extend([c for c in additional_colors if c and is_valid_hex_color(c)])
     
     # Ensure colors is never empty, fallback to existing or default
     if not colors:
-        colors = [product.get('hex_color', "#cc0000")]
+        existing_color = product.get('hex_color', '#cc0000')
+        colors = [existing_color if is_valid_hex_color(existing_color) else '#cc0000']
     
     product['hex_color'] = colors[0]
     product['colors'] = colors

@@ -868,19 +868,37 @@
             // Add additional colors if they exist
             if (colors && Array.isArray(colors) && colors.length > 1) {
                 for (let i = 1; i < colors.length; i++) {
+                    // Validate color format
+                    const color = colors[i];
+                    const validColor = /^#[0-9A-Fa-f]{6}$/.test(color) ? color : '#ffffff';
+                    
                     const newRow = document.createElement('div');
                     newRow.className = 'color-variation-row';
-                    newRow.innerHTML = `
-                        <button type="button" class="remove-color-btn" onclick="removeColorVariation(this)">
-                            <svg class="trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                            </svg>
-                        </button>
-                        <div class="color-input-wrapper">
-                            <input type="color" name="additional_colors[]" class="form-control form-control-color color-input-shortened" value="${colors[i]}">
-                            <button type="button" class="add-color-btn" onclick="addColorVariation('edit')">+</button>
-                        </div>
-                    `;
+                    const colorInput = document.createElement('input');
+                    colorInput.type = 'color';
+                    colorInput.name = 'additional_colors[]';
+                    colorInput.className = 'form-control form-control-color color-input-shortened';
+                    colorInput.value = validColor;
+                    
+                    const addBtn = document.createElement('button');
+                    addBtn.type = 'button';
+                    addBtn.className = 'add-color-btn';
+                    addBtn.textContent = '+';
+                    addBtn.onclick = function() { addColorVariation('edit'); };
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'remove-color-btn';
+                    removeBtn.innerHTML = '<svg class="trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+                    removeBtn.onclick = function() { removeColorVariation(this); };
+                    
+                    const colorWrapper = document.createElement('div');
+                    colorWrapper.className = 'color-input-wrapper';
+                    colorWrapper.appendChild(colorInput);
+                    colorWrapper.appendChild(addBtn);
+                    
+                    newRow.appendChild(removeBtn);
+                    newRow.appendChild(colorWrapper);
                     editContainer.appendChild(newRow);
                 }
             }
@@ -964,21 +982,43 @@
         setupSyncedSlider('edit-range-shine', 'edit-num-shine', 'edit-bubble-shine');
         
         // Color variations handling
+        const DEFAULT_NEW_COLOR = '#ffffff';
+        
         function addColorVariation(modalType) {
             const container = document.getElementById('color-variations-' + modalType);
             const newRow = document.createElement('div');
             newRow.className = 'color-variation-row';
-            newRow.innerHTML = `
-                <button type="button" class="remove-color-btn" onclick="removeColorVariation(this)">
-                    <svg class="trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    </svg>
-                </button>
-                <div class="color-input-wrapper">
-                    <input type="color" name="additional_colors[]" class="form-control form-control-color color-input-shortened" value="#ffffff">
-                    <button type="button" class="add-color-btn" onclick="addColorVariation('${modalType}')">+</button>
-                </div>
-            `;
+            
+            // Create remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'remove-color-btn';
+            removeBtn.innerHTML = '<svg class="trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+            removeBtn.onclick = function() { removeColorVariation(this); };
+            
+            // Create color input wrapper
+            const colorWrapper = document.createElement('div');
+            colorWrapper.className = 'color-input-wrapper';
+            
+            // Create color input
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.name = 'additional_colors[]';
+            colorInput.className = 'form-control form-control-color color-input-shortened';
+            colorInput.value = DEFAULT_NEW_COLOR;
+            
+            // Create add button
+            const addBtn = document.createElement('button');
+            addBtn.type = 'button';
+            addBtn.className = 'add-color-btn';
+            addBtn.textContent = '+';
+            addBtn.onclick = function() { addColorVariation(modalType); };
+            
+            // Assemble elements
+            colorWrapper.appendChild(colorInput);
+            colorWrapper.appendChild(addBtn);
+            newRow.appendChild(removeBtn);
+            newRow.appendChild(colorWrapper);
             container.appendChild(newRow);
         }
         
