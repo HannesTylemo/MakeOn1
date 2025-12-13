@@ -56,6 +56,14 @@
             color: #000;
         }
         .close-app-btn:hover { background: #f0f0f0; }
+        
+        /* Desktop: Align X button vertically with toolbar buttons */
+        @media (min-width: 768px) {
+            .close-app-btn {
+                top: 30px; /* Match toolbar padding-top */
+                right: 105px; /* Position to the left of the 90px toolbar + 15px spacing */
+            }
+        }
 
         /* STARTUP */
         .startup-overlay {
@@ -281,10 +289,10 @@
         }
         .toolbar-button { background: transparent; border: none; cursor: pointer; width: 44px; height: 100%; display:flex; justify-content:center; align-items:center;}
         .toolbar-button svg { width: 24px; height: 24px; stroke: #000; stroke-width: 2; fill: none; }
-        #addProductBtn svg { width: 36px; height: 36px; }
+        #addProductBtn svg { width: 29px; height: 29px; } /* 20% smaller: 36 * 0.8 = 28.8 ≈ 29 */
         .toolbar-button img { width: 48px; height: 48px; object-fit: contain; }
         #editorBtn img { width: 29px; height: 29px; }
-        #lipstickBtn svg { width: 29px; height: 29px; }
+        #lipstickBtn svg { width: 23px; height: 23px; } /* 20% smaller: 29 * 0.8 = 23.2 ≈ 23 */
 
         .desktop-arrows-container { display: none; flex-direction: column; gap: 15px; align-items: center; }
         .nav-buttons-container { display: flex; justify-content: space-around; width: 100%; height: 100%; }
@@ -335,10 +343,9 @@
             align-items: center;
             text-align: center;
             line-height: 1.1;
-            margin: 0 auto;
         }
         .new-photo-editor-btn:hover { background: #f0f0f0; }
-        @media (max-width: 767px) { .new-photo-editor-btn { width: 34px; height: 34px; font-size: 7px; } }
+        @media (max-width: 767px) { .new-photo-editor-btn { width: 34px; height: 34px; font-size: 7px; display: none !important; } }
 
         /* SIDE PANEL */
         .side-panel {
@@ -361,10 +368,10 @@
             .nav-buttons-container { flex-direction: column; height: auto; gap: 20px; justify-content: flex-end; }
             .toolbar-button { height: 60px; width: 100%; }
             .toolbar-button svg { width: 32px; height: 32px; }
-            #addProductBtn svg { width: 48px; height: 48px; }
+            #addProductBtn svg { width: 38px; height: 38px; } /* 20% smaller: 48 * 0.8 = 38.4 ≈ 38 */
             .toolbar-button img { width: 64px; height: 64px; }
             #editorBtn img { width: 38px; height: 38px; }
-            #lipstickBtn svg { width: 38px; height: 38px; }
+            #lipstickBtn svg { width: 30px; height: 30px; } /* 20% smaller: 38 * 0.8 = 30.4 ≈ 30 */
             .side-panel {
                 width: 300px; right: -300px; top: 0; height: 100%; z-index: 45;
                 border-left: 1px solid #eee; padding-top: 30px;
@@ -1016,6 +1023,7 @@
             <div style="height:20px;" class="desktop-only"></div>
             <div class="desktop-arrows-container">
                 <button class="new-photo-btn" id="newPhotoBtn">New<br>Photo</button>
+                <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
                 <button class="toolbar-button" id="arrowUpBtn">
                     <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
@@ -1027,10 +1035,10 @@
                 <!-- Scroll mode: lipstick and editor buttons -->
                 <button class="toolbar-button" id="lipstickBtn">
                      <svg viewBox="0 0 24 24">
-                        <circle cx="8" cy="11" r="5" stroke="#000" stroke-width="2" fill="none" />
-                        <path d="M5 11 L7 9" stroke="#000" stroke-width="1.5" />
+                        <circle cx="8" cy="11" r="5" stroke="#000" stroke-width="4" fill="none" />
+                        <path d="M5 11 L7 9" stroke="#000" stroke-width="3" />
                         <rect x="2" y="17" width="12" height="2" rx="1" fill="#000" />
-                        <rect x="17" y="13" width="4" height="6" rx="0.5" stroke="#000" stroke-width="2" fill="none" />
+                        <rect x="17" y="13" width="4" height="6" rx="0.5" stroke="#000" stroke-width="4" fill="none" />
                         <rect x="17" y="10" width="4" height="3" fill="#000" />
                         <path d="M17 10 L17 4 L21 2 L21 10 Z" fill="#000" />
                      </svg>
@@ -1039,10 +1047,9 @@
                     <!-- Editor/Gallery icon for navigating to editor mode -->
                     <img src="/static/uploads/editor-icon.png" alt="Editor">
                 </button>
-                <!-- Editor mode: New Photo, Add new item, Back to scroll (bottom to top) - Product icon removed -->
-                <button class="new-photo-editor-btn" id="newPhotoEditorBtn" style="display:none;">New<br>Photo</button>
+                <!-- Editor mode: Add new item, Back to scroll (bottom to top) -->
                 <button class="toolbar-button" id="addProductBtn" style="display:none;">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="1" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="1"/></svg>
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="#000" stroke-width="2"/></svg>
                 </button>
                 <button class="toolbar-button" id="scrollBackBtnToolbar" style="display:none;" onclick="showScrollBackConfirm()">
                     <!-- Swipe icon for navigating back to scroll mode -->
@@ -1095,10 +1102,22 @@
     </div>
 
     <script>
-        // Check URL parameters for editor mode
+        // Check URL parameters for editor mode and entry mode
         const urlParams = new URLSearchParams(window.location.search);
         const shouldEnterEditorMode = urlParams.get('mode') === 'editor';
         const productParam = urlParams.get('product');
+        const entryMode = urlParams.get('entry'); // 'explore' or 'tryon'
+
+        // Update welcome text based on entry mode
+        const welcomeText = document.querySelector('.startup-content p');
+        if (welcomeText) {
+            if (entryMode === 'tryon') {
+                welcomeText.textContent = 'Upload or take a photo to get started!';
+            } else if (entryMode === 'explore') {
+                welcomeText.textContent = 'Upload or take a photo to get started. We will analyze your skintone and create personalised looks just for you. If you want to, you can also create your very own.';
+            }
+            // If no entry mode is specified, keep default text
+        }
 
         const overlay = document.getElementById('startupOverlay');
         const exitModal = document.getElementById('exitModal');
